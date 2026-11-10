@@ -104,6 +104,7 @@ h1, h2, h3 { font-weight: 600; line-height: 1.2; }
 .alert-error { background: var(--error-bg); color: #b4191a; border-left-color: var(--error); }
 .alert-ok { background: var(--success-bg); color: #006b45; border-left-color: var(--success); }
 .alert-info { background: var(--info-bg); color: #075a9c; border-left-color: var(--info); }
+.alert-warn { background: #fff7e0; color: #7a5a00; border-left-color: #e8bf27; }
 
 /* Label seksi merah huruf kapital, seperti "VARIANT COMPONENT" di Brand Center. */
 .eyebrow { margin: 0 0 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--iglo-red); }

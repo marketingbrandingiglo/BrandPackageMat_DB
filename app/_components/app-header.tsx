@@ -15,7 +15,10 @@ export default function AppHeader({ user }: { user: PublicUser }) {
       </Link>
       <nav className={styles.nav}>
         {user.role === "superadmin" && (
-          <Link href="/admin" className={styles.link}>Admin</Link>
+          <>
+            <Link href="/admin/lab" className={styles.link}>Lab</Link>
+            <Link href="/admin" className={styles.link}>Admin</Link>
+          </>
         )}
         <span className={styles.email}>{user.email}</span>
         <form action={logout}>

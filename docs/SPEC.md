@@ -161,10 +161,10 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 ## 7. Visual AI (opsional)
 
 - Lingkup: **satu aset dekoratif per paket** (pola/ilustrasi latar) yang dipakai ulang di beberapa materi, bukan satu per materi. Pola sederhana dibuat dari kode.
-- Penyedia: **OpenAI Images API** atau **Magnific** lewat API key sendiri, hanya dipanggil dari server. (Koneksi Magnific di sesi cloud bukan akses untuk backend. Detail API perlu diverifikasi saat Tahap 5.)
+- Penyedia: **Claude API** (sama dengan mesin brand), hanya dipanggil dari server. Keluaran berupa **kode SVG** (pola, bentuk geometris, ilustrasi abstrak), bukan gambar raster; tidak ada foto atau ilustrasi realistis. SVG hasil Claude disanitasi dan divalidasi seperti logo unggahan. *(Diubah 2026-11-10: sebelumnya OpenAI Images API atau Magnific.)*
 - Aturan prompt tetap: tanpa teks, tanpa logo, tanpa wajah orang nyata, sisakan ruang kosong untuk judul. Teks dan logo selalu dari template.
 - Cache berdasarkan hash prompt, maksimal 3 kali percobaan ulang, biaya dicatat.
-- Aset raster di SVG kurang mudah diedit dan harus cukup beresolusi untuk cetak.
+- Karena keluarannya vektor, aset tetap bisa diedit di Illustrator dan tajam untuk cetak.
 
 ## 8. Arsitektur
 
@@ -172,7 +172,7 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 - **Upstash Redis**: user, sesi, status job, penghitung pemakaian, rate limit, cache kurs. **Dua database terpisah**: lokal/dev dan production.
 - **Vercel Blob (private)**: logo yang diunggah, hasil generate, ZIP. Dikirim ke user lewat route yang butuh login (bukan URL publik yang bisa ditebak).
 - **Vercel Cron**: pembersihan file kedaluwarsa.
-- **Claude API**: dipanggil dari server saja (analisis logo, saran font/warna/tone, terjemahan konten). Input user diperlakukan sebagai data (lihat bagian 12).
+- **Claude API**: dipanggil dari server saja (analisis logo, saran font/warna/tone, terjemahan konten, aset dekoratif SVG). Input user diperlakukan sebagai data (lihat bagian 12).
 - **Render**: kebutuhan arsitektur ini diputuskan oleh **uji kelayakan di Tahap 1**, dengan urutan prioritas:
   1. PDF dari SVG **tanpa browser** (pustaka ringan);
   2. Chromium versi ringkas untuk serverless;
@@ -225,12 +225,12 @@ NamaPerusahaan_BrandPackage_A.zip
 
 ## 11. Pemakaian dan biaya
 
-- Setiap pemanggilan penyedia dicatat sebagai event: user, sesi, job, penyedia (Anthropic/OpenAI/Magnific), model, token input/output atau kredit, estimasi biaya.
+- Setiap pemanggilan penyedia dicatat sebagai event: user, sesi, job, penyedia (Anthropic), model, token input/output, estimasi biaya.
 - **Sesi = satu kali login** (maksimal 12 jam). Pemakaian ditampilkan per proses generate dan kumulatif per sesi, per user, dan **total gabungan semua pengguna** (hitungan atomik di Upstash).
-- Yang dihitung "token" hanya bagian Claude. Render PDF/PPTX tidak memakai token. OpenAI dan Magnific dihitung terpisah (token bila tersedia, kredit untuk Magnific).
+- Yang dihitung "token" hanya bagian Claude (satu-satunya penyedia AI). Render PDF/PPTX tidak memakai token.
 - **Biaya ditampilkan dalam USD dan IDR.** USD adalah nilai dasar. Kurs USD→IDR diambil server dari sumber publik, disimpan sementara di Upstash, diperbarui setiap beberapa jam. Antarmuka menampilkan kurs, waktu, dan sumbernya. Bila sumber gagal, dipakai kurs terakhir yang berhasil diambil.
 - Sumber gratis umumnya hanya diperbarui sekali sehari (mis. kurs referensi harian Bank Indonesia atau kurs berbasis Bank Sentral Eropa); kurs intrahari butuh layanan berbayar. Sumber final diverifikasi saat membangun.
-- **Tabel harga** (per juta token Claude, harga gambar OpenAI, nilai per kredit Magnific) disimpan sebagai data yang mudah diubah dan **diverifikasi ke halaman harga resmi** saat dipakai. Nilai per kredit Magnific diberikan pemilik sesuai paket langganannya.
+- **Tabel harga** (per juta token Claude, per model) disimpan sebagai data yang mudah diubah dan **diverifikasi ke halaman harga resmi** saat dipakai.
 - Default: IDR dihitung dengan **kurs saat event terjadi** dan disimpan bersama event, supaya riwayat tidak berubah ketika kurs bergerak.
 - Admin melihat rekap di halaman admin. Belum ada batas pemakaian.
 
@@ -290,7 +290,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 
 ## 17. Belum diputuskan / perlu diverifikasi
 
-1. Nilai harga token dan kredit; nilai per kredit Magnific (dari pemilik); sumber kurs final.
+1. Nilai harga token Claude per model; sumber kurs final.
 2. Daftar 300 font terkurasi: disusun Claude Code (kategori, tag, dukungan huruf Indonesia, bobot), **ditinjau pemilik**.
 3. Pemetaan bidang usaha ke karakter font dan tone.
 4. **Isi tengah cap**: logo dikonversi monokrom bila bersih, atau inisial/ornamen bila tidak. Diputuskan saat Tahap 4.
@@ -299,7 +299,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 7. Ambang peringatan resolusi logo.
 8. Aset visual AI dipakai di materi mana (usulan: sampul PPT, sisi belakang ID card, sisi belakang kartu nama).
 9. Penamaan ZIP hasil checklist, dan apakah versi di lokal diberi label "(lokal)".
-10. Detail API OpenAI dan Magnific untuk backend (belum diuji).
+10. ~~Detail API OpenAI dan Magnific~~ — tidak berlaku lagi (visual AI memakai Claude, 2026-11-10).
 11. Penggantian kurs: IDR memakai kurs saat event (default di bagian 11); ubah bila pemilik memilih kurs berjalan.
 
 ## 18. Riwayat keputusan penting
@@ -309,3 +309,5 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Render: ditentukan oleh uji kelayakan Tahap 1. **Hasil (2026-11-10): PDF dari SVG tanpa browser (PDFKit + svg-to-pdfkit, PNG via resvg) lulus di lokal dan di Vercel.** Detail: `docs/render.md`.
 - Unduhan: tiga cara (semua, per materi, checklist) disetujui; tiga keputusan kecil ZIP (paket tidak dipilih tetap 24 jam, font tidak dibundel, nama file) disetujui.
 - Upstash (2026-11-10): dev dan production memakai **satu database Upstash yang sudah ada** (dipakai juga oleh project lain), dipisahkan dengan prefiks kunci `bpa:dev:` dan `bpa:prod:`. Ini menggantikan "dua database terpisah" di bagian 8, 13, dan 14. Konsekuensi yang diterima pemilik: kredensial database production ada di `.env.local`; pembersihan data wajib dibatasi ke prefiks `bpa:*` (tidak boleh `FLUSHDB`/`FLUSHALL`). Env var mengikuti integrasi Vercel: `KV_REST_API_URL`, `KV_REST_API_TOKEN`; environment dibaca dari `VERCEL_ENV`.
+- Visual AI (2026-11-10): **Claude saja** (keluaran SVG), menggantikan OpenAI/Magnific. Satu penyedia dan satu API key; pencatatan biaya hanya token Claude.
+- Tahap 3 (2026-11-10): dikerjakan bertahap 3a-3e dengan titik uji pemilik di tiap bagian; diuji lewat halaman `/admin/lab` (khusus super admin). Ambang resolusi logo tetap (peringatan < 800 px, peringatan keras < 400 px). Pemilik menyetujui: tinjauan daftar font, usulan pemetaan bidang usaha, dan pembagian model Claude (model paling mampu untuk analisis visual/pemilihan font, model ringan untuk tugas sederhana; harga diverifikasi sebelum dipakai).

@@ -1,0 +1,25 @@
+{
+  "$comment": "Daftar bidang usaha (SPEC bagian 3). Pemetaan ke karakter font dan tone ditambahkan di Tahap 3e.",
+  "industries": [
+    { "id": "it", "id_label": "Teknologi Informasi & Software", "en_label": "IT & Software" },
+    { "id": "cybersecurity", "id_label": "Keamanan Siber", "en_label": "Cybersecurity" },
+    { "id": "telco", "id_label": "Telekomunikasi & Jaringan", "en_label": "Telecommunications & Networking" },
+    { "id": "finance", "id_label": "Keuangan, Perbankan & Asuransi", "en_label": "Finance, Banking & Insurance" },
+    { "id": "consulting", "id_label": "Konsultan & Jasa Profesional", "en_label": "Consulting & Professional Services" },
+    { "id": "healthcare", "id_label": "Kesehatan, Farmasi & Alat Kesehatan", "en_label": "Healthcare & Pharma" },
+    { "id": "education", "id_label": "Pendidikan & Pelatihan", "en_label": "Education & Training" },
+    { "id": "fnb", "id_label": "Makanan & Minuman", "en_label": "Food & Beverage" },
+    { "id": "hospitality", "id_label": "Perhotelan, Pariwisata & Event", "en_label": "Hospitality, Tourism & Events" },
+    { "id": "retail", "id_label": "Ritel & E-commerce", "en_label": "Retail & E-commerce" },
+    { "id": "manufacturing", "id_label": "Manufaktur & Industri", "en_label": "Manufacturing & Industrial" },
+    { "id": "construction", "id_label": "Konstruksi, Properti & Arsitektur", "en_label": "Construction, Property & Architecture" },
+    { "id": "energy", "id_label": "Energi, Pertambangan & Lingkungan", "en_label": "Energy, Mining & Environment" },
+    { "id": "logistics", "id_label": "Logistik & Transportasi", "en_label": "Logistics & Transportation" },
+    { "id": "agriculture", "id_label": "Pertanian, Perikanan & Perkebunan", "en_label": "Agriculture, Fisheries & Plantation" },
+    { "id": "creative", "id_label": "Kreatif, Media & Periklanan", "en_label": "Creative, Media & Advertising" },
+    { "id": "lifestyle", "id_label": "Fashion, Kecantikan & Gaya Hidup", "en_label": "Fashion, Beauty & Lifestyle" },
+    { "id": "automotive", "id_label": "Otomotif", "en_label": "Automotive" },
+    { "id": "nonprofit", "id_label": "Organisasi Nirlaba, Komunitas & Pemerintahan", "en_label": "Non-profit, Community & Government" },
+    { "id": "other", "id_label": "Lainnya", "en_label": "Other", "freeText": true }
+  ]
+}

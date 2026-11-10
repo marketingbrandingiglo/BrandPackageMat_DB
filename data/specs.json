@@ -1,0 +1,24 @@
+{
+  "$comment": "Katalog spesifikasi (SPEC bagian 5). Ukuran umum, BUKAN hasil verifikasi vendor; pemilik memverifikasi ke percetakan. Satuan mm kecuali disebut lain.",
+  "print": { "bleedMm": 3, "safeAreaMm": 4 },
+  "materials": {
+    "businessCard": { "label": { "id": "Kartu nama", "en": "Business card" }, "widthMm": 90, "heightMm": 55, "sides": ["front", "back"] },
+    "idCardLandscape": { "label": { "id": "ID card landscape", "en": "ID card landscape" }, "widthMm": 85.6, "heightMm": 54, "sides": ["front", "back"], "standard": "CR80" },
+    "idCardPortrait": { "label": { "id": "ID card portrait", "en": "ID card portrait" }, "widthMm": 54, "heightMm": 85.6, "sides": ["front", "back"], "standard": "CR80" },
+    "envelope": { "label": { "id": "Amplop", "en": "Envelope" }, "widthMm": 220, "heightMm": 110, "standard": "DL", "note": "Sebagian percetakan Indonesia memakai ±110 × 230 mm." },
+    "letterhead": { "label": { "id": "Kop surat", "en": "Letterhead" }, "widthMm": 210, "heightMm": 297, "standard": "A4" },
+    "stamp": { "label": { "id": "Cap perusahaan", "en": "Company stamp" }, "diameterMm": 40, "shape": "circle", "colors": 1 },
+    "presentation": { "label": { "id": "Template PPT", "en": "PPT template" }, "aspectRatio": "16:9", "widthIn": 13.333, "heightIn": 7.5 },
+    "emailSignature": { "label": { "id": "Email signature", "en": "Email signature" }, "maxWidthPx": 600 }
+  },
+  "logo": {
+    "$comment": "Pengecekan logo (SPEC bagian 3). Peringatan, bukan penolakan, kecuali tipe dan ukuran file.",
+    "maxFileBytes": 5242880,
+    "allowedTypes": ["image/png", "image/svg+xml"],
+    "pngWarnBelowPx": 800,
+    "pngHardWarnBelowPx": 400,
+    "minContrastOnBackground": 3,
+    "darkBackground": "#212122",
+    "lightBackground": "#FFFFFF"
+  }
+}
