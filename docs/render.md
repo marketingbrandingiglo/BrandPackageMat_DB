@@ -24,7 +24,13 @@ Kode: `lib/render/svg.ts`. Uji lokal: `npm run render:test` (hasil di `out/rende
 - Variable font: PDFKit dan resvg hanya memakai **instance default**. Untuk Bold dll., skrip font Tahap 3 perlu membuat file statis (Regular/Bold) dari variable font (mis. `fontTools.varLib.instancer`).
 - Satuan viewBox = mm; ukuran halaman PDF diberikan dalam mm saat render.
 
-## Belum diuji
+## Hasil uji di Vercel (2026-11-10, deploy preview via CLI)
 
-- Di Vercel sungguhan (butuh satu kali deploy atas izin pemilik).
-- Buka SVG di Illustrator (pemilik).
+- `GET /api/render-test` -> `ok: true`, Linux x64, Node v26.13.0, region `iad1`.
+- PDF ±26,9 KB dalam 346 ms, PNG ±98 KB dalam 62 ms (termasuk cold start).
+- Kesimpulan: **pilihan 1 (tanpa browser) lulus**; Chromium atau layanan render terpisah tidak diperlukan.
+
+## Uji pemilik di Illustrator (2026-11-10)
+
+- SVG terbuka dan teks bisa diedit.
+- PDF: teks bisa diedit per baris utuh (setelah penggabungan teks).

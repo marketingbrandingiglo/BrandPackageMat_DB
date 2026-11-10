@@ -306,6 +306,6 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 
 - Font: opsi **A (terkurasi di repo)** dipilih karena tidak mau biaya tambahan; opsi katalog penuh dengan file di Blob ditunda.
 - Akses: **login buatan sendiri (email + password)**, bukan Password Protection Vercel.
-- Render: ditentukan oleh uji kelayakan Tahap 1.
+- Render: ditentukan oleh uji kelayakan Tahap 1. **Hasil (2026-11-10): PDF dari SVG tanpa browser (PDFKit + svg-to-pdfkit, PNG via resvg) lulus di lokal dan di Vercel.** Detail: `docs/render.md`.
 - Unduhan: tiga cara (semua, per materi, checklist) disetujui; tiga keputusan kecil ZIP (paket tidak dipilih tetap 24 jam, font tidak dibundel, nama file) disetujui.
 - Upstash (2026-11-10): dev dan production memakai **satu database Upstash yang sudah ada** (dipakai juga oleh project lain), dipisahkan dengan prefiks kunci `bpa:dev:` dan `bpa:prod:`. Ini menggantikan "dua database terpisah" di bagian 8, 13, dan 14. Konsekuensi yang diterima pemilik: kredensial database production ada di `.env.local`; pembersihan data wajib dibatasi ke prefiks `bpa:*` (tidak boleh `FLUSHDB`/`FLUSHALL`). Env var mengikuti integrasi Vercel: `KV_REST_API_URL`, `KV_REST_API_TOKEN`; environment dibaca dari `VERCEL_ENV`.
