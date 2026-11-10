@@ -17,15 +17,18 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     <>
       <AppHeader user={me} />
       <main className={styles.main}>
+        <p className="eyebrow">Super admin</p>
         <h1 className={styles.h1}>Admin</h1>
         {dihapus && <p className={`alert alert-ok ${styles.banner}`} role="status">{dihapus} dihapus.</p>}
 
         <section className={styles.section}>
+          <p className="eyebrow">Akses</p>
           <h2>Tambah user</h2>
           <CreateUserForm />
         </section>
 
         <section className={styles.section}>
+          <p className="eyebrow">Daftar</p>
           <h2>User ({list.length})</h2>
           <div className={styles.list}>
             {list.map((u) => (
@@ -41,8 +44,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </section>
 
         <section className={styles.section}>
+          <p className="eyebrow">Pemantauan</p>
           <h2>Pemakaian dan biaya</h2>
-          <p className={styles.muted}>Rekap token, kredit, dan estimasi biaya (USD/IDR) per user dan per sesi dibuat di Tahap 7.</p>
+          <div className="alert alert-info">Rekap token, kredit, dan estimasi biaya (USD/IDR) per user dan per sesi dibuat di Tahap 7.</div>
         </section>
       </main>
     </>

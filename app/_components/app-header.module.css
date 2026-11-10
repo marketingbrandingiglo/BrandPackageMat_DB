@@ -1,16 +1,30 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
-  padding: 14px 24px;
-  border-bottom: 1px solid #eee9e6;
+  min-height: 64px;
+  padding: 10px 24px;
   background: #fff;
+  border-bottom: 1px solid var(--card-border);
 }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; text-decoration: none; }
-.nav { display: flex; align-items: center; gap: 18px; font-size: 14px; }
-.nav a { text-decoration: none; font-weight: 600; }
+.brand { display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; text-decoration: none; }
+.logo { width: 44px; height: auto; }
+.accent { color: var(--iglo-red); }
+.nav { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+.link { text-decoration: none; font-weight: 600; padding: 8px 10px; border-radius: 8px; }
+.link:hover { background: var(--n10); color: var(--iglo-red); }
 .email { color: var(--muted); }
-.logout { font: inherit; font-weight: 600; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-@media (max-width: 560px) { .email { display: none; } }
+.logout { height: 38px; font-size: 14px; padding: 0 14px; }
+@media (max-width: 640px) {
+  .header { padding: 10px 16px; }
+  .brand { font-size: 15px; gap: 8px; }
+  .logo { width: 36px; }
+  .email { display: none; }
+}
+@media (max-width: 400px) {
+  .brand > span { display: none; }
+}

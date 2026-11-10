@@ -10,7 +10,7 @@ export default async function LoginPage() {
   return (
     <main className={styles.page}>
       <div className={styles.card}>
-        <Image src="/logo-iglo.png" alt="iglo" width={102} height={82} priority className={styles.logo} />
+        <Image src="/LOGO-IGLO.png" alt="IGLO" width={1000} height={844} priority className={styles.logo} />
         <h1 className={styles.title}>Automation Brand Package</h1>
         <LoginForm />
         <p className={styles.help}>Lupa password atau akun terkunci? Hubungi admin.</p>

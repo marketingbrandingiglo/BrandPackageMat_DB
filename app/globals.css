@@ -1,17 +1,41 @@
+/*
+ * Token mengikuti IGLO Brand Center (brandasset-iglo.vercel.app, Design System 2026):
+ * warna primer, netral 10-100, tipografi Plus Jakarta Sans, field radius 8, button radius 12.
+ */
 :root {
-  --bg: #fefcfb;
-  --text: #1f1f1d;
-  --muted: #55555a;
-  --faint: #9a9a9e;
-  --border: #d5d9df;
-  --field: #ffffff;
-  --brand: #e82728;
-  --brand-hover: #cf1f20;
-  --danger-bg: #fdecec;
-  --danger: #b4191a;
-  --ok-bg: #eaf6ee;
-  --ok: #1d6b3a;
-  --radius: 10px;
+  --iglo-red: #e82827;
+  --iglo-red-dark: #bb2027;
+  --iglo-red-tint: #fdeae9;
+  --iglo-white: #fdfcfa;
+  --iglo-black: #212122;
+  --n10: #f3f2f0;
+  --n20: #e9e8e7;
+  --n30: #dfdfde;
+  --n40: #d5d5d5;
+  --n50: #cccccc;
+  --n60: #a8a8a9;
+  --n70: #858586;
+  --n80: #636364;
+  --n90: #424243;
+  --field-border: #cbd5e1;
+  --card-border: #e2e8f0;
+
+  --success: #009761;
+  --success-bg: #e6f5ef;
+  --error: #e82827;
+  --error-bg: #fdeeee;
+  --info: #0783e3;
+  --info-bg: #eef6ff;
+
+  --bg: var(--iglo-white);
+  --text: var(--iglo-black);
+  --muted: var(--n80);
+  --faint: var(--n60);
+  --radius-field: 8px;
+  --radius-btn: 12px;
+  --radius-card: 16px;
+  --shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-ml: 0 8px 20px rgba(136, 136, 136, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -21,42 +45,65 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.4;
   -webkit-font-smoothing: antialiased;
 }
 
 a { color: inherit; }
+h1, h2, h3 { font-weight: 600; line-height: 1.2; }
 
-.field-label { display: block; font-size: 15px; margin-bottom: 6px; }
+.field-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
 
 .input {
   width: 100%;
-  height: 48px;
-  padding: 0 14px;
+  height: 44px;
+  padding: 0 12px;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text);
-  background: var(--field);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: #fff;
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-field);
   outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.input:focus { border-color: #9aa4b2; box-shadow: 0 0 0 3px rgba(232, 39, 40, 0.12); }
+.input::placeholder { color: var(--n60); }
+.input:focus { border-color: var(--iglo-red); box-shadow: 0 0 0 3px rgba(232, 40, 39, 0.12); }
 
 .btn {
-  height: 48px;
+  height: 44px;
   padding: 0 18px;
   font: inherit;
-  font-weight: 700;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 15px;
   border: 0;
-  border-radius: var(--radius);
+  border-radius: var(--radius-btn);
   cursor: pointer;
+  transition: background-color 0.15s;
 }
-.btn-primary { background: var(--brand); color: #fff; width: 100%; }
-.btn-primary:hover { background: var(--brand-hover); }
-.btn:disabled { opacity: 0.6; cursor: default; }
+.btn-primary { background: var(--iglo-red); color: #fff; }
+.btn-primary:hover { background: var(--iglo-red-dark); }
+.btn-secondary { background: #fff; color: var(--iglo-red); border: 1px solid var(--iglo-red); }
+.btn-secondary:hover { background: var(--iglo-red-tint); }
+.btn-tonal { background: var(--iglo-red-tint); color: var(--iglo-red); }
+.btn-ghost { background: transparent; color: var(--text); }
+.btn-ghost:hover { background: var(--n10); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+.btn-block { width: 100%; }
 
-.alert { padding: 10px 14px; border-radius: var(--radius); font-size: 14px; }
-.alert-error { background: var(--danger-bg); color: var(--danger); }
-.alert-ok { background: var(--ok-bg); color: var(--ok); }
+/* Alert gaya "Accent" IGLO: latar tipis + garis kiri 4 px. */
+.alert {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-field);
+  border-left: 4px solid currentColor;
+  font-size: 14px;
+  font-weight: 500;
+}
+.alert-error { background: var(--error-bg); color: #b4191a; border-left-color: var(--error); }
+.alert-ok { background: var(--success-bg); color: #006b45; border-left-color: var(--success); }
+.alert-info { background: var(--info-bg); color: #075a9c; border-left-color: var(--info); }
+
+/* Label seksi merah huruf kapital, seperti "VARIANT COMPONENT" di Brand Center. */
+.eyebrow { margin: 0 0 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--iglo-red); }

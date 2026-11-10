@@ -1,4 +1,4 @@
-/* Ukuran mengikuti desain referensi (layar lebar): input 54 px, label 18 px. */
+/* Mengikuti desain login referensi pemilik (ukuran besar), dengan warna dan font IGLO. */
 .page {
   min-height: 100dvh;
   display: flex;
@@ -7,7 +7,8 @@
   padding: 20vh 16px 48px;
 }
 .card { width: 100%; max-width: 640px; text-align: center; }
-.logo { width: 102px; height: auto; margin: 0 auto 36px; display: block; }
+/* Logo mark IGLO: tidak diubah warna/proporsi; ruang kosong di sekitar logo dijaga. */
+.logo { width: 100px; height: auto; margin: 0 auto 36px; display: block; }
 .title {
   margin: 0 0 62px;
   font-size: clamp(28px, 7vw, 44px);
@@ -16,8 +17,8 @@
   line-height: 1.1;
 }
 .form { display: grid; gap: 26px; text-align: left; max-width: 470px; margin: 0 auto; }
-.form :global(.field-label) { font-size: 18px; margin-bottom: 8px; }
-.form :global(.input) { height: 56px; font-size: 17px; }
+.form :global(.field-label) { font-size: 18px; font-weight: 400; margin-bottom: 8px; }
+.form :global(.input) { height: 56px; font-size: 17px; padding: 0 16px; border-radius: 10px; }
 .passwordWrap { position: relative; }
 .passwordWrap input { padding-right: 52px; }
 .eye {
@@ -31,12 +32,13 @@
   place-items: center;
   background: none;
   border: 0;
-  color: #3a3a3d;
+  color: var(--n90);
   cursor: pointer;
   border-radius: 8px;
 }
-.eye:focus-visible { outline: 2px solid var(--border); }
-.submit { height: 56px; font-size: 18px; }
+.eye:hover { background: var(--n10); }
+.eye:focus-visible { outline: 2px solid var(--field-border); }
+.submit { height: 56px; font-size: 18px; font-weight: 700; border-radius: 10px; }
 .help { margin: 50px 0 0; color: var(--muted); font-size: 18px; }
 .version { margin: 70px 0 0; color: var(--faint); font-size: 16px; }
 @media (max-width: 560px) {

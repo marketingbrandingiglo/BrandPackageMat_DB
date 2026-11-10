@@ -24,7 +24,7 @@ function PasswordInput({ id }: { id: string }) {
   return (
     <div className={styles.pwRow}>
       <input id={id} name="password" type="text" className="input" minLength={PASSWORD_MIN} required autoComplete="new-password" value={value} onChange={(e) => setValue(e.target.value)} placeholder={`Minimal ${PASSWORD_MIN} karakter`} />
-      <button type="button" className={styles.secondary} onClick={() => setValue(randomPassword())}>Buat acak</button>
+      <button type="button" className={`btn btn-tonal ${styles.nowrap}`} onClick={() => setValue(randomPassword())}>Buat acak</button>
     </div>
   );
 }
@@ -49,7 +49,7 @@ export function CreateUserForm() {
         <PasswordInput id="new-password" />
         <p className={styles.hint}>Salin password ini dan berikan langsung ke user. Password tidak bisa dilihat lagi setelah disimpan.</p>
       </div>
-      <button type="submit" className={`btn ${styles.primaryInline}`} disabled={pending}>{pending ? "Menyimpan…" : "Tambah user"}</button>
+      <button type="submit" className={`btn btn-primary ${styles.submitInline}`} disabled={pending}>{pending ? "Menyimpan…" : "Tambah user"}</button>
     </form>
   );
 }
@@ -74,10 +74,10 @@ export function UserRow({ user, isSelf, created, lastLogin }: { user: PublicUser
             <form action={activeAction}>
               <input type="hidden" name="id" value={user.id} />
               <input type="hidden" name="active" value={user.active ? "0" : "1"} />
-              <button type="submit" className={styles.secondary}>{user.active ? "Nonaktifkan" : "Aktifkan"}</button>
+              <button type="submit" className={styles.neutral}>{user.active ? "Nonaktifkan" : "Aktifkan"}</button>
             </form>
-            <button type="button" className={styles.secondary} onClick={() => setOpen(open === "password" ? "none" : "password")}>Ganti password</button>
-            <button type="button" className={styles.danger} onClick={() => setOpen(open === "delete" ? "none" : "delete")}>Hapus</button>
+            <button type="button" className={styles.neutral} onClick={() => setOpen(open === "password" ? "none" : "password")}>Ganti password</button>
+            <button type="button" className={styles.dangerOutline} onClick={() => setOpen(open === "delete" ? "none" : "delete")}>Hapus</button>
           </div>
         )}
       </div>
@@ -88,7 +88,7 @@ export function UserRow({ user, isSelf, created, lastLogin }: { user: PublicUser
         <form action={pwAction} className={styles.inline}>
           <input type="hidden" name="id" value={user.id} />
           <PasswordInput id={`pw-${user.id}`} />
-          <button type="submit" className={`btn ${styles.primaryInline}`}>Simpan password</button>
+          <button type="submit" className={`btn btn-primary ${styles.submitInline}`}>Simpan password</button>
         </form>
       )}
       {open === "delete" && (
@@ -97,7 +97,7 @@ export function UserRow({ user, isSelf, created, lastLogin }: { user: PublicUser
           <label className="field-label" htmlFor={`del-${user.id}`}>Ketik <strong>{user.email}</strong> untuk menghapus permanen</label>
           <div className={styles.pwRow}>
             <input id={`del-${user.id}`} name="confirm" className="input" autoComplete="off" />
-            <button type="submit" className={styles.dangerSolid}>Hapus permanen</button>
+            <button type="submit" className={`btn btn-primary ${styles.nowrap}`}>Hapus permanen</button>
           </div>
         </form>
       )}

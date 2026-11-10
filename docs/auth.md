@@ -35,5 +35,7 @@ Email, nama, dan password diminta lewat prompt (password tidak tampil). Menjalan
 ## Diuji (2026-11-10, Redis lokal + emulator REST Upstash, Playwright)
 401/redirect tanpa login, pesan umum untuk password salah dan email tak terdaftar, login (email tidak peka huruf besar), cookie httpOnly/Lax/12 jam, buat user + password acak, tolak email ganda, user biasa tidak bisa buka /admin, nonaktifkan menghentikan sesi, user nonaktif tidak bisa login, pembatasan percobaan per email, hapus user dengan konfirmasi, logout, tampilan HP tanpa scroll horizontal.
 
-## Logo
-`public/logo-iglo.png` sementara dipotong dari screenshot desain (resolusi rendah). Ganti dengan file logo asli beresolusi tinggi dengan nama yang sama (atau SVG; ubah referensinya di `app/login/page.tsx` dan `app/_components/app-header.tsx`).
+## Tampilan
+- Mengikuti IGLO Brand Center (https://brandasset-iglo.vercel.app/): Plus Jakarta Sans; Red Iglo `#E82827`, Darker Red `#BB2027` (hover), IGLO White `#FDFCFA` (latar), IGLO Black `#212122` (teks), netral 10-100; field radius 8, button radius 12; alert gaya "Accent". Token di `app/globals.css`.
+- Halaman login mengikuti desain referensi pemilik (ukuran lebih besar).
+- Logo: `public/LOGO-IGLO.png` (logo mark merah, untuk latar terang). Warna dan proporsi tidak diubah.

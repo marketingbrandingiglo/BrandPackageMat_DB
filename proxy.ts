@@ -15,5 +15,5 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   // Semua path kecuali /login, aset Next.js, dan file statis di public/.
-  matcher: ["/((?!login|_next/static|_next/image|favicon.ico|logo-iglo.png).*)"],
+  matcher: ["/((?!login|_next/static|_next/image|favicon.ico|LOGO-IGLO.png).*)"],
 };

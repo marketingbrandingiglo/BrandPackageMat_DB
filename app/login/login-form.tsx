@@ -43,7 +43,7 @@ export default function LoginForm() {
           </button>
         </div>
       </div>
-      <button type="submit" className={`btn btn-primary ${styles.submit}`} disabled={pending}>
+      <button type="submit" className={`btn btn-primary btn-block ${styles.submit}`} disabled={pending}>
         {pending ? "Memproses…" : "Masuk"}
       </button>
     </form>
