@@ -308,3 +308,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Akses: **login buatan sendiri (email + password)**, bukan Password Protection Vercel.
 - Render: ditentukan oleh uji kelayakan Tahap 1.
 - Unduhan: tiga cara (semua, per materi, checklist) disetujui; tiga keputusan kecil ZIP (paket tidak dipilih tetap 24 jam, font tidak dibundel, nama file) disetujui.
+- Upstash (2026-11-10): dev dan production memakai **satu database Upstash yang sudah ada** (dipakai juga oleh project lain), dipisahkan dengan prefiks kunci `bpa:dev:` dan `bpa:prod:`. Ini menggantikan "dua database terpisah" di bagian 8, 13, dan 14. Konsekuensi yang diterima pemilik: kredensial database production ada di `.env.local`; pembersihan data wajib dibatasi ke prefiks `bpa:*` (tidak boleh `FLUSHDB`/`FLUSHALL`). Env var mengikuti integrasi Vercel: `KV_REST_API_URL`, `KV_REST_API_TOKEN`; environment dibaca dari `VERCEL_ENV`.

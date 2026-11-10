@@ -11,8 +11,8 @@ npm run dev
 ```
 
 ## Environment
-- Dua database Upstash terpisah: dev (lokal, `.env.local`) dan production (env var Vercel, `APP_ENV=production`).
-- Kunci Redis diberi awalan `dev:` atau `prod:`.
+- Satu database Upstash (bersama project lain) via integrasi Vercel (`KV_REST_API_URL`, `KV_REST_API_TOKEN`). Lokal mengisi `.env.local`.
+- Kunci Redis diberi awalan `bpa:dev:` (lokal) atau `bpa:prod:` (Vercel production, dari `VERCEL_ENV`). Jangan pernah `FLUSHDB`.
 
 ## Branch dan rilis
 - `main` = production, `dev` = branch kerja.
