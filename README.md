@@ -16,5 +16,6 @@ npm run dev
 
 ## Branch dan rilis
 - `main` = production, `dev` = branch kerja.
-- Vercel hanya membangun `main` (`ignoreCommand` di `vercel.json`); branch lain dilewati. Perlu dicek di dashboard Vercel saat proyek dihubungkan.
+- Vercel hanya membangun `main` (`ignoreCommand` di `vercel.json`); branch lain dilewati.
+- Pengecualian: deploy **preview** manual lewat CLI dengan `vercel deploy --build-env FORCE_BUILD=1` (tanpa `--prod`). `.vercelignore` mencegah `.env*` ikut terunggah.
 - Push ke `main` hanya atas perintah pemilik; versi naik lewat `npm run version:bump`.

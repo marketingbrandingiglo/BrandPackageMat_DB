@@ -4,7 +4,7 @@ Pilihan 1 dari SPEC bagian 8 (PDF dari SVG tanpa browser).
 
 | Kebutuhan | Pustaka | Catatan |
 |---|---|---|
-| SVG -> PDF vektor | `pdfkit` + `svg-to-pdfkit` | Teks tetap teks; font TTF di-embed sebagai subset. |
+| SVG -> PDF vektor | `pdfkit` + `svg-to-pdfkit` | Teks tetap teks; font TTF di-embed sebagai subset. Huruf satu baris digabung jadi satu potongan teks (`lib/render/text-runs.ts`) agar Illustrator tidak memecahnya per huruf; hasil render identik piksel (dicek 600 dpi). |
 | SVG -> PNG preview | `@resvg/resvg-js` | Binary native (prebuilt untuk macOS arm64 dan Linux x64). Hanya memakai font yang diberikan, bukan font sistem. |
 
 Kode: `lib/render/svg.ts`. Uji lokal: `npm run render:test` (hasil di `out/render-test/`, tidak di-commit). Uji server: `GET /api/render-test` (JSON), `?format=pdf|png|svg`.

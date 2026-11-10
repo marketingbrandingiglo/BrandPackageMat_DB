@@ -1,0 +1,7 @@
+# Jangan pernah mengunggah rahasia atau hasil lokal lewat Vercel CLI.
+.env*
+!.env.example
+out/
+.next/
+node_modules/
+*.tsbuildinfo

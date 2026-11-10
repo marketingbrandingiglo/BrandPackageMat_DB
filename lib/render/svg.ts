@@ -2,6 +2,7 @@ import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
 import { Resvg } from "@resvg/resvg-js";
 import { allFontFiles, firstFamily, type FontFamily } from "./fonts";
+import { withMergedTextRuns } from "./text-runs";
 
 const MM_TO_PT = 72 / 25.4;
 
@@ -21,6 +22,8 @@ export interface RenderWarning {
 /**
  * SVG -> PDF vektor tanpa browser (PDFKit + svg-to-pdfkit).
  * Teks tetap teks (font di-embed sebagai subset), bentuk tetap vektor.
+ * Huruf dalam satu baris digabung menjadi satu potongan teks (lib/render/text-runs.ts)
+ * agar Illustrator membukanya sebagai kalimat utuh, bukan per huruf.
  * Catatan: svg-to-pdfkit hanya mengenali bold bila font-weight="bold" (bukan 700).
  */
 export async function svgToPdf(
@@ -54,7 +57,7 @@ export async function svgToPdf(
     doc.on("error", reject);
   });
 
-  SVGtoPDF(doc, svg, 0, 0, {
+  withMergedTextRuns(doc, () => SVGtoPDF(doc, svg, 0, 0, {
     width,
     height,
     preserveAspectRatio: "xMidYMid meet",
@@ -70,7 +73,7 @@ export async function svgToPdf(
       warnings.push({ source: "font", message: `Font "${name}" tidak terdaftar, dipakai Helvetica` });
       return bold ? "Helvetica-Bold" : "Helvetica";
     },
-  });
+  }));
   doc.end();
   await done;
   return { pdf: Buffer.concat(chunks), warnings };

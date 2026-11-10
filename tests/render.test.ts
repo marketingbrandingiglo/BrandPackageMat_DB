@@ -35,3 +35,23 @@ describe("render SVG tanpa browser", () => {
     expect(png.subarray(1, 4).toString()).toBe("PNG");
   });
 });
+
+describe("penggabungan teks PDF", () => {
+  it("huruf satu baris menjadi satu Tm + TJ dengan penyesuaian jarak", async () => {
+    const { mergeTextBlock } = await import("@/lib/render/text-runs");
+    // Lebar 500/1000 em, ukuran 2, skala 1 -> jarak alami 1. Huruf ke-3 bergeser 0,2 (letter-spacing).
+    const out = mergeTextBlock(
+      ["BT", "/F1 2 Tf", "0 Tr", "1 0 0 -1 10 5 Tm", "<0001> Tj", "1 0 0 -1 11 5 Tm", "<0002> Tj", "1 0 0 -1 12.2 5 Tm", "<0003> Tj", "ET"],
+      () => [0, 500, 500, 500],
+    );
+    expect(out).toEqual(["BT", "/F1 2 Tf", "0 Tr", "1 0 0 -1 10 5 Tm", "[<0001> <0002> -100 <0003>] TJ", "ET"]);
+  });
+
+  it("baris berbeda dipisah, blok tak dikenal dibiarkan", async () => {
+    const { mergeTextBlock } = await import("@/lib/render/text-runs");
+    const w = () => [0, 500, 500];
+    const two = mergeTextBlock(["BT", "/F1 2 Tf", "1 0 0 -1 10 5 Tm", "<0001> Tj", "1 0 0 -1 10 9 Tm", "<0002> Tj", "ET"], w);
+    expect(two?.filter((l) => l.endsWith("TJ"))).toHaveLength(2);
+    expect(mergeTextBlock(["BT", "/F1 2 Tf", "aneh", "ET"], w)).toBeNull();
+  });
+});
