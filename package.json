@@ -10,21 +10,27 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "version:bump": "node scripts/bump-version.mjs",
-    "check:redis": "node --env-file-if-exists=.env.local scripts/check-redis.mjs"
+    "check:redis": "node --env-file-if-exists=.env.local scripts/check-redis.mjs",
+    "render:test": "tsx scripts/render-test.mts"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@upstash/redis": "^1.41.0",
     "next": "16.4.6",
+    "pdfkit": "^0.20.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "svg-to-pdfkit": "^0.1.8"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
+    "@types/pdfkit": "^0.17.7",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.1.0"
   }

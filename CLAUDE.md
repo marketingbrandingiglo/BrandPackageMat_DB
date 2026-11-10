@@ -10,6 +10,6 @@ Aturan singkat (detail di SPEC):
 - Rahasia tidak pernah masuk repo, log, atau percakapan. `.env.local` tidak di-commit; `.env.example` adalah templatnya.
 - Versi `MAJOR.MINOR` hanya naik saat push ke `main` (`npm run version:bump -- [minor|major]`).
 
-Perintah: `npm run dev | build | lint | typecheck | test | check:redis`
+Perintah: `npm run dev | build | lint | typecheck | test | check:redis | render:test`
 
 Catatan Next.js: versi ini punya perubahan dari yang umum dikenal; baca `node_modules/next/dist/docs/` sebelum memakai API Next.js.
