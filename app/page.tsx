@@ -1,13 +1,17 @@
-import { APP_VERSION } from "@/lib/version";
+import AppHeader from "@/app/_components/app-header";
+import { requireUser } from "@/lib/auth/server";
 
-export default function Home() {
+export default async function Home() {
+  const { user } = await requireUser();
   return (
-    <main>
-      <h1>Brand Package Automation</h1>
-      <p>Fondasi aplikasi (Tahap 0). Belum ada fitur.</p>
-      <p>
-        <small>Versi {APP_VERSION}</small>
-      </p>
-    </main>
+    <>
+      <AppHeader user={user} />
+      <main style={{ maxWidth: 720, margin: "48px auto", padding: "0 16px" }}>
+        <h1 style={{ letterSpacing: "-0.02em" }}>Halo, {user.name || user.email}</h1>
+        <p style={{ color: "var(--muted)" }}>
+          Form pembuatan brand package akan tersedia di tahap berikutnya.
+        </p>
+      </main>
+    </>
   );
 }

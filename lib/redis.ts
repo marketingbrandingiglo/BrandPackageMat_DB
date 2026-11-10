@@ -1,4 +1,3 @@
-import "server-only";
 import { Redis } from "@upstash/redis";
 import { appEnv, requireEnv } from "./env";
 
@@ -7,6 +6,7 @@ let client: Redis | undefined;
 /**
  * Klien Upstash Redis. Nama env var mengikuti integrasi Upstash di Vercel
  * (KV_REST_API_*); nama UPSTASH_REDIS_REST_* diterima sebagai cadangan.
+ * Hanya untuk kode server dan skrip; jangan diimpor dari komponen klien.
  */
 export function redis(): Redis {
   client ??= new Redis({

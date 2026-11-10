@@ -7,14 +7,18 @@ Butuh **Node.js 26** (sama dengan Vercel; lihat `.nvmrc` dan `engines` di packag
 
 ```bash
 npm install
-cp .env.example .env.local   # isi kredensial Upstash database DEV
+cp .env.example .env.local   # isi kredensial Upstash dan SESSION_SECRET
 npm run check:redis
+npm run admin:set-password -- dev   # buat super admin lokal
 npm run dev
 ```
 
 ## Environment
 - Satu database Upstash (bersama project lain) via integrasi Vercel (`KV_REST_API_URL`, `KV_REST_API_TOKEN`). Lokal mengisi `.env.local`.
 - Kunci Redis diberi awalan `bpa:dev:` (lokal) atau `bpa:prod:` (Vercel production, dari `VERCEL_ENV`). Jangan pernah `FLUSHDB`.
+
+## Login
+Lihat [docs/auth.md](docs/auth.md).
 
 ## Region
 Fungsi Vercel berjalan di `sin1` (Singapura), dekat dengan Upstash (`ap-southeast-1`) dan pengguna di Indonesia (`regions` di `vercel.json`).

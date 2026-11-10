@@ -11,10 +11,13 @@
     "typecheck": "tsc --noEmit",
     "version:bump": "node scripts/bump-version.mjs",
     "check:redis": "node --env-file-if-exists=.env.local scripts/check-redis.mjs",
-    "render:test": "tsx scripts/render-test.mts"
+    "render:test": "tsx scripts/render-test.mts",
+    "admin:set-password": "tsx --env-file-if-exists=.env.local scripts/admin-set-password.mts"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.2.2",
     "@resvg/resvg-js": "^2.6.2",
+    "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.41.0",
     "next": "16.4.6",
     "pdfkit": "^0.20.2",

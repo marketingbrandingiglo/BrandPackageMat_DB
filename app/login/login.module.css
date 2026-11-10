@@ -1,0 +1,47 @@
+/* Ukuran mengikuti desain referensi (layar lebar): input 54 px, label 18 px. */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20vh 16px 48px;
+}
+.card { width: 100%; max-width: 640px; text-align: center; }
+.logo { width: 102px; height: auto; margin: 0 auto 36px; display: block; }
+.title {
+  margin: 0 0 62px;
+  font-size: clamp(28px, 7vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+.form { display: grid; gap: 26px; text-align: left; max-width: 470px; margin: 0 auto; }
+.form :global(.field-label) { font-size: 18px; margin-bottom: 8px; }
+.form :global(.input) { height: 56px; font-size: 17px; }
+.passwordWrap { position: relative; }
+.passwordWrap input { padding-right: 52px; }
+.eye {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  color: #3a3a3d;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.eye:focus-visible { outline: 2px solid var(--border); }
+.submit { height: 56px; font-size: 18px; }
+.help { margin: 50px 0 0; color: var(--muted); font-size: 18px; }
+.version { margin: 70px 0 0; color: var(--faint); font-size: 16px; }
+@media (max-width: 560px) {
+  .page { padding-top: 12vh; }
+  .title { margin-bottom: 40px; }
+  .help { font-size: 16px; margin-top: 40px; }
+  .version { margin-top: 48px; }
+}

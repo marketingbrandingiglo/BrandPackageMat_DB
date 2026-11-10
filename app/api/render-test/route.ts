@@ -1,10 +1,11 @@
 import type { NextRequest } from "next/server";
+import { getCurrentUser } from "@/lib/auth/server";
 import { TEST_FONTS } from "@/lib/render/fonts";
 import { SAMPLE_SIZE, sampleBusinessCardSvg } from "@/lib/render/sample";
 import { svgToPdf, svgToPng } from "@/lib/render/svg";
 
 /**
- * Uji render Tahap 1 (sementara; dihapus atau dikunci login di Tahap 2).
+ * Uji render Tahap 1. Hanya untuk user yang sudah login.
  * Tidak menerima input user: selalu merender SVG contoh.
  *   /api/render-test            -> JSON diagnostik (durasi, ukuran, peringatan)
  *   /api/render-test?format=pdf -> PDF
@@ -12,6 +13,7 @@ import { svgToPdf, svgToPng } from "@/lib/render/svg";
  *   /api/render-test?format=svg -> SVG sumber
  */
 export async function GET(req: NextRequest) {
+  if (!(await getCurrentUser())) return Response.json({ error: "unauthorized" }, { status: 401 });
   const format = req.nextUrl.searchParams.get("format") ?? "json";
   const svg = sampleBusinessCardSvg();
   if (format === "svg") {
