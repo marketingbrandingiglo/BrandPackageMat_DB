@@ -1,6 +1,7 @@
 "use server";
 
 import { requireSuperAdmin } from "@/lib/auth/server";
+import { buildPalette, type Palette } from "@/lib/brand/palette";
 import { analyzeLogo, LogoRejected, type BackgroundStrategy, type LogoWarning } from "@/lib/brand/logo";
 
 export interface LabLogoResult {
@@ -20,11 +21,13 @@ export interface LabLogoResult {
     previews: { original: string; monoWhite?: string; monoDark?: string };
     hasMonoSvg: boolean;
   };
+  /** Tahap 3b: palet dari warna logo. */
+  palette?: Palette;
 }
 
 const dataUrl = (b: Buffer) => `data:image/png;base64,${b.toString("base64")}`;
 
-/** Lab Tahap 3a: periksa logo tanpa menyimpan apa pun. */
+/** Lab Tahap 3a-3b: periksa logo dan susun palet, tanpa menyimpan apa pun. */
 export async function checkLogo(_prev: LabLogoResult, form: FormData): Promise<LabLogoResult> {
   await requireSuperAdmin();
   const file = form.get("logo");
@@ -51,6 +54,7 @@ export async function checkLogo(_prev: LabLogoResult, form: FormData): Promise<L
         },
         hasMonoSvg: Boolean(r.monoSvg),
       },
+      palette: r.colors.length ? buildPalette(r.colors) : undefined,
     };
   } catch (e) {
     if (e instanceof LogoRejected) return { error: e.message, fileName: file.name.slice(0, 120) };

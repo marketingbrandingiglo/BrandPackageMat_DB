@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { checkLogo, type LabLogoResult } from "./actions";
+import PaletteView from "./palette-view";
 import styles from "./lab.module.css";
 
 const LEVEL_CLASS = { hard: "alert-error", warn: "alert-warn", info: "alert-info" } as const;
@@ -37,7 +38,7 @@ export default function LogoLab() {
           <span className={styles.muted}>Klik untuk memilih SVG atau PNG</span>
         </label>
         <button type="submit" className="btn btn-primary" disabled={pending || !fileName}>
-          {pending ? "Memeriksa…" : "Periksa logo"}
+          {pending ? "Memeriksa…" : "Periksa logo dan palet"}
         </button>
       </form>
 
@@ -118,6 +119,7 @@ export default function LogoLab() {
               {r.hasMonoSvg ? " Versi SVG satu warna (putih/gelap) juga tersedia untuk materi." : ""}
             </p>
           )}
+          {state.palette && <PaletteView p={state.palette} />}
         </div>
       )}
     </div>

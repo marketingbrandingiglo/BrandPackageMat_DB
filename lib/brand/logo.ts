@@ -4,6 +4,7 @@ import { DOMParser, XMLSerializer, type Element as XElement } from "@xmldom/xmld
 import { SPECS } from "./specs";
 import { contrastRatio, hexToRgb, type RGB } from "./color";
 import { sanitizeSvg, SvgRejected } from "./svg-sanitize";
+import { extractLogoColors, type LogoColor, type Raster } from "./palette";
 
 export type WarningLevel = "info" | "warn" | "hard";
 export interface LogoWarning {
@@ -40,6 +41,8 @@ export interface LogoReport {
   onLight: BackgroundCheck;
   /** PNG pratinjau (maks 600 px), varian putih dan gelap bila relevan. */
   previews: { original: Buffer; monoWhite?: Buffer; monoDark?: Buffer };
+  /** Warna logo (k-means), urut dari porsi terbesar; latar non-transparan tidak ikut. */
+  colors: LogoColor[];
   /** SVG satu warna, bila logo SVG dan monokrom. */
   monoSvg?: { white: string; dark: string };
 }
@@ -55,10 +58,22 @@ export function detectKind(buf: Buffer): "png" | "svg" | null {
   return null;
 }
 
-interface Raster {
-  data: Buffer; // RGBA
-  width: number;
-  height: number;
+
+/** Warna rata-rata tepi gambar (perkiraan warna latar logo yang tidak transparan). */
+function borderColor(r: Raster): RGB {
+  const sum = [0, 0, 0];
+  let n = 0;
+  for (let y = 0; y < r.height; y++) {
+    for (let x = 0; x < r.width; x++) {
+      if (x !== 0 && y !== 0 && x !== r.width - 1 && y !== r.height - 1) continue;
+      const i = (y * r.width + x) * 4;
+      sum[0] += r.data[i];
+      sum[1] += r.data[i + 1];
+      sum[2] += r.data[i + 2];
+      n++;
+    }
+  }
+  return sum.map((v) => v / Math.max(1, n)) as RGB;
 }
 
 async function toRaster(input: Buffer, maxSide: number): Promise<Raster> {
@@ -247,7 +262,9 @@ export async function analyzeLogo(buf: Buffer): Promise<LogoReport> {
   if (onDark.strategy === "mono") previews.monoWhite = await monoPng(preview, "#FFFFFF");
   if (onLight.strategy === "mono") previews.monoDark = await monoPng(preview, SPECS.logo.darkBackground);
 
-  const report: LogoReport = { kind, bytes: buf.length, width, height, warnings, sanitized, transparentBackground: transparent, monochrome, onDark, onLight, previews };
+  const colors = extractLogoColors(raster, transparent ? undefined : borderColor(raster));
+
+  const report: LogoReport = { kind, bytes: buf.length, width, height, warnings, sanitized, transparentBackground: transparent, monochrome, onDark, onLight, previews, colors };
   if (kind === "svg" && monochrome && sanitized && !/<image[\s>]/i.test(sanitized.svg)) {
     report.monoSvg = { white: svgMonochrome(sanitized.svg, "#FFFFFF"), dark: svgMonochrome(sanitized.svg, SPECS.logo.darkBackground) };
   }

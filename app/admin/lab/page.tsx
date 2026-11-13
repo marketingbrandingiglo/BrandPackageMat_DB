@@ -16,10 +16,10 @@ export default async function LabPage() {
           Halaman uji untuk super admin. Hasil tidak disimpan. Bagian yang tersedia akan bertambah per tahap (3a sampai 3e).
         </p>
         <section className={styles.section}>
-          <p className="eyebrow">3a · Pengecekan logo</p>
-          <h2>Periksa logo</h2>
+          <p className="eyebrow">3a · Pengecekan logo · 3b · Palet warna</p>
+          <h2>Periksa logo dan susun palet</h2>
           <p className={styles.muted}>
-            SVG atau PNG, maks {Math.round(SPECS.logo.maxFileBytes / 1024 / 1024)} MB. PNG: peringatan bila sisi terpanjang &lt; {SPECS.logo.pngWarnBelowPx} px, peringatan keras &lt; {SPECS.logo.pngHardWarnBelowPx} px.
+            SVG atau PNG, maks {Math.round(SPECS.logo.maxFileBytes / 1024 / 1024)} MB. PNG: peringatan bila sisi terpanjang &lt; {SPECS.logo.pngWarnBelowPx} px, peringatan keras &lt; {SPECS.logo.pngHardWarnBelowPx} px. Palet warna disusun dari logo yang sama.
           </p>
           <LogoLab />
         </section>

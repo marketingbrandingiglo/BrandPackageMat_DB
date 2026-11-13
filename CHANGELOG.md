@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 3b: palet warna dari logo (k-means OKLab), warna utama + versi teks, aksen Paket A (warna logo/analogus) dan Paket B (komplementer terbelah), netral, HEX/RGB/CMYK, pasangan kontras WCAG; tampil di Lab.
 - Login adaptif: pas di layar tanpa scroll (HP sampai desktop), ukuran mengecil proporsional di layar pendek.
 - Tahap 3a: katalog spesifikasi (`data/specs.json`), daftar bidang usaha, sanitasi SVG, pengecekan logo (resolusi, transparansi, keterbacaan di latar gelap/terang, varian satu warna), halaman `/admin/lab`. SPEC: visual AI memakai Claude (SVG).
 - Tampilan aplikasi mengikuti IGLO Brand Center (warna, tipografi, komponen); logo IGLO hi-res.

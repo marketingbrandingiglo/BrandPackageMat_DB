@@ -100,4 +100,11 @@ describe("pengecekan logo", () => {
     expect(out).toContain('stroke="none"');
     expect(out).toMatch(/<svg[^>]*fill="#FFFFFF"/);
   });
+
+  it("warna logo: latar putih non-transparan tidak ikut dihitung", async () => {
+    const r = await analyzeLogo(await png(900, "#0E5A8A", false));
+    expect(r.colors.map((c) => c.hex)).toEqual(["#0E5A8A"]);
+    const t = await analyzeLogo(await png(900, "#E82827"));
+    expect(t.colors[0].hex).toBe("#E82827");
+  });
 });
