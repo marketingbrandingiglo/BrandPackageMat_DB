@@ -12,7 +12,8 @@
     "version:bump": "node scripts/bump-version.mjs",
     "check:redis": "node --env-file-if-exists=.env.local scripts/check-redis.mjs",
     "render:test": "tsx scripts/render-test.mts",
-    "admin:set-password": "tsx --env-file-if-exists=.env.local scripts/admin-set-password.mts"
+    "admin:set-password": "tsx --env-file-if-exists=.env.local scripts/admin-set-password.mts",
+    "fonts:build": "tsx scripts/fonts-build.mts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
@@ -35,6 +36,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "fontkit": "^2.0.4",
+    "subset-font": "^2.9.0",
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.1.0"

@@ -1,0 +1,338 @@
+# Daftar font terkurasi (SPEC bagian 6.3). Satu nama family Google Fonts per baris,
+# persis seperti di fonts.google.com. Baris diawali # adalah komentar.
+# Setelah mengubah daftar, jalankan: npm run fonts:build
+# Kategori, tag karakter, dan lisensi diambil otomatis dari metadata Google Fonts.
+
+# ── Sans serif (teks isi dan heading) ─────────────────────────────
+Roboto
+Open Sans
+Inter
+Montserrat
+Poppins
+Lato
+Arimo
+Roboto Condensed
+DM Sans
+Oswald
+Raleway
+Nunito
+Nunito Sans
+Manrope
+Rubik
+Outfit
+Plus Jakarta Sans
+Kanit
+Figtree
+Work Sans
+Archivo
+Mulish
+Barlow
+IBM Plex Sans
+Heebo
+Quicksand
+Prompt
+PT Sans
+Jost
+Saira
+Source Sans 3
+Space Grotesk
+Bricolage Grotesque
+Karla
+Fira Sans
+Geist
+Barlow Condensed
+Titillium Web
+Inter Tight
+Oxygen
+Public Sans
+Libre Franklin
+Sora
+Josefin Sans
+Assistant
+Schibsted Grotesk
+Geologica
+Urbanist
+Lexend
+Merriweather Sans
+Cabin
+Instrument Sans
+Mukta
+Fredoka
+Roboto Flex
+PT Sans Narrow
+Red Hat Display
+Dosis
+Rajdhani
+Atkinson Hyperlegible
+Orbitron
+Exo 2
+Hanken Grotesk
+Hind
+Barlow Semi Condensed
+Overpass
+Lexend Deca
+Chakra Petch
+Epilogue
+Teko
+Be Vietnam Pro
+Onest
+Asap
+Unbounded
+Maven Pro
+Albert Sans
+Archivo Narrow
+Syne
+Saira Condensed
+League Spartan
+Exo
+Play
+Changa
+Golos Text
+Sofia Sans
+Sarabun
+Chivo
+Fira Sans Condensed
+Arsenal
+Alegreya Sans
+Red Hat Text
+Montserrat Alternates
+Antonio
+Signika
+Encode Sans
+Rethink Sans
+IBM Plex Sans Condensed
+Khand
+Cantarell
+Kumbh Sans
+Commissioner
+Andika
+Sen
+Philosopher
+Encode Sans Condensed
+Advent Pro
+Gudea
+Bai Jamjuree
+Quattrocento Sans
+Sofia Sans Condensed
+Asap Condensed
+Amaranth
+Proza Libre
+Signika Negative
+Istok Web
+Host Grotesk
+Atkinson Hyperlegible Next
+Monda
+Funnel Sans
+Familjen Grotesk
+Mona Sans
+Radio Canada
+Afacad
+Georama
+Alumni Sans
+Blinker
+Anek Latin
+Wix Madefor Display
+Reddit Sans
+Jura
+Darker Grotesque
+Cuprum
+Yanone Kaffeesatz
+Syncopate
+Quantico
+Krub
+
+# ── Serif dan slab serif (teks isi dan heading) ───────────────────
+Playfair Display
+Roboto Slab
+Merriweather
+Lora
+Cormorant Garamond
+Libre Baskerville
+Fraunces
+PT Serif
+EB Garamond
+Cinzel
+Bitter
+Newsreader
+Source Serif 4
+Bodoni Moda
+Crimson Text
+Arvo
+IBM Plex Serif
+Domine
+Zilla Slab
+Spectral
+Roboto Serif
+Cormorant
+Faustina
+Baskervville
+Frank Ruhl Libre
+Literata
+Crimson Pro
+Playfair
+Vollkorn
+Andada Pro
+Cardo
+Libre Caslon Text
+Alegreya
+Aleo
+Noticia Text
+Old Standard TT
+STIX Two Text
+Martel
+Quattrocento
+Unna
+Josefin Slab
+Neuton
+Rokkitt
+Gelasio
+Volkhov
+Abhaya Libre
+Libre Bodoni
+Petrona
+Besley
+Kreon
+Enriqueta
+Rufina
+Podkova
+Yrsa
+Castoro
+Hepta Slab
+Charis SIL
+Inria Serif
+Kameron
+Brygada 1918
+BioRhyme
+Caudex
+Glegoo
+Platypi
+Montagu Slab
+Piazzolla
+Judson
+Ibarra Real Nova
+Libertinus Serif
+Solway
+Poltawski Nowy
+Bona Nova
+Buenard
+Maitree
+Pridi
+Tienne
+Asul
+
+# ── Display (heading saja) ────────────────────────────────────────
+Abril Fatface
+Alfa Slab One
+Lobster
+Lobster Two
+Comfortaa
+Bungee
+Titan One
+Baloo 2
+Bangers
+Lilita One
+Oleo Script
+Gravitas One
+Righteous
+Special Elite
+Rowdies
+Patua One
+Londrina Solid
+Oxanium
+Passion One
+Fugaz One
+Audiowide
+Gabarito
+Cinzel Decorative
+Rammetto One
+Poiret One
+Calistoga
+Forum
+Balsamiq Sans
+Yeseva One
+Tektur
+Concert One
+Goldman
+Staatliches
+Racing Sans One
+Averia Serif Libre
+Unica One
+Monoton
+Funnel Display
+Caprasimo
+Carter One
+Bowlby One
+Grandstander
+Pixelify Sans
+Knewave
+Chewy
+Shrikhand
+MuseoModerno
+Limelight
+Aboreto
+Black Ops One
+Luckiest Guy
+Dela Gothic One
+Shantell Sans
+Bellota Text
+Fredericka the Great
+Anybody
+Tilt Warp
+DynaPuff
+Sigmar One
+
+# ── Tulisan tangan dan script (heading saja) ──────────────────────
+Dancing Script
+Caveat
+Shadows Into Light
+Pacifico
+Satisfy
+Great Vibes
+Permanent Marker
+Kalam
+Indie Flower
+Yellowtail
+Comic Neue
+Patrick Hand
+Amatic SC
+Allura
+Kaushan Script
+Architects Daughter
+Courgette
+Sacramento
+Pinyon Script
+Tangerine
+Gloria Hallelujah
+Alex Brush
+Homemade Apple
+Cookie
+Merienda
+Parisienne
+Handlee
+Rock Salt
+Mr Dafoe
+Caveat Brush
+Marck Script
+Gochi Hand
+Italianno
+Damion
+Playpen Sans
+Grand Hotel
+Leckerli One
+Petit Formal Script
+Delius
+Playball
+
+# ── Monospace (aksen teknologi) ───────────────────────────────────
+Roboto Mono
+JetBrains Mono
+Source Code Pro
+Inconsolata
+IBM Plex Mono
+Geist Mono
+Space Mono
+Fira Code
+Courier Prime
+Martian Mono
+Spline Sans Mono
+Azeret Mono

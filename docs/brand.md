@@ -31,3 +31,17 @@ Kode: `lib/brand/palette.ts`, konversi warna di `lib/brand/color.ts`. Diuji di L
 - **Logo tanpa warna**: harmoni hue tidak berlaku. Pendukung sementara netral (A monokrom, B monokrom kontras); aksen berwarna diusulkan di 3d/3e berdasarkan bidang usaha.
 - Tiap warna: **HEX, RGB, CMYK** (konversi naif, hanya acuan; catatan proof dicantumkan), kontras di putih dan di netral gelap, serta warna teks terbaik di atasnya.
 - **Pasangan WCAG**: teks gelap di latar terang, abu sedang di putih, warna utama di putih, teks di warna utama, putih di netral gelap. Level: AAA ≥ 7, AA ≥ 4,5, AA teks besar ≥ 3.
+
+## 3c · Daftar font terkurasi
+
+- **Daftar**: `data/fonts/families.txt`, satu nama family Google Fonts per baris (sekarang 324: sans serif 136, serif 77, display 60, tulisan tangan 39, monospace 12). Menambah atau membuang font cukup mengubah file ini lalu menjalankan `npm run fonts:build`.
+- **Skrip** `scripts/fonts-build.mts` (bisa dijalankan ulang; hanya membangun yang belum ada, `--force` membangun ulang semua, `--only "A,B"` membangun ulang family tertentu; folder yang tidak lagi di daftar dihapus):
+  1. Mengambil metadata fonts.google.com (kategori, popularitas) dan tag `tags/all/families.csv` dari repo `google/fonts` (tag karakter Expressive 0-100 seperti Business/Calm/Competent; klasifikasi seperti Sans/Humanist). Tag yang hanya ada per posisi sumbu dirata-rata.
+  2. Mengunduh file dan `METADATA.pb` dari `google/fonts` (folder `ofl/` atau `apache/`; lisensi UFL tidak dipakai).
+  3. Variable font dijadikan statis: Regular (wght 400) dan Bold (wght 700), sumbu lain di nilai default (subset-font/harfbuzz). Font statis memakai file 400 dan 700.
+  4. Dipangkas ke rentang "latin" Google Fonts; dicek huruf wajib (A-Z, a-z, 0-9, tanda baca dasar). Tanda baca tipografis yang tidak ada dicatat di `missingNice`.
+  5. Hasil: `fonts/lib/<folder>/<Nama>-Regular.ttf`, `-Bold.ttf`, file lisensi; metadata di `data/fonts/catalog.json` (`lib/brand/fonts.ts`).
+- **Aturan**: font teks isi (sans, serif, mono) wajib Regular + Bold. Display dan tulisan tangan ditandai `headingOnly` (boleh satu bobot).
+- Dibuang saat penyusunan: Tinos (tidak ada file lisensi di repo), Lusitana dan Squada One (tanpa tanda kutip melengkung/tanda pisah), Ubuntu (lisensi UFL), font tiruan metrik (Carlito, Caladea), varian SC/Unicase, font musiman/barcode, dan font yang aksara utamanya bukan Latin bila bagian Latinnya lemah.
+- **Tinjauan pemilik**: `/admin/lab/font`, contoh teks memakai file font hasil skrip (dimuat saat kartu terlihat), filter kategori, urut menurut tag karakter, tombol Tandai dan Salin nama. File font dilayani route `/admin/lab/font/file/...` (super admin saja, hanya file yang tercatat di katalog).
+- Seleksi dua tahap (shortlist metadata lalu perbandingan visual oleh Claude) dikerjakan di 3d.

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   // File font dibaca lewat fs saat runtime, jadi harus ikut di bundle fungsi.
   outputFileTracingIncludes: {
     "/api/render-test": ["./fonts/test/**/*"],
+    "/admin/lab/font/file/**": ["./fonts/lib/**/*"],
   },
 };
 
