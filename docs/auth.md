@@ -37,5 +37,5 @@ Email, nama, dan password diminta lewat prompt (password tidak tampil). Menjalan
 
 ## Tampilan
 - Mengikuti IGLO Brand Center (https://brandasset-iglo.vercel.app/): Plus Jakarta Sans; Red Iglo `#E82827`, Darker Red `#BB2027` (hover), IGLO White `#FDFCFA` (latar), IGLO Black `#212122` (teks), netral 10-100; field radius 8, button radius 12; alert gaya "Accent". Token di `app/globals.css`.
-- Halaman login mengikuti desain referensi pemilik (ukuran lebih besar).
+- Halaman login mengikuti desain referensi pemilik dan adaptif terhadap tinggi layar: isi di tengah, ukuran mengikuti tinggi viewport (`clamp()` + `dvh`) sehingga pas tanpa scroll dari HP (iPhone SE) sampai desktop. Layar sangat pendek (HP landscape, ≤ 460 px) dipadatkan; bila tetap tidak muat, boleh scroll sedikit. Diuji di 14 ukuran layar.
 - Logo: `public/LOGO-IGLO.png` (logo mark merah, untuk latar terang). Warna dan proporsi tidak diubah.

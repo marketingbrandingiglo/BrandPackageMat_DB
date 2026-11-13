@@ -1,24 +1,51 @@
-/* Mengikuti desain login referensi pemilik (ukuran besar), dengan warna dan font IGLO. */
+/*
+ * Adaptif terhadap tinggi layar: isi diletakkan di tengah dan semua ukuran
+ * mengikuti tinggi viewport (dvh) dengan batas min/max lewat clamp().
+ * Layar tinggi = ukuran desain penuh; layar pendek = mengecil proporsional.
+ * Layar yang terlalu pendek (mis. HP landscape) boleh scroll sedikit.
+ */
 .page {
   min-height: 100dvh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 20vh 16px 48px;
+  padding: clamp(16px, 4dvh, 48px) 16px;
 }
 .card { width: 100%; max-width: 640px; text-align: center; }
 /* Logo mark IGLO: tidak diubah warna/proporsi; ruang kosong di sekitar logo dijaga. */
-.logo { width: 100px; height: auto; margin: 0 auto 36px; display: block; }
+.logo {
+  width: clamp(52px, 9.5dvh, 100px);
+  height: auto;
+  margin: 0 auto clamp(12px, 3.4dvh, 36px);
+  display: block;
+}
 .title {
-  margin: 0 0 62px;
-  font-size: clamp(28px, 7vw, 44px);
+  margin: 0 0 clamp(18px, 5.8dvh, 62px);
+  font-size: clamp(24px, min(7vw, 4.2dvh), 44px);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 1.1;
+  text-wrap: balance;
 }
-.form { display: grid; gap: 26px; text-align: left; max-width: 470px; margin: 0 auto; }
-.form :global(.field-label) { font-size: 18px; font-weight: 400; margin-bottom: 8px; }
-.form :global(.input) { height: 56px; font-size: 17px; padding: 0 16px; border-radius: 10px; }
+.form {
+  display: grid;
+  gap: clamp(12px, 2.4dvh, 26px);
+  text-align: left;
+  max-width: 470px;
+  margin: 0 auto;
+}
+.form :global(.field-label) {
+  font-size: clamp(15px, 1.7dvh, 18px);
+  font-weight: 400;
+  margin-bottom: clamp(4px, 0.75dvh, 8px);
+}
+/* font-size minimal 16px agar iPhone tidak auto-zoom saat mengetik. */
+.form :global(.input) {
+  height: clamp(44px, 5.3dvh, 56px);
+  font-size: clamp(16px, 1.6dvh, 17px);
+  padding: 0 16px;
+  border-radius: 10px;
+}
 .passwordWrap { position: relative; }
 .passwordWrap input { padding-right: 52px; }
 .eye {
@@ -38,12 +65,30 @@
 }
 .eye:hover { background: var(--n10); }
 .eye:focus-visible { outline: 2px solid var(--field-border); }
-.submit { height: 56px; font-size: 18px; font-weight: 700; border-radius: 10px; }
-.help { margin: 50px 0 0; color: var(--muted); font-size: 18px; }
-.version { margin: 70px 0 0; color: var(--faint); font-size: 16px; }
-@media (max-width: 560px) {
-  .page { padding-top: 12vh; }
-  .title { margin-bottom: 40px; }
-  .help { font-size: 16px; margin-top: 40px; }
-  .version { margin-top: 48px; }
+.submit {
+  height: clamp(44px, 5.3dvh, 56px);
+  font-size: clamp(16px, 1.7dvh, 18px);
+  font-weight: 700;
+  border-radius: 10px;
+}
+.help {
+  margin: clamp(16px, 4.7dvh, 50px) 0 0;
+  color: var(--muted);
+  font-size: clamp(14px, 1.7dvh, 18px);
+}
+.version {
+  margin: clamp(10px, 6.6dvh, 70px) 0 0;
+  color: var(--faint);
+  font-size: clamp(13px, 1.5dvh, 16px);
+}
+/* Layar sangat pendek (HP landscape): jarak dan ukuran dipadatkan lebih jauh. */
+@media (max-height: 460px) {
+  .page { padding-block: 10px; }
+  .logo { width: 40px; margin-bottom: 8px; }
+  .title { font-size: 22px; margin-bottom: 12px; }
+  .form { gap: 8px; }
+  .form :global(.field-label) { font-size: 14px; margin-bottom: 3px; }
+  .form :global(.input), .submit { height: 40px; }
+  .help { margin-top: 10px; font-size: 13px; }
+  .version { margin-top: 4px; font-size: 12px; }
 }
