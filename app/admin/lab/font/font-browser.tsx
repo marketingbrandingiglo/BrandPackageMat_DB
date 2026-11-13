@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORY_LABEL, EXPRESSIVE_LABEL, type FontCategory } from "@/lib/brand/fonts";
+import { loadCatalogFont } from "./load-font";
 import styles from "./font.module.css";
 
 export interface FontCard {
@@ -22,13 +23,10 @@ const CATS = Object.keys(CATEGORY_LABEL) as FontCategory[];
 const TAGS = Object.keys(EXPRESSIVE_LABEL);
 const BODY = "Kami membantu usaha Anda tumbuh lewat layanan yang jujur, cepat, dan tepat. Hubungi kami: 0812 3456 7890.";
 
-const faceName = (f: FontCard) => `bpa-${f.regular.split("/")[0]}`;
-const fileUrl = (rel: string) => `/admin/lab/font/file/${rel}`;
-
 /** Muat font hanya saat kartunya terlihat. */
 function useLazyFont(f: FontCard) {
   const ref = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
+  const [family, setFamily] = useState<string | null>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -37,14 +35,8 @@ function useLazyFont(f: FontCard) {
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         io.disconnect();
-        const name = faceName(f);
-        const faces = [new FontFace(name, `url(${fileUrl(f.regular)})`, { weight: "400" })];
-        if (f.bold) faces.push(new FontFace(name, `url(${fileUrl(f.bold)})`, { weight: "700" }));
-        Promise.all(faces.map((x) => x.load()))
-          .then((loaded) => {
-            loaded.forEach((x) => document.fonts.add(x));
-            if (!cancelled) setReady(true);
-          })
+        loadCatalogFont(f.regular, f.bold)
+          .then((name) => !cancelled && setFamily(name))
           .catch(() => {});
       },
       { rootMargin: "400px" },
@@ -55,7 +47,7 @@ function useLazyFont(f: FontCard) {
       io.disconnect();
     };
   }, [f]);
-  return { ref, ready };
+  return { ref, ready: family !== null, family };
 }
 
 function topTags(e: Record<string, number>, n = 3) {
@@ -66,8 +58,8 @@ function topTags(e: Record<string, number>, n = 3) {
 }
 
 function Card({ f, sample, marked, onMark }: { f: FontCard; sample: string; marked: boolean; onMark: () => void }) {
-  const { ref, ready } = useLazyFont(f);
-  const ff = ready ? `"${faceName(f)}", system-ui` : "system-ui";
+  const { ref, ready, family } = useLazyFont(f);
+  const ff = family ? `"${family}", system-ui` : "system-ui";
   return (
     <div ref={ref} className={styles.card} data-marked={marked || undefined}>
       <div className={styles.cardHead}>

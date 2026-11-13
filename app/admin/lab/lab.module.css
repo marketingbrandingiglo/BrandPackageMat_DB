@@ -98,3 +98,25 @@
   .pairSample { padding: 4px 8px; font-size: 12px; }
   .pairs td, .pairs th { padding: 6px 4px; }
 }
+
+/* ---------- 3d · Pasangan font ---------- */
+.fontFields { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; width: 100%; }
+.fontFields label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.fontFields .input { height: 44px; font-size: 16px; }
+.fontFields :global(.btn) { height: 44px; }
+.fontNote { margin: 0; width: 100%; font-size: 13px; color: var(--muted); }
+.pairCard { border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; display: grid; gap: 10px; align-content: start; background: #fff; }
+.pairHeading { margin: 0; font-size: 36px; line-height: 1.15; overflow-wrap: anywhere; }
+.pairSub { margin: 4px 0 0; font-size: 18px; }
+.pairBody { margin: 0; font-size: 15px; line-height: 1.6; }
+.pairMeta { display: grid; gap: 4px; margin: 4px 0 0; font-size: 14px; }
+.pairMeta div { display: flex; gap: 8px; }
+.pairMeta dt { color: var(--muted); min-width: 72px; }
+.pairMeta dd { margin: 0; font-weight: 600; }
+.pairMeta a { color: var(--iglo-red); }
+.sheet { width: 100%; height: auto; border: 1px solid var(--card-border); border-radius: 10px; margin-top: 12px; }
+details.group summary { cursor: pointer; }
+@media (max-width: 760px) {
+  .fontFields { grid-template-columns: 1fr; }
+  .pairHeading { font-size: 28px; }
+}

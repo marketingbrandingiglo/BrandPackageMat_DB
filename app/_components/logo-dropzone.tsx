@@ -72,6 +72,23 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
     [maxBytes, onChange],
   );
 
+  // React mereset form setelah server action selesai, termasuk <input type="file">.
+  // Pasang kembali file yang sedang dipilih supaya tombol berikutnya tetap mengirim logo.
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) return;
+    const onReset = () =>
+      setTimeout(() => {
+        const input = inputRef.current;
+        if (!input || !file) return;
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+      }, 0);
+    form.addEventListener("reset", onReset);
+    return () => form.removeEventListener("reset", onReset);
+  }, [file]);
+
   // Tempel dari clipboard di mana saja di halaman, kecuali saat sedang mengetik di kolom teks.
   useEffect(() => {
     if (disabled) return;

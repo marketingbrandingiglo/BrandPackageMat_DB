@@ -45,3 +45,9 @@ Kode: `lib/brand/palette.ts`, konversi warna di `lib/brand/color.ts`. Diuji di L
 - Dibuang saat penyusunan: Tinos (tidak ada file lisensi di repo), Lusitana dan Squada One (tanpa tanda kutip melengkung/tanda pisah), Ubuntu (lisensi UFL), font tiruan metrik (Carlito, Caladea), varian SC/Unicase, font musiman/barcode, dan font yang aksara utamanya bukan Latin bila bagian Latinnya lemah.
 - **Tinjauan pemilik**: `/admin/lab/font`, contoh teks memakai file font hasil skrip (dimuat saat kartu terlihat), filter kategori, urut menurut tag karakter, tombol Tandai dan Salin nama. File font dilayani route `/admin/lab/font/file/...` (super admin saja, hanya file yang tercatat di katalog).
 - Seleksi dua tahap (shortlist metadata lalu perbandingan visual oleh Claude) dikerjakan di 3d.
+- Catatan teknis: font hasil instancing variable font menyimpan nama family bawaan file (mis. "Nunito ExtraLight") di tabel nama. Mesin render tidak bergantung pada nama itu (font didaftarkan dengan nama katalog), dan file untuk user tetap diunduh dari Google Fonts.
+
+## 3d · Analisis logo dan pasangan font
+
+Detail alur, model, dan biaya: `docs/claude.md`. Kode: `lib/brand/font-select.ts` (panggilan Claude), `lib/brand/font-shortlist.ts` (seleksi metadata), `lib/brand/font-specimen.ts` (lembar spesimen). Di Lab: isi nama perusahaan (dan bidang usaha bila mau), lalu klik "Pilih font dengan Claude" setelah memilih logo.
+

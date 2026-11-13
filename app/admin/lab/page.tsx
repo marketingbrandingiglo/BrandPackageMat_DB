@@ -1,5 +1,7 @@
 import Link from "next/link";
 import AppHeader from "@/app/_components/app-header";
+import industries from "@/data/industries.json";
+import { claudeConfigured } from "@/lib/ai/claude";
 import { requireSuperAdmin } from "@/lib/auth/server";
 import { FONT_CATALOG } from "@/lib/brand/fonts";
 import { SPECS } from "@/lib/brand/specs";
@@ -18,12 +20,16 @@ export default async function LabPage() {
           Halaman uji untuk super admin. Hasil tidak disimpan. Bagian yang tersedia akan bertambah per tahap (3a sampai 3e).
         </p>
         <section className={styles.section}>
-          <p className="eyebrow">3a · Pengecekan logo · 3b · Palet warna</p>
-          <h2>Periksa logo dan susun palet</h2>
+          <p className="eyebrow">3a · Pengecekan logo · 3b · Palet warna · 3d · Pasangan font</p>
+          <h2>Periksa logo, susun palet, pilih font</h2>
           <p className={styles.muted}>
-            SVG atau PNG, maks {Math.round(SPECS.logo.maxFileBytes / 1024 / 1024)} MB. PNG: peringatan bila sisi terpanjang &lt; {SPECS.logo.pngWarnBelowPx} px, peringatan keras &lt; {SPECS.logo.pngHardWarnBelowPx} px. Palet warna disusun dari logo yang sama.
+            SVG atau PNG, maks {Math.round(SPECS.logo.maxFileBytes / 1024 / 1024)} MB. PNG: peringatan bila sisi terpanjang &lt; {SPECS.logo.pngWarnBelowPx} px, peringatan keras &lt; {SPECS.logo.pngHardWarnBelowPx} px. Palet warna disusun dari logo yang sama. Pemilihan font (3d) memakai Claude dan berbayar, jadi dijalankan dengan tombol terpisah.
           </p>
-          <LogoLab maxBytes={SPECS.logo.maxFileBytes} />
+          <LogoLab
+            maxBytes={SPECS.logo.maxFileBytes}
+            industries={industries.industries.map((x) => ({ id: x.id, label: x.id_label }))}
+            claudeReady={claudeConfigured()}
+          />
         </section>
         <section className={styles.section}>
           <p className="eyebrow">3c · Daftar font terkurasi</p>

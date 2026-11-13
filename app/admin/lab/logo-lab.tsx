@@ -1,8 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { checkLogo, type LabLogoResult } from "./actions";
+import { checkLogo, chooseFonts, type LabFontResult, type LabLogoResult } from "./actions";
 import LogoDropzone from "@/app/_components/logo-dropzone";
+import FontPairsView from "./font-pairs-view";
 import PaletteView from "./palette-view";
 import styles from "./lab.module.css";
 
@@ -20,9 +21,18 @@ function fmtBytes(n: number) {
   return n < 1024 * 1024 ? `${(n / 1024).toFixed(0)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export default function LogoLab({ maxBytes }: { maxBytes: number }) {
-  const [state, action, pending] = useActionState<LabLogoResult, FormData>(checkLogo, {});
+export interface LabIndustry {
+  id: string;
+  label: string;
+}
+
+export default function LogoLab({ maxBytes, industries, claudeReady }: { maxBytes: number; industries: LabIndustry[]; claudeReady: boolean }) {
+  const [state, action, pendingLogo] = useActionState<LabLogoResult, FormData>(checkLogo, {});
+  const [fonts, fontAction, pendingFonts] = useActionState<LabFontResult, FormData>(chooseFonts, {});
   const [fileName, setFileName] = useState<string>("");
+  const [company, setCompany] = useState("");
+  const [industry, setIndustry] = useState("");
+  const pending = pendingLogo || pendingFonts;
   const r = state.report;
 
   return (
@@ -30,11 +40,34 @@ export default function LogoLab({ maxBytes }: { maxBytes: number }) {
       <form action={action} className={styles.upload}>
         <LogoDropzone name="logo" maxBytes={maxBytes} onChange={(f) => setFileName(f?.name ?? "")} disabled={pending} />
         <button type="submit" className="btn btn-primary" disabled={pending || !fileName}>
-          {pending ? "Memeriksa…" : "Periksa logo dan palet"}
+          {pendingLogo ? "Memeriksa…" : "Periksa logo dan palet"}
         </button>
+        <div className={styles.fontFields}>
+          <label>
+            <span>Nama perusahaan (3d)</span>
+            <input className="input" name="companyName" value={company} onChange={(e) => setCompany(e.target.value)} maxLength={80} placeholder="mis. PT Sejahtera Bersama" />
+          </label>
+          <label>
+            <span>Bidang usaha (opsional)</span>
+            <select className="input" name="industry" value={industry} onChange={(e) => setIndustry(e.target.value)}>
+              <option value="">Tidak disebutkan</option>
+              {industries.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+            </select>
+          </label>
+          <button type="submit" formAction={fontAction} className="btn btn-secondary" disabled={pending || !fileName || !company.trim() || !claudeReady}>
+            {pendingFonts ? "Claude sedang memilih…" : "Pilih font dengan Claude"}
+          </button>
+        </div>
+        <p className={styles.fontNote}>
+          {claudeReady
+            ? "3d memanggil Claude dua kali (analisis logo, lalu perbandingan spesimen). Perkiraan biaya di bawah US$0,30 per percobaan; butuh sekitar 30-90 detik."
+            : "3d belum aktif: ANTHROPIC_API_KEY belum diisi. Lihat docs/claude.md."}
+        </p>
       </form>
 
       {state.error && <p className="alert alert-error" role="alert">{state.error}</p>}
+      {fonts.error && <p className="alert alert-error" role="alert">{fonts.error}</p>}
+      {fonts.packages && <FontPairsView r={fonts} />}
 
       {r && (
         <div className={styles.result}>
