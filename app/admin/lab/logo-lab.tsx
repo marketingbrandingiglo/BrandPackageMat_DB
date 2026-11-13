@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { checkLogo, type LabLogoResult } from "./actions";
+import LogoDropzone from "@/app/_components/logo-dropzone";
 import PaletteView from "./palette-view";
 import styles from "./lab.module.css";
 
@@ -19,7 +20,7 @@ function fmtBytes(n: number) {
   return n < 1024 * 1024 ? `${(n / 1024).toFixed(0)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export default function LogoLab() {
+export default function LogoLab({ maxBytes }: { maxBytes: number }) {
   const [state, action, pending] = useActionState<LabLogoResult, FormData>(checkLogo, {});
   const [fileName, setFileName] = useState<string>("");
   const r = state.report;
@@ -27,16 +28,7 @@ export default function LogoLab() {
   return (
     <div className={styles.lab}>
       <form action={action} className={styles.upload}>
-        <label className={styles.drop}>
-          <input
-            type="file"
-            name="logo"
-            accept=".svg,.png,image/svg+xml,image/png"
-            onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
-          />
-          <span className={styles.dropTitle}>{fileName || "Pilih file logo"}</span>
-          <span className={styles.muted}>Klik untuk memilih SVG atau PNG</span>
-        </label>
+        <LogoDropzone name="logo" maxBytes={maxBytes} onChange={(f) => setFileName(f?.name ?? "")} disabled={pending} />
         <button type="submit" className="btn btn-primary" disabled={pending || !fileName}>
           {pending ? "Memeriksa…" : "Periksa logo dan palet"}
         </button>

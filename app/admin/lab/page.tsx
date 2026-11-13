@@ -21,7 +21,7 @@ export default async function LabPage() {
           <p className={styles.muted}>
             SVG atau PNG, maks {Math.round(SPECS.logo.maxFileBytes / 1024 / 1024)} MB. PNG: peringatan bila sisi terpanjang &lt; {SPECS.logo.pngWarnBelowPx} px, peringatan keras &lt; {SPECS.logo.pngHardWarnBelowPx} px. Palet warna disusun dari logo yang sama.
           </p>
-          <LogoLab />
+          <LogoLab maxBytes={SPECS.logo.maxFileBytes} />
         </section>
       </main>
     </>
