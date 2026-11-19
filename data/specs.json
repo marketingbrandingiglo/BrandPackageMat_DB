@@ -13,7 +13,7 @@
   },
   "logo": {
     "$comment": "Pengecekan logo (SPEC bagian 3). Peringatan, bukan penolakan, kecuali tipe dan ukuran file.",
-    "maxFileBytes": 5242880,
+    "maxFileBytes": 4194304,
     "allowedTypes": ["image/png", "image/svg+xml"],
     "pngWarnBelowPx": 800,
     "pngHardWarnBelowPx": 400,

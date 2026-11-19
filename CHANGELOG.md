@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- SPEC: engine Claude lewat sesi pekerja berlangganan (tanpa API key), penyimpanan Google Drive pemilik, masa simpan 90 hari, paket tidak dipilih langsung dihapus, ZIP dibuat saat unduh, halaman Riwayat. PR saluran kontrol #1. Batas logo 4 MB.
 - Perbaikan upload logo: file tetap terpilih setelah tombol diklik (sebelumnya klik kedua menghasilkan "Pilih file logo terlebih dulu").
 - Tahap 3d: analisis logo oleh Claude (karakter visual -> kriteria font), shortlist 20-30 font dari metadata katalog, lembar spesimen dirender dengan font asli, Claude memilih pasangan heading + teks isi untuk Paket A dan B; tampil di Lab dengan biaya per percobaan. Panduan API key dan model: `docs/claude.md`.
 - Tahap 3c: daftar 324 font Google terkurasi (`data/fonts/families.txt`), skrip `npm run fonts:build` (Regular/Bold statis dari variable font, dipangkas ke Latin, lisensi OFL/Apache, tag karakter Google Fonts), katalog `data/fonts/catalog.json`, halaman tinjauan `/admin/lab/font` dengan tombol tandai untuk dibuang.

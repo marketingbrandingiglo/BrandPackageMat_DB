@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    // Upload logo maks 5 MB (SPEC bagian 3) + overhead multipart.
-    serverActions: { bodySizeLimit: "6mb" },
+    // Upload logo maks 4 MB (SPEC bagian 3) + overhead multipart; tetap di bawah batas Vercel 4,5 MB.
+    serverActions: { bodySizeLimit: "4.5mb" },
   },
   // Pustaka render dimuat apa adanya dari node_modules (PDFKit membaca file data
   // AFM lewat fs; resvg memakai binary native).

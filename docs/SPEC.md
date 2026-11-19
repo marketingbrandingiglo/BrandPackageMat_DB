@@ -31,7 +31,8 @@ Semua materi berupa **template placeholder**. Pengisian data per orang dilakukan
 
 - Pengguna: **internal saja**. Pengguna aplikasi terpisah dari anggota tim Vercel.
 - Satu **halaman login** (email + password). Tanpa registrasi mandiri.
-- **Super admin** = pemilik. Super admin dapat: membuat user beserta password-nya, menonaktifkan atau menghapus user, melihat pemakaian token/kredit dan estimasi biaya per user dan per sesi.
+- **Super admin** = pemilik. Super admin dapat: membuat user beserta password-nya, menonaktifkan atau menghapus user, melihat pemakaian (jumlah generate) per user dan per sesi, dan melihat riwayat generate semua user.
+- Saat ini dipakai pemilik dan anggota tim yang diberi akses (prototype). Bila nanti dibuka untuk publik, pemilik memberi tahu dan arsitektur ditinjau ulang (engine Claude, penyimpanan).
 - Password buatan super admin **boleh langsung dipakai** user (tidak dipaksa ganti saat login pertama).
 - **Sesi login berlaku 12 jam.**
 - Keamanan login:
@@ -58,7 +59,7 @@ Website **tidak** menjadi input. Semua layout harus tampil rapi tanpa website, d
 
 ### Pengecekan logo (peringatan, bukan penolakan)
 
-- Hanya SVG dan PNG. Batas ukuran file (default 5 MB).
+- Hanya SVG dan PNG. Batas ukuran file **4 MB** (di bawah batas body request Vercel 4,5 MB; diubah 2026-11-19 dari 5 MB).
 - PNG: peringatan bila **resolusi rendah** dan bila **latar tidak transparan**. Ambang default bisa diubah (usulan awal: peringatan di bawah 800 px sisi terpanjang, peringatan keras di bawah 400 px).
 - SVG: **disanitasi** (buang script, event handler, referensi eksternal, `foreignObject`), peringatan bila ada gambar raster tertanam atau teks yang belum di-outline.
 - Varian untuk latar gelap dicek/dibuat agar logo tetap terbaca di kartu berwarna dan slide gelap.
@@ -149,7 +150,7 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 
 ## 6. Mesin brand (guideline)
 
-1. **Analisis logo**: kombinasi deteksi deterministik (warna dominan lewat k-means) dan analisis visual oleh Claude (gaya: geometris/organik, ketebalan, ada/tidak serif, formalitas, energi). Output berupa JSON terstruktur, divalidasi schema.
+1. **Analisis logo**: kombinasi deteksi deterministik (warna dominan lewat k-means) dan analisis visual oleh Claude (sesi pekerja, bagian 8) (gaya: geometris/organik, ketebalan, ada/tidak serif, formalitas, energi). Output berupa JSON terstruktur, divalidasi schema.
 2. **Palet warna**: warna utama dari logo, 2-3 warna pendukung dari aturan harmoni, plus netral. Tiap warna punya **HEX, RGB, CMYK**. CMYK dari konversi hitung-hitungan dan **hanya acuan**; guideline mencantumkan catatan bahwa hasil cetak perlu proof. Pasangan warna teks/latar dicek kontrasnya (WCAG).
 3. **Font** (hanya Google Fonts):
    - **Daftar terkurasi sekitar 300 family** di dalam repo, dipangkas ke aksara Latin, beserta file lisensi tiap font (OFL/Apache). Skrip pembuatnya **bisa dijalankan ulang**, sehingga menambah font nanti cukup dengan menambah nama family ke daftar atas permintaan pemilik.
@@ -161,29 +162,36 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 ## 7. Visual AI (opsional)
 
 - Lingkup: **satu aset dekoratif per paket** (pola/ilustrasi latar) yang dipakai ulang di beberapa materi, bukan satu per materi. Pola sederhana dibuat dari kode.
-- Penyedia: **Claude API** (sama dengan mesin brand), hanya dipanggil dari server. Keluaran berupa **kode SVG** (pola, bentuk geometris, ilustrasi abstrak), bukan gambar raster; tidak ada foto atau ilustrasi realistis. SVG hasil Claude disanitasi dan divalidasi seperti logo unggahan. *(Diubah 2026-11-10: sebelumnya OpenAI Images API atau Magnific.)*
+- Penyedia: **Claude** lewat sesi pekerja (sama dengan mesin brand, bagian 8). Keluaran berupa **kode SVG** (pola, bentuk geometris, ilustrasi abstrak), bukan gambar raster; tidak ada foto atau ilustrasi realistis. SVG hasil Claude disanitasi dan divalidasi seperti logo unggahan. *(Diubah 2026-11-10: sebelumnya OpenAI Images API atau Magnific.)*
 - Aturan prompt tetap: tanpa teks, tanpa logo, tanpa wajah orang nyata, sisakan ruang kosong untuk judul. Teks dan logo selalu dari template.
-- Cache berdasarkan hash prompt, maksimal 3 kali percobaan ulang, biaya dicatat.
+- Cache berdasarkan hash prompt, maksimal 3 kali percobaan ulang.
 - Karena keluarannya vektor, aset tetap bisa diedit di Illustrator dan tajam untuk cetak.
 
 ## 8. Arsitektur
 
 - **Stack**: Next.js (App Router) + TypeScript, deploy di **Vercel Pro** (satu tim). Satu codebase untuk tampilan dan backend.
-- **Upstash Redis**: user, sesi, status job, penghitung pemakaian, rate limit, cache kurs. **Dua database terpisah**: lokal/dev dan production.
-- **Vercel Blob (private)**: logo yang diunggah, hasil generate, ZIP. Dikirim ke user lewat route yang butuh login (bukan URL publik yang bisa ditebak).
-- **Vercel Cron**: pembersihan file kedaluwarsa.
-- **Claude API**: dipanggil dari server saja (analisis logo, saran font/warna/tone, terjemahan konten, aset dekoratif SVG). Input user diperlakukan sebagai data (lihat bagian 12).
+- **Upstash Redis**: user, sesi, antrean dan status job, riwayat, penghitung pemakaian, rate limit, cache kurs, token Google Drive (terenkripsi). Dev dan production dipisah dengan prefiks kunci (bagian 18).
+- **Google Drive pemilik** (akun Gmail pribadi, paket 400 GB): logo yang diunggah dan file materi hasil generate, di satu folder aplikasi, dipisah per environment dan per job. Akses lewat Google Drive API dengan scope `drive.file` (aplikasi hanya melihat file yang ia buat sendiri); pemilik menghubungkan Drive sekali dari halaman Admin, token disimpan terenkripsi. File dikirim ke user lewat route yang butuh login, tidak pernah lewat tautan berbagi Drive. *(Diubah 2026-11-19: sebelumnya Vercel Blob, kapasitas akun tim sudah penuh.)*
+- **Vercel Cron**: pembersihan file kedaluwarsa (bagian 10).
+- **Claude lewat sesi pekerja (langganan Claude, tanpa API key)**, pola sama dengan aplikasi `thread` dan `socmed`:
+  1. Aplikasi menyimpan permintaan (job) di Redis dan file di Drive, lalu menulis komentar 🛎️ berisi **ID job saja** di PR saluran kontrol (repo ini, tidak pernah di-merge).
+  2. Satu sesi Claude Code yang memantau PR itu bangun, mengambil job dari Redis, mengerjakannya dengan skrip pekerja (bagian deterministik: shortlist font, spesimen, render, validasi) dan penilaian visualnya sendiri (melihat logo dan spesimen sebagai file), lalu menulis hasil ke Redis dan Drive. Tidak ada data klien yang masuk repo.
+  3. Aplikasi memantau status job dan menampilkan hasil. Waktu tunggu beberapa menit; job diproses berurutan oleh satu sesi pekerja yang melayani dev dan production.
+  - PR saluran kontrol: [#1](https://github.com/marketingbrandingiglo/BrandPackageMat_DB/pull/1) (branch `bpa/control-channel`, draft).
+  - Komentar PR hanya bel; isi job yang sah hanya yang ada di Redis. Input user diperlakukan sebagai data (bagian 12). Runbook pekerja: `docs/worker.md`.
+  - *(Diubah 2026-11-19: sebelumnya Claude API dengan API key. Jalur API dihapus dari kode dan bisa dikembalikan dari riwayat git bila dibutuhkan.)*
 - **Render**: kebutuhan arsitektur ini diputuskan oleh **uji kelayakan di Tahap 1**, dengan urutan prioritas:
   1. PDF dari SVG **tanpa browser** (pustaka ringan);
   2. Chromium versi ringkas untuk serverless;
   3. layanan render terpisah (kontainer kecil), web form tetap di Vercel.
-- **Generate paralel**: tahap 1 (analisis logo, guideline, aset visual) harus selesai dulu karena semua materi bergantung padanya. Setelah itu **semua materi dikerjakan bersamaan**, tiap materi sebagai tugas pendek terpisah untuk kedua paket. Status tiap tugas ada di Redis; UI menampilkan progres per materi.
+- **Generate paralel**: tahap 1 (analisis logo, guideline, aset visual; dikerjakan sesi pekerja) harus selesai dulu karena semua materi bergantung padanya. Setelah itu **semua materi dikerjakan bersamaan**, tiap materi sebagai tugas pendek terpisah untuk kedua paket. Status tiap tugas ada di Redis; UI menampilkan progres per materi.
 - **Font di bundel**: terkurasi (±300 family, ±43 MB setelah dipangkas), di dalam repo, aman terhadap batas ukuran fungsi.
 
 ### Fakta platform (diverifikasi pada 2026-11-09 dari dokumentasi Vercel; cek ulang bila ragu)
 
 - Vercel Functions dengan Fluid compute: durasi default 300 detik (maks 800 detik di Pro). Batas bundle 250 MB uncompressed ("large functions" beta sampai 5 GB). Batas body request/respons 4,5 MB, **tidak berlaku untuk respons streaming**. Puppeteer dengan Chromium bawaan disebut penyebab umum melebihi batas 250 MB.
-- Vercel Blob tersedia di semua plan; di Pro dibayar berdasarkan pemakaian (contoh di dokumentasi: ±$0,023/GB-bulan untuk penyimpanan; operasi hapus gratis).
+- Vercel Blob tersedia di semua plan; di Pro dibayar berdasarkan pemakaian (contoh di dokumentasi: ±$0,023/GB-bulan untuk penyimpanan; operasi hapus gratis). Tidak dipakai (2026-11-19).
+- Google OAuth (diverifikasi 2026-11-19): scope `drive.file` tergolong non-sensitive, jadi aplikasi bisa berstatus "In production" tanpa verifikasi panjang; refresh token aplikasi berstatus "Testing" kedaluwarsa 7 hari. Refresh token juga berhenti bila izin dicabut, tidak dipakai 6 bulan, atau melewati 100 token per akun per client.
 - Password Protection bawaan Vercel **tidak dipakai** (di Pro berbiaya $20/bulan/proyek). Autentikasi dilakukan oleh aplikasi sendiri.
 - Data font (diukur 2026-11-09 dari repo `google/fonts`): 2.042 family, 3.785 file, 2,23 GB; family CJK saja 1,34 GB; ini alasan memakai daftar terkurasi.
 
@@ -196,7 +204,7 @@ Setelah kedua paket selesai, user membandingkan lalu **memilih satu paket**. Unt
 3. **Checklist**: user mencentang **lebih dari satu materi, tetapi tidak semua**, lalu mengunduh pilihannya sebagai satu ZIP.
 
 Aturan:
-- ZIP lengkap dibuat sebagai **langkah terakhir** setelah semua materi selesai, disimpan di Blob. ZIP hasil checklist dibuat **sesuai permintaan** dengan streaming dari file yang sudah ada (tidak disimpan).
+- **ZIP tidak disimpan.** Yang disimpan hanya file materi; ZIP (semua maupun checklist) dibuat saat diunduh dengan streaming dari file yang sudah ada.
 - Struktur ZIP lengkap:
 
 ```
@@ -213,17 +221,20 @@ NamaPerusahaan_BrandPackage_A.zip
 ```
 
 - Nama folder dan isi `BACA-SAYA` mengikuti bahasa terpilih. Nama file memakai nama perusahaan yang sudah dibersihkan dari karakter bermasalah. `BACA-SAYA` selalu ikut di setiap ZIP, termasuk hasil checklist (usulan penamaan: `..._A_Pilihan.zip`).
-- **Paket yang tidak dipilih tetap tersedia sampai batas 24 jam**, supaya user bisa berubah pikiran.
+- **Paket yang tidak dipilih langsung dihapus** saat user memilih paket. Bila user belum memilih, kedua paket disimpan selama masa simpan (bagian 10).
 - **File font tidak dibundel** di ZIP untuk saat ini; hanya tautan unduh font Google di `BACA-SAYA` (font di repo sudah dipangkas ke Latin, jadi tidak cocok didistribusikan untuk diedit). Bisa ditambah nanti.
 
-## 10. Retensi dan privasi
+## 10. Retensi, riwayat, dan privasi
 
-- Semua hasil generate **dan logo yang diunggah dihapus otomatis setelah 24 jam**, atau lebih awal saat user yang sama memulai generate baru (hasil sebelumnya diganti, per user).
-- Penghapusan dilakukan per user/sesi, tidak pernah global. Pembersihan terjadwal lewat Vercel Cron; metadata di Redis memakai TTL 24 jam.
-- Antarmuka menampilkan keterangan "file tersedia hingga {waktu}" (hitung mundur).
-- Setiap user hanya menyimpan satu generate (kedua paket A dan B) pada satu waktu.
+- Logo yang diunggah dan file materi hasil generate **disimpan 3 bulan (90 hari)**, lalu dihapus otomatis. *(Diubah 2026-11-19: sebelumnya 24 jam.)*
+- Paket yang tidak dipilih dihapus saat user memilih paket (bagian 9); bila tidak pernah dipilih, kedua paket disimpan 90 hari.
+- Pembersihan terjadwal lewat Vercel Cron (harian): file di Drive yang berumur lebih dari 90 hari dihapus permanen (tidak lewat Trash), per job, tidak pernah global. Metadata job di Redis memakai TTL 90 hari.
+- **Riwayat**: user bisa melihat dan mengunduh ulang generate miliknya selama masa simpan. Tiap user hanya melihat riwayatnya sendiri; super admin melihat riwayat semua user.
+- Antarmuka menampilkan keterangan "file tersedia hingga {tanggal}".
 
 ## 11. Pemakaian dan biaya
+
+> **Catatan 2026-11-19:** selama engine Claude memakai sesi pekerja (langganan, bagian 8), tidak ada biaya per token. Pemakaian dicatat sebagai **jumlah job per user, per sesi, dan total**, beserta durasinya. Butir di bawah tentang token dan kurs berlaku lagi bila jalur API dipakai kembali.
 
 - Setiap pemanggilan penyedia dicatat sebagai event: user, sesi, job, penyedia (Anthropic), model, token input/output, estimasi biaya.
 - **Sesi = satu kali login** (maksimal 12 jam). Pemakaian ditampilkan per proses generate dan kumulatif per sesi, per user, dan **total gabungan semua pengguna** (hitungan atomik di Upstash).
@@ -239,25 +250,26 @@ NamaPerusahaan_BrandPackage_A.zip
 - Brief, nama perusahaan, dan isi kolom "Lainnya" adalah **data, bukan instruksi**. Panggilan ke Claude memakai output terstruktur (schema), tanpa akses tool berbahaya, dan hasilnya divalidasi.
 - Semua teks user di-escape saat masuk ke SVG, HTML, dan DOCX. Nama file disanitasi.
 - Upload dibatasi tipe dan ukuran. SVG disanitasi (bagian 3).
-- API key hanya di environment variable server. Tidak ada di kode klien.
+- Rahasia (token GitHub, kredensial Upstash, OAuth client Google, kunci enkripsi token Drive) hanya di environment variable server atau environment sesi pekerja. Tidak ada di kode klien, repo, log, atau percakapan.
+- Komentar di PR saluran kontrol hanya berisi ID job; tidak ada nama perusahaan, logo, atau data lain (repo publik).
 - Rate limit pada login dan pada endpoint generate.
 
 ## 13. Struktur data (garis besar)
 
-Redis (kunci berawalan sesuai environment): `user:{id}`, `session:{id}` (TTL 12 jam), `job:{id}` dan `task:{id}` (status materi, TTL 24 jam), `usage:*` (penghitung), `fx:usd_idr` (cache kurs). File di Blob dengan prefiks per user.
+Redis (kunci berawalan sesuai environment): `user:{id}`, `session:{id}` (TTL 12 jam), `job:{id}` dan `task:{id}` (status, TTL 90 hari), antrean job, indeks riwayat per user, `usage:*` (penghitung), `fx:usd_idr` (cache kurs), token Google Drive (terenkripsi). File di Google Drive: folder aplikasi > environment > job.
 
 ## 14. Alur development dan rilis
 
 - Pengembangan di **lokal** pemilik. Repo GitHub; hanya pemilik yang mengerjakan repo ini.
 - Branch: **`main`** = production, **`dev`** = branch kerja. `dev` di-push ke GitHub sebagai cadangan **tanpa memicu Vercel**: preview deployment untuk branch selain `main` dimatikan (lewat `vercel.json` atau Ignored Build Step; caranya diverifikasi saat setup).
 - **Vercel hanya diperbarui saat pemilik memerintahkan push ke `main`.**
-- Tanpa pull request. Prosedur push ke `main` atas perintah pemilik:
+- Tanpa pull request untuk kode. Satu-satunya PR adalah **PR saluran kontrol** (bel sesi pekerja, bagian 8), yang tidak pernah di-merge atau ditutup. Prosedur push ke `main` atas perintah pemilik:
   1. `fetch` dari GitHub; bila `main` di remote punya perubahan baru, **pull dulu**.
   2. Gabungkan `dev` ke `main`.
   3. Naikkan versi di `package.json` dan commit.
   4. Push `main`.
   5. Laporkan nomor versi dan alasannya.
-- Dua environment dengan **Upstash dan API key terpisah**: lokal/dev dan production. File `.env.local` tidak pernah di-commit; production memakai environment variable Vercel.
+- Dua environment: lokal/dev dan production (Upstash dengan prefiks terpisah, folder Drive terpisah). File `.env.local` tidak pernah di-commit; production memakai environment variable Vercel.
 
 ### Versi aplikasi
 
@@ -272,7 +284,7 @@ Redis (kunci berawalan sesuai environment): `user:{id}`, `session:{id}` (TTL 12 
 - **Pengecekan otomatis** tiap render: teks meluap, teks keluar dari margin atau safe area, blok bertabrakan, kontras warna, font terpasang. Mode ketat mengembalikan error untuk dipakai di pipeline.
 - Hasil render diperiksa secara visual sebelum dianggap selesai.
 - Pemilik menguji sendiri: SVG di Illustrator, PPTX di PowerPoint, DOCX di Word, signature di klien email. Itu tidak bisa diverifikasi dari lingkungan cloud.
-- Tes unit untuk validasi input, perhitungan biaya, aturan versi, dan penghapusan 24 jam.
+- Tes unit untuk validasi input, perhitungan pemakaian, aturan versi, dan penghapusan 90 hari.
 
 ## 16. Roadmap
 
@@ -284,8 +296,8 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 3. **Mesin brand**: katalog spesifikasi, pengecekan logo, daftar font terkurasi dan seleksi dua tahap, palet HEX/RGB/CMYK, tone of voice, dua arah paket, dua bahasa.
 4. **Materi**: kartu nama, cap, amplop, ID card (SVG + PDF); kop surat (DOCX + PDF); PPTX; email signature HTML; guideline PDF.
 5. **Visual AI (opsional)**: aset dekoratif per paket, cache, batas percobaan.
-6. **Web form**: wizard input, tombol bahasa, progres paralel per materi, tampilan dua paket berdampingan, pilih satu, unduh semua / per materi / checklist.
-7. **Pemakaian dan kurs**: penghitung, estimasi USD/IDR, rekap admin, penghapusan 24 jam.
+6. **Web form**: wizard input, tombol bahasa, progres paralel per materi, tampilan dua paket berdampingan, pilih satu, unduh semua / per materi / checklist, halaman Riwayat.
+7. **Pemakaian**: penghitung job, rekap admin, penghapusan 90 hari.
 8. **Pengujian dan rilis 1.0**: pengecekan otomatis, pengujian pemilik di aplikasi Adobe/Microsoft, push ke `main` sebagai versi 1.0.
 
 ## 17. Belum diputuskan / perlu diverifikasi
@@ -294,7 +306,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 2. Daftar 300 font terkurasi: disusun Claude Code (kategori, tag, dukungan huruf Indonesia, bobot), **ditinjau pemilik**.
 3. Pemetaan bidang usaha ke karakter font dan tone.
 4. **Isi tengah cap**: logo dikonversi monokrom bila bersih, atau inisial/ornamen bila tidak. Diputuskan saat Tahap 4.
-5. **Gambar di email signature** (logo, ikon sosial media): file hasil dihapus dalam 24 jam, sehingga signature tidak boleh bergantung pada URL milik aplikasi. Usulan: tempatkan placeholder URL, sertakan file gambar di ZIP, dan jelaskan di `BACA-SAYA` cara mengunggahnya ke Gmail/Outlook atau hosting sendiri; sosial media berupa tautan teks secara default.
+5. **Gambar di email signature** (logo, ikon sosial media): file hasil hanya disimpan sementara (90 hari), sehingga signature tidak boleh bergantung pada URL milik aplikasi. Usulan: tempatkan placeholder URL, sertakan file gambar di ZIP, dan jelaskan di `BACA-SAYA` cara mengunggahnya ke Gmail/Outlook atau hosting sendiri; sosial media berupa tautan teks secara default.
 6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
 7. Ambang peringatan resolusi logo.
 8. Aset visual AI dipakai di materi mana (usulan: sampul PPT, sisi belakang ID card, sisi belakang kartu nama).
@@ -315,3 +327,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Upload logo (2026-11-13): drag & drop dan tempel dari clipboard (Cmd/Ctrl + V, termasuk teks SVG) selain klik; logo diproses saat tombol diklik, bukan otomatis. Komponen dipakai ulang di form Tahap 4.
 - Tahap 3c (2026-11-13): daftar terkurasi 324 family (sans 136, serif 77, display 60, tulisan tangan 39, mono 12; 31,7 MB) disusun dari popularitas Google Fonts dan dipangkas manual; ditinjau pemilik di `/admin/lab/font`. File font dibuat dengan subset-font (harfbuzz) di Node, tanpa Python. Lisensi UFL (Ubuntu) tidak dipakai karena SPEC membatasi OFL/Apache.
 - Tahap 3d (2026-11-13): model utama `claude-opus-5-5` (US$4/20 per juta token), model ringan `claude-haiku-5-5`; keduanya bisa diganti lewat env var. Shortlist berupa satu kumpulan maks. 30 kandidat; Claude memilih dari lembar spesimen (10 font per gambar). Bila model utama menolak, API memakai model cadangan otomatis.
+- Engine Claude dan penyimpanan (2026-11-19): aplikasi dipakai pemilik dan tim (prototype). Claude dijalankan lewat **sesi pekerja berlangganan** yang dibangunkan komentar di PR saluran kontrol (tanpa API key; jalur API Tahap 3d dihapus). Penyimpanan file di **Google Drive pemilik** (Vercel Blob penuh; Cloudflare R2 dipertimbangkan tetapi tidak dipilih). Logo dan hasil disimpan **90 hari**; paket tidak dipilih langsung dihapus saat user memilih, kedua paket disimpan 90 hari bila belum dipilih; ZIP dibuat saat diunduh, tidak disimpan. Halaman **Riwayat**: user melihat miliknya, super admin melihat semua. Batas logo diturunkan menjadi **4 MB**.
