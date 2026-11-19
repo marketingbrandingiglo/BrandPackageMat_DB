@@ -12,6 +12,7 @@
  *
  * File kerja ada di luar repo: <tmp>/bpa-worker/<env>-<id>/ (logo.png, traits.json, sheet-N.png, picks.json, tone.json).
  */
+import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -73,6 +74,22 @@ function industryBaseline(job: Job): string {
   ].join("\n");
 }
 
+/**
+ * Pastikan kode pekerja sama dengan branch dev terbaru. Bila tertinggal, berhenti: aturan dan
+ * langkah (mis. tone of voice) bisa berbeda dari versi yang dipakai aplikasi.
+ */
+function ensureLatestCode() {
+  try {
+    execSync("git fetch -q origin dev", { stdio: "ignore", timeout: 60_000 });
+    const behind = Number(execSync("git rev-list --count HEAD..origin/dev").toString().trim());
+    if (behind > 0) {
+      die(`kode pekerja tertinggal ${behind} commit dari origin/dev. Jalankan: git pull origin dev && npm ci, lalu BACA ULANG docs/worker.md (langkahnya bisa berubah), baru ulangi perintah ini.`);
+    }
+  } catch {
+    console.warn("Peringatan: tidak bisa memeriksa versi kode (git fetch gagal). Pastikan sudah git pull origin dev.");
+  }
+}
+
 async function main() {
   switch (cmd) {
     case "status": {
@@ -108,6 +125,7 @@ async function main() {
       break;
     }
     case "begin": {
+      ensureLatestCode();
       const job = await loadJob();
       if (job.status === "done") die("job sudah selesai");
       await startJob(job);

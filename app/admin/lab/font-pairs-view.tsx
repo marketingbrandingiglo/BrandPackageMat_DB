@@ -63,7 +63,11 @@ export default function FontPairsView({ r, jobId, companyName, industry, took }:
       </div>
       <p className="alert alert-info">{r.notes.id}</p>
 
-      {r.tone && <ToneView tone={r.tone} />}
+      {r.tone ? (
+        <ToneView tone={r.tone} />
+      ) : (
+        <p className="alert alert-warn">Tone of voice (3e) tidak ada di hasil ini: job dikerjakan sesi pekerja dengan kode versi lama. Kirim ulang setelah pekerja menjalankan git pull.</p>
+      )}
 
       <div className={styles.group}>
         <h4>Karakter logo menurut Claude</h4>

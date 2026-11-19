@@ -21,6 +21,8 @@ npm ci                       # hanya bila package-lock berubah
 npm run worker -- pending
 ```
 
+**Selalu `git pull origin dev` dan baca ulang runbook ini setiap kali dibangunkan**: langkah dan aturan bisa berubah. `begin` menolak berjalan bila kode pekerja tertinggal dari `origin/dev`.
+
 Kerjakan job satu per satu, urut dari yang terlama. Untuk job `font-select` (3d):
 
 1. `npm run worker -- begin <env> <id>` → mencetak data user, pemetaan bidang usaha (nada dasar dan karakter font dari aplikasi), dan path `logo.png`. **Buka logo itu dengan Read** dan amati.
