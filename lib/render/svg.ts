@@ -21,15 +21,16 @@ export interface RenderWarning {
 
 /**
  * SVG -> PDF vektor tanpa browser (PDFKit + svg-to-pdfkit).
- * Teks tetap teks (font di-embed sebagai subset), bentuk tetap vektor.
+ * Teks tetap teks (font di-embed sebagai subset), bentuk tetap vektor. Beberapa SVG = beberapa halaman.
  * Huruf dalam satu baris digabung menjadi satu potongan teks (lib/render/text-runs.ts)
  * agar Illustrator membukanya sebagai kalimat utuh, bukan per huruf.
  * Catatan: svg-to-pdfkit hanya mengenali bold bila font-weight="bold" (bukan 700).
  */
 export async function svgToPdf(
-  svg: string,
+  svg: string | string[],
   opts: PdfOptions,
 ): Promise<{ pdf: Buffer; warnings: RenderWarning[] }> {
+  const pages = Array.isArray(svg) ? svg : [svg];
   const warnings: RenderWarning[] = [];
   const width = opts.widthMm * MM_TO_PT;
   const height = opts.heightMm * MM_TO_PT;
@@ -57,23 +58,26 @@ export async function svgToPdf(
     doc.on("error", reject);
   });
 
-  withMergedTextRuns(doc, () => SVGtoPDF(doc, svg, 0, 0, {
-    width,
-    height,
-    preserveAspectRatio: "xMidYMid meet",
-    warningCallback: (message) => warnings.push({ source: "pdf", message }),
-    fontCallback: (family, bold) => {
-      const name = firstFamily(family);
-      const key = `${name}|${bold ? "bold" : "regular"}`;
-      if (registered.has(key)) return key;
-      if (registered.has(`${name}|regular`)) {
-        warnings.push({ source: "font", message: `Bold tidak tersedia untuk "${name}", dipakai Regular` });
-        return `${name}|regular`;
-      }
-      warnings.push({ source: "font", message: `Font "${name}" tidak terdaftar, dipakai Helvetica` });
-      return bold ? "Helvetica-Bold" : "Helvetica";
-    },
-  }));
+  pages.forEach((page, i) => {
+    if (i > 0) doc.addPage({ size: [width, height], margin: 0 });
+    withMergedTextRuns(doc, () => SVGtoPDF(doc, page, 0, 0, {
+      width,
+      height,
+      preserveAspectRatio: "xMidYMid meet",
+      warningCallback: (message) => warnings.push({ source: "pdf", message }),
+      fontCallback: (family, bold) => {
+        const name = firstFamily(family);
+        const key = `${name}|${bold ? "bold" : "regular"}`;
+        if (registered.has(key)) return key;
+        if (registered.has(`${name}|regular`)) {
+          warnings.push({ source: "font", message: `Bold tidak tersedia untuk "${name}", dipakai Regular` });
+          return `${name}|regular`;
+        }
+        warnings.push({ source: "font", message: `Font "${name}" tidak terdaftar, dipakai Helvetica` });
+        return bold ? "Helvetica-Bold" : "Helvetica";
+      },
+    }));
+  });
   doc.end();
   await done;
   return { pdf: Buffer.concat(chunks), warnings };

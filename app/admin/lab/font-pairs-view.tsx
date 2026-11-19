@@ -5,6 +5,8 @@ import { EXPRESSIVE_LABEL } from "@/lib/brand/fonts";
 import type { FontRef, FontSelectResult } from "@/lib/brand/font-select";
 import { loadCatalogFont } from "./font/load-font";
 import ToneView from "./tone-view";
+import MaterialsPanel from "./materials-panel";
+import type { Materials } from "@/lib/materials/generate";
 import styles from "./lab.module.css";
 
 const LETTERFORM: Record<string, string> = { sans: "Sans serif", serif: "Serif", slab: "Slab serif", script: "Script", display: "Display", mixed: "Campuran", none: "Tanpa huruf" };
@@ -43,7 +45,7 @@ function PairCard({ k, p, name }: { k: "A" | "B"; p: FontSelectResult["packages"
   );
 }
 
-export default function FontPairsView({ r, jobId, companyName, industry, took }: { r: FontSelectResult; jobId: string; companyName: string; industry?: string; took?: number }) {
+export default function FontPairsView({ r, jobId, companyName, industry, took, materials }: { r: FontSelectResult; jobId: string; companyName: string; industry?: string; took?: number; materials?: Materials }) {
   const t = r.traits;
   return (
     <div className={styles.palette}>
@@ -68,6 +70,8 @@ export default function FontPairsView({ r, jobId, companyName, industry, took }:
       ) : (
         <p className="alert alert-warn">Tone of voice (3e) tidak ada di hasil ini: job dikerjakan sesi pekerja dengan kode versi lama. Kirim ulang setelah pekerja menjalankan git pull.</p>
       )}
+
+      <MaterialsPanel jobId={jobId} initial={materials} />
 
       <div className={styles.group}>
         <h4>Karakter logo menurut Claude</h4>

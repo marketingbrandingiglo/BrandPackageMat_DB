@@ -1,6 +1,8 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 4a: fondasi materi (`lib/materials/`: kit, ukur/bungkus teks, logo vektor bersarang, pengecekan otomatis area aman/tabrakan/kontras), kartu nama Paket A dan B (SVG depan/belakang + PDF 2 halaman + pratinjau), panel materi di Lab, unduhan bernama `<Perusahaan>_<file>`. Detail: `docs/materials.md`.
+- Font: nama family/style di dalam file ditulis ulang sesuai katalog (PDF menyebut font yang benar).
 - Tahap 3e: pemetaan bidang usaha ke karakter font dan nada dasar (`data/industries.json`), tag bidang usaha ikut menyusun shortlist font, tone of voice Paket A/B (Indonesia + Inggris) ditulis sesi pekerja (`npm run worker -- tone`) dan tampil di Lab. Lab: isi bebas untuk bidang usaha "Lainnya".
 - Font: Paket B wajib beda karakter dari Paket A (kategori atau gaya heading berbeda, tanpa font yang sama). Shortlist menambah maks. 6 kandidat kontras berlabel di lembar spesimen; `npm run worker -- pick` menolak pilihan yang melanggar.
 - Sesi pekerja Claude (tanpa API key): job di Upstash, bel komentar di PR #1, skrip `npm run worker` (begin/traits/pick/fail), runbook `docs/worker.md`. Lab 3d mengirim job dan memantau status tiap 5 detik. Jalur Claude API dihapus.

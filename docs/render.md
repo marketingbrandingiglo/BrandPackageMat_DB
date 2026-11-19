@@ -23,6 +23,8 @@ Kode: `lib/render/svg.ts`. Uji lokal: `npm run render:test` (hasil di `out/rende
 - `font-family` cukup satu nama family yang terdaftar; fallback memberi peringatan dan memakai Helvetica.
 - Variable font: PDFKit dan resvg hanya memakai **instance default**. Untuk Bold dll., skrip font Tahap 3 perlu membuat file statis (Regular/Bold) dari variable font (mis. `fontTools.varLib.instancer`).
 - Satuan viewBox = mm; ukuran halaman PDF diberikan dalam mm saat render.
+- `svgToPdf` menerima array SVG → PDF beberapa halaman (mis. kartu nama depan + belakang).
+- Logo SVG disisipkan sebagai `<svg>` bersarang; didukung PDFKit/svg-to-pdfkit dan resvg (dicek 2026-11-19).
 
 ## Hasil uji di Vercel (2026-11-10, deploy preview via CLI)
 

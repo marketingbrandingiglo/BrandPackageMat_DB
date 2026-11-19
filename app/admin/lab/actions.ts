@@ -4,7 +4,10 @@ import { requireSuperAdmin } from "@/lib/auth/server";
 import { INDUSTRIES } from "@/lib/brand/industries";
 import { createFolder, DriveError, DriveNotConnected, envFolder, upload } from "@/lib/drive/drive";
 import { ring } from "@/lib/jobs/bell";
-import { currentEnv, enqueue, newJobId, saveJob, type Job } from "@/lib/jobs/jobs";
+import { currentEnv, enqueue, getJob, newJobId, saveJob, type Job } from "@/lib/jobs/jobs";
+import type { FontSelectResult } from "@/lib/brand/font-select";
+import { makeBusinessCards, type Materials } from "@/lib/materials/generate";
+import type { CompanyData, Lang } from "@/lib/materials/kit";
 import { buildPalette, type Palette } from "@/lib/brand/palette";
 import { analyzeLogo, LogoRejected, type BackgroundStrategy, type LogoWarning } from "@/lib/brand/logo";
 
@@ -124,6 +127,41 @@ export async function requestFonts(_prev: LabFontRequest, form: FormData): Promi
   } catch (e) {
     if (e instanceof LogoRejected || e instanceof DriveNotConnected) return { error: e.message };
     if (e instanceof DriveError) return { error: `Gagal menyimpan ke Google Drive: ${e.message}` };
+    throw e;
+  }
+}
+
+/* ---------- Tahap 4: materi dari job 3d-3e ---------- */
+
+export interface LabMaterialsResult {
+  error?: string;
+  materials?: Materials;
+}
+
+const SOCIAL_FIELDS = ["instagram", "linkedin", "facebook", "x", "tiktok", "youtube", "whatsapp"] as const;
+
+/** Lab 4a: buat kartu nama Paket A dan B dari job yang selesai. */
+export async function makeMaterials(_prev: LabMaterialsResult, form: FormData): Promise<LabMaterialsResult> {
+  await requireSuperAdmin();
+  const jobId = String(form.get("jobId") ?? "");
+  const job = await getJob<FontSelectResult>(currentEnv(), jobId);
+  if (!job || job.status !== "done" || !job.result) return { error: "Job tidak ditemukan atau belum selesai." };
+  const field = (n: string, max: number) => String(form.get(n) ?? "").trim().replace(/\s+/g, " ").slice(0, max);
+  const email = field("email", 120);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Format email tidak valid." };
+  const company: CompanyData = {
+    name: job.input.companyName,
+    email,
+    phone: field("phone", 30),
+    address: field("address", 160),
+    socials: SOCIAL_FIELDS.map((p) => ({ platform: p, handle: field(p, 60).replace(/^https?:\/\/\S+\//, "") })).filter((s) => s.handle),
+  };
+  const lang: Lang = form.get("lang") === "en" ? "en" : "id";
+  try {
+    return { materials: await makeBusinessCards(job, company, lang) };
+  } catch (e) {
+    if (e instanceof DriveNotConnected) return { error: e.message };
+    if (e instanceof DriveError) return { error: `Google Drive: ${e.message}` };
     throw e;
   }
 }
