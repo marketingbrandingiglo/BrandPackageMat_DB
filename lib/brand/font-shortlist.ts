@@ -47,11 +47,13 @@ export interface ScoredFont {
   /** Boleh dipakai untuk heading / teks isi menurut kriteria logo. */
   heading: boolean;
   body: boolean;
+  /** Alternatif berkarakter lain, disediakan supaya Paket B bisa berbeda jelas dari Paket A. */
+  contrast?: boolean;
 }
 
-export const SHORTLIST = { max: 30, perHeadingCategory: 3, heading: 22, body: 14 };
+export const SHORTLIST = { max: 30, perHeadingCategory: 3, heading: 22, body: 14, contrastHeading: 4, contrastBody: 2 };
 
-function stylesOf(f: CatalogFont): string[] {
+export function stylesOf(f: CatalogFont): string[] {
   return f.stroke === "Slab Serif" ? [...f.styles, "Serif/Slab"] : f.styles;
 }
 
@@ -70,7 +72,10 @@ export function scoreFont(f: CatalogFont, q: ShortlistInput): number {
  * Satu kumpulan kandidat (maks. 30), tiap font muncul sekali:
  * 1. tiap kategori heading yang diizinkan mendapat jatah minimal 3 font teratas;
  * 2. diisi sampai 22 kandidat heading dengan skor tertinggi;
- * 3. ditambah font teks isi (Regular + Bold, sans/serif) sampai minimal 14 kandidat teks isi.
+ * 3. ditambah font teks isi (Regular + Bold, sans/serif) sampai minimal 14 kandidat teks isi;
+ * 4. ditambah maks. 6 kandidat **kontras** (keputusan pemilik 2026-11-19: Paket B wajib beda karakter):
+ *    kategori sans/serif yang tidak dipilih untuk logo ini, atau, bila keduanya sudah dipilih, gaya
+ *    huruf yang berbeda dari gaya logo. Total kandidat maks. 36 (SPEC: 20-40).
  */
 export function buildShortlist(q: ShortlistInput, fonts: CatalogFont[] = FONTS): ScoredFont[] {
   const headingCats = q.headingCategories.length ? q.headingCategories : (["Sans Serif", "Serif"] as FontCategory[]);
@@ -97,5 +102,30 @@ export function buildShortlist(q: ShortlistInput, fonts: CatalogFont[] = FONTS):
     add(x);
   }
   for (const x of scored) if (x.body && bodyCount() < SHORTLIST.body) add(x);
-  return pool.sort((a, b) => b.score - a.score);
+  pool.sort((a, b) => b.score - a.score);
+
+  // Kandidat kontras untuk Paket B.
+  const otherCats = (["Sans Serif", "Serif"] as FontCategory[]).filter((c) => !headingCats.includes(c));
+  const isContrast = (f: CatalogFont) =>
+    otherCats.length ? otherCats.includes(f.category) : (f.category === "Sans Serif" || f.category === "Serif") && stylesOf(f).length > 0 && !stylesOf(f).some((x) => q.styles.includes(x));
+  const canBody = (f: CatalogFont) => !f.headingOnly && Boolean(f.files.bold) && (f.category === "Sans Serif" || f.category === "Serif");
+  const fresh = scored.filter((x) => !pool.some((p) => p.font === x.font) && isContrast(x.font));
+  const contrast: ScoredFont[] = [];
+  for (const x of fresh.slice(0, SHORTLIST.contrastHeading)) contrast.push({ ...x, heading: true, body: canBody(x.font), contrast: true });
+  // Pastikan ada kandidat kontras untuk teks isi juga (maks. 6 kandidat kontras).
+  for (const x of fresh) {
+    if (contrast.filter((c) => c.body).length >= SHORTLIST.contrastBody || contrast.length >= SHORTLIST.contrastHeading + SHORTLIST.contrastBody) break;
+    if (canBody(x.font) && !contrast.some((c) => c.font === x.font)) contrast.push({ ...x, heading: true, body: true, contrast: true });
+  }
+  return [...pool, ...contrast];
+}
+
+/**
+ * Apakah dua font berbeda karakter: kategori berbeda (mis. sans vs serif), atau kategori sama
+ * dengan klasifikasi gaya yang tidak beririsan (mis. Geometric vs Humanist).
+ */
+export function differentCharacter(a: CatalogFont, b: CatalogFont): boolean {
+  if (a.category !== b.category) return true;
+  const sa = stylesOf(a), sb = stylesOf(b);
+  return sa.length > 0 && sb.length > 0 && !sa.some((x) => sb.includes(x));
 }

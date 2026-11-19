@@ -42,6 +42,8 @@ export interface SpecimenItem {
   font: CatalogFont;
   /** Boleh untuk teks isi; bila tidak, hanya baris heading dan contoh huruf. */
   body: boolean;
+  /** Kandidat kontras untuk Paket B. */
+  contrast?: boolean;
 }
 
 const W = 1500;
@@ -61,7 +63,7 @@ async function sheet(title: string, items: SpecimenItem[], companyName: string):
     const left = (i % COLS) * TILE_W + PAD;
     const top = HEAD_H + Math.floor(i / COLS) * TILE_H;
     const f = it.font.files;
-    layers.push({ input: line(`${it.code}${it.body ? "" : " · heading saja"}`, LABEL_FONT, 17, inner, "#e82827"), left, top: top + 12 });
+    layers.push({ input: line(`${it.code}${it.body ? "" : " · heading saja"}${it.contrast ? " · kontras (Paket B)" : ""}`, LABEL_FONT, 17, inner, "#e82827"), left, top: top + 12 });
     layers.push({ input: line(companyName, f.bold ?? f.regular, 46, inner), left, top: top + 44 });
     if (it.body) {
       layers.push({ input: line("Kami membantu usaha Anda tumbuh lewat layanan", f.regular, 21, inner), left, top: top + 118 });

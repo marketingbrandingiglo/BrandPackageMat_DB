@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { buildShortlist, SHORTLIST } from "@/lib/brand/font-shortlist";
-import { buildResult, candidates, describe as describeCandidates, LogoTraitsSchema, PairsSchema, type LogoTraits } from "@/lib/brand/font-select";
+import { buildResult, candidates, checkPackages, describe as describeCandidates, LogoTraitsSchema, PairsSchema, type LogoTraits } from "@/lib/brand/font-select";
 import { specimenSheets } from "@/lib/brand/font-specimen";
 import { open, seal } from "@/lib/drive/crypto";
 import { newJobId } from "@/lib/jobs/jobs";
@@ -31,9 +31,10 @@ describe("shortlist font (tahap a)", () => {
   };
   const pool = buildShortlist(q);
 
-  it("berukuran 20-30, tanpa duplikat, cukup kandidat teks isi", () => {
+  it("berukuran 20-36 (utama maks. 30 + kontras maks. 6), tanpa duplikat, cukup kandidat teks isi", () => {
     expect(pool.length).toBeGreaterThanOrEqual(20);
-    expect(pool.length).toBeLessThanOrEqual(SHORTLIST.max);
+    expect(pool.filter((x) => !x.contrast).length).toBeLessThanOrEqual(SHORTLIST.max);
+    expect(pool.length).toBeLessThanOrEqual(36);
     expect(new Set(pool.map((x) => x.font.family)).size).toBe(pool.length);
     expect(pool.filter((x) => x.body).length).toBeGreaterThanOrEqual(SHORTLIST.body);
   });
@@ -47,7 +48,7 @@ describe("shortlist font (tahap a)", () => {
 
   it("tiap kategori heading mendapat jatah dan skor terurut", () => {
     for (const c of q.headingCategories) expect(pool.filter((x) => x.font.category === c).length).toBeGreaterThanOrEqual(3);
-    const scores = pool.map((x) => x.score);
+    const scores = pool.filter((x) => !x.contrast).map((x) => x.score);
     expect([...scores].sort((a, b) => b - a)).toEqual(scores);
   });
 
@@ -101,5 +102,31 @@ describe("token Drive dan job", () => {
   });
   it("ID job berformat tanggal-acak", () => {
     expect(newJobId()).toMatch(/^\d{8}-[0-9a-f]{8}$/);
+  });
+});
+
+describe("Paket B wajib beda karakter", () => {
+  const sansOnly = { ...traits, headingCategories: ["Sans Serif"] as LogoTraits["headingCategories"], bodyCategories: ["Sans Serif"] as LogoTraits["bodyCategories"] };
+  const items = candidates(sansOnly);
+
+  it("shortlist menyertakan kandidat kontras (serif) walau logo hanya cocok sans", () => {
+    const c = items.filter((x) => x.contrast);
+    expect(c.length).toBeGreaterThanOrEqual(4);
+    expect(c.length).toBeLessThanOrEqual(6);
+    expect(c.every((x) => x.font.category === "Serif")).toBe(true);
+    expect(c.some((x) => x.body)).toBe(true);
+    expect(items.length).toBeLessThanOrEqual(36);
+    expect(new Set(items.map((x) => x.font.family)).size).toBe(items.length);
+  });
+
+  it("menolak B yang sekarakter atau memakai font A, menerima B kontras", () => {
+    const sans = items.filter((x) => !x.contrast && x.body);
+    const serif = items.find((x) => x.contrast && x.body)!;
+    const loc = { id: "x", en: "x" };
+    const same = PairsSchema.parse({ A: { heading: sans[0].code, body: sans[1].code, reason: loc }, B: { heading: sans[0].code, body: sans[2].code, reason: loc }, notes: loc });
+    expect(checkPackages(same, items).length).toBeGreaterThanOrEqual(1);
+    const ok = PairsSchema.parse({ A: { heading: sans[0].code, body: sans[1].code, reason: loc }, B: { heading: serif.code, body: sans[2].code, reason: loc }, notes: loc });
+    expect(checkPackages(ok, items)).toEqual([]);
+    expect(describeCandidates(items)).toContain("[KONTRAS untuk Paket B]");
   });
 });

@@ -16,7 +16,7 @@ import os from "node:os";
 import path from "node:path";
 import sharp from "sharp";
 import { download, driveStatus, upload } from "../lib/drive/drive";
-import { buildResult, candidates, describe, issues, LogoTraitsSchema, PairsSchema, type FontSelectResult } from "../lib/brand/font-select";
+import { buildResult, candidates, checkPackages, describe, issues, LogoTraitsSchema, PairsSchema, type FontSelectResult } from "../lib/brand/font-select";
 import { specimenSheets } from "../lib/brand/font-specimen";
 import { failJob, finishJob, getJob, queued, saveJob, startJob, type Job, type JobEnv } from "../lib/jobs/jobs";
 import { redis } from "../lib/redis";
@@ -117,7 +117,7 @@ async function main() {
       if (!parsed.success) die(`traits.json tidak sesuai format:\n${issues(parsed.error)}`);
       const items = candidates(parsed.data);
       const sheets = await specimenSheets(
-        items.map((x) => ({ code: x.code, font: x.font, body: x.body })),
+        items.map((x) => ({ code: x.code, font: x.font, body: x.body, contrast: x.contrast })),
         job.input.companyName.trim().slice(0, 40) || "Nama Perusahaan",
       );
       sheets.forEach((b, i) => writeFileSync(path.join(dir, `sheet-${i + 1}.png`), b));
@@ -138,7 +138,8 @@ async function main() {
       const pairs = PairsSchema.safeParse(readJson(path.join(dir, "picks.json")));
       if (!pairs.success) die(`picks.json tidak sesuai format:\n${issues(pairs.error)}`);
       const items = candidates(traits.data);
-      if (pairs.data.A.heading === pairs.data.B.heading && pairs.data.A.body === pairs.data.B.body) die("Paket A dan B tidak boleh memakai pasangan yang sama persis.");
+      const broken = checkPackages(pairs.data, items);
+      if (broken.length) die(`picks.json belum memenuhi aturan Paket B:\n- ${broken.join("\n- ")}`);
       const names: string[] = [];
       for (let i = 1; existsSync(path.join(dir, `sheet-${i}.png`)); i++) {
         const name = `spesimen-${i}.png`;

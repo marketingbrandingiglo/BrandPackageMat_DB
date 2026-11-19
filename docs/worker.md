@@ -24,7 +24,7 @@ npm run worker -- pending
 Kerjakan job satu per satu, urut dari yang terlama. Untuk job `font-select` (3d):
 
 1. `npm run worker -- begin <env> <id>` → mencetak data user dan path `logo.png`. **Buka logo itu dengan Read** dan amati.
-2. Tulis `traits.json` di folder kerja yang disebut (bentuk di bawah). `npm run worker -- traits <env> <id>` → validasi, shortlist 20-30 kandidat, lembar spesimen `sheet-N.png`. Bila ada pesan `GAGAL`, perbaiki JSON lalu ulangi.
+2. Tulis `traits.json` di folder kerja yang disebut (bentuk di bawah). `npm run worker -- traits <env> <id>` → validasi, shortlist 20-36 kandidat (termasuk kandidat kontras untuk Paket B), lembar spesimen `sheet-N.png`. Bila ada pesan `GAGAL`, perbaiki JSON lalu ulangi.
 3. **Buka semua lembar spesimen dengan Read**, bandingkan dengan logo, tulis `picks.json`. `npm run worker -- pick <env> <id>` → hasil disimpan, job selesai.
 4. Bila job tidak bisa dikerjakan (logo rusak, Drive putus, dll.): `npm run worker -- fail <env> <id> "<alasan singkat untuk user>"`.
 
@@ -67,7 +67,8 @@ Amati bentuk huruf (bila ada), geometris/organik, ketebalan, formalitas, energi.
 }
 ```
 
-- **Paket A**: paling selaras dengan karakter logo. **Paket B**: alternatif yang terasa jelas berbeda dari A, tetap pantas untuk logo dan bidang usahanya.
+- **Paket A**: paling selaras dengan karakter logo.
+- **Paket B wajib beda karakter** (keputusan pemilik 2026-11-19): heading B harus beda **kategori** (mis. serif vs sans) atau beda **gaya** (mis. Geometric vs Humanist) dari heading A, dan B tidak memakai font yang sama dengan A. Kandidat bertanda `[KONTRAS untuk Paket B]` disediakan untuk ini. Tetap pantas untuk logo dan bidang usahanya. `pick` menolak pilihan yang melanggar; pilih ulang lalu jalankan lagi.
 - Heading + teks isi harus nyaman berdampingan (kontras cukup, atau satu family bila memang paling tepat). Teks isi hanya dari kandidat "boleh untuk teks isi". A dan B tidak boleh sama persis.
 - Kode asing atau font "heading saja" untuk teks isi diganti otomatis dan dicatat sebagai koreksi; sebaiknya tidak terjadi.
 

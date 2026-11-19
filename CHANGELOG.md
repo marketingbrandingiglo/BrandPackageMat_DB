@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Font: Paket B wajib beda karakter dari Paket A (kategori atau gaya heading berbeda, tanpa font yang sama). Shortlist menambah maks. 6 kandidat kontras berlabel di lembar spesimen; `npm run worker -- pick` menolak pilihan yang melanggar.
 - Sesi pekerja Claude (tanpa API key): job di Upstash, bel komentar di PR #1, skrip `npm run worker` (begin/traits/pick/fail), runbook `docs/worker.md`. Lab 3d mengirim job dan memantau status tiap 5 detik. Jalur Claude API dihapus.
 - Google Drive: hubungkan dari Admin (OAuth `drive.file`, token terenkripsi di Upstash), logo dan lembar spesimen disimpan per job, pembersihan harian folder > 90 hari (`/api/cron/cleanup`, Vercel Cron). Halaman publik `/privacy`.
 - Form Lab tidak lagi direset setelah dikirim (logo, nama perusahaan, bidang usaha tetap terisi).

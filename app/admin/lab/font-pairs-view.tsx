@@ -87,7 +87,7 @@ export default function FontPairsView({ r, jobId, companyName, industry, took }:
             {r.shortlist.map((x) => (
               <tr key={x.code}>
                 <td>{x.code}</td><td>{x.family}</td><td>{x.category}</td><td>{x.score.toFixed(2)}</td>
-                <td>{[x.heading && "heading", x.body && "teks isi"].filter(Boolean).join(", ")}</td>
+                <td>{[x.heading && "heading", x.body && "teks isi"].filter(Boolean).join(", ")}{x.contrast ? " · kontras (Paket B)" : ""}</td>
               </tr>
             ))}
           </tbody>
