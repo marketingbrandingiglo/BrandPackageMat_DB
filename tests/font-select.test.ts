@@ -1,52 +1,35 @@
 import sharp from "sharp";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { buildShortlist, SHORTLIST } from "@/lib/brand/font-shortlist";
+import { buildResult, candidates, describe as describeCandidates, LogoTraitsSchema, PairsSchema, type LogoTraits } from "@/lib/brand/font-select";
+import { specimenSheets } from "@/lib/brand/font-specimen";
+import { open, seal } from "@/lib/drive/crypto";
+import { newJobId } from "@/lib/jobs/jobs";
 
-vi.mock("server-only", () => ({}));
-
-// Claude disimulasikan: tidak ada panggilan jaringan di tes.
-const calls: { effort?: string; images: number; text: string }[] = [];
-let pairsAnswer: unknown;
-vi.mock("@/lib/ai/claude", async (orig) => {
-  const real = await orig<typeof import("@/lib/ai/claude")>();
-  return {
-    ...real,
-    claude: () => ({
-      beta: {
-        messages: {
-          parse: async (p: { output_config: { effort: string }; messages: { content: { type: string; text?: string }[] }[] }) => {
-            const content = p.messages[0].content;
-            calls.push({ effort: p.output_config.effort, images: content.filter((c) => c.type === "image").length, text: content.map((c) => c.text ?? "").join("\n") });
-            const usage = { input_tokens: 5000, output_tokens: 1000, cache_read_input_tokens: 0, cache_creation_input_tokens: 0, iterations: null };
-            const traits = {
-              hasText: true, letterform: "sans", geometry: "geometric", weight: "bold", formality: 4, energy: 3,
-              impression: { id: "Tegas dan modern.", en: "Bold and modern." },
-              wantTags: [{ tag: "Business", weight: 1 }, { tag: "Competent", weight: 0.8 }],
-              avoidTags: ["Childlike"], styles: ["Sans/Geometric"],
-              headingCategories: ["Sans Serif", "Serif"], bodyCategories: ["Sans Serif"],
-            };
-            return { stop_reason: "end_turn", usage, parsed_output: calls.length === 1 ? traits : pairsAnswer };
-          },
-        },
-      },
-    }),
-  };
-});
-
-const { buildShortlist, SHORTLIST } = await import("@/lib/brand/font-shortlist");
-const { selectFonts } = await import("@/lib/brand/font-select");
-const { costOf } = await import("@/lib/ai/claude");
-
-const logo = await sharp({ create: { width: 300, height: 120, channels: 4, background: { r: 232, g: 40, b: 39, alpha: 1 } } }).png().toBuffer();
+const traits: LogoTraits = {
+  hasText: true,
+  letterform: "sans",
+  geometry: "geometric",
+  weight: "bold",
+  formality: 4,
+  energy: 3,
+  impression: { id: "Tegas dan modern.", en: "Bold and modern." },
+  wantTags: [{ tag: "Business", weight: 1 }, { tag: "Competent", weight: 0.8 }, { tag: "Innovative", weight: 0.4 }],
+  avoidTags: ["Childlike"],
+  styles: ["Sans/Geometric"],
+  headingCategories: ["Sans Serif", "Serif"],
+  bodyCategories: ["Sans Serif"],
+};
 
 describe("shortlist font (tahap a)", () => {
   const q = {
     wantTags: [{ tag: "Playful", weight: 1 }, { tag: "Happy", weight: 0.6 }],
     avoidTags: ["Stiff"],
     styles: ["Sans/Rounded"],
-    headingCategories: ["Sans Serif", "Display", "Handwriting"] as const,
-    bodyCategories: ["Sans Serif"] as const,
+    headingCategories: ["Sans Serif", "Display", "Handwriting"] as ("Sans Serif" | "Display" | "Handwriting")[],
+    bodyCategories: ["Sans Serif"] as "Sans Serif"[],
   };
-  const pool = buildShortlist({ ...q, headingCategories: [...q.headingCategories], bodyCategories: [...q.bodyCategories] });
+  const pool = buildShortlist(q);
 
   it("berukuran 20-30, tanpa duplikat, cukup kandidat teks isi", () => {
     expect(pool.length).toBeGreaterThanOrEqual(20);
@@ -69,61 +52,54 @@ describe("shortlist font (tahap a)", () => {
   });
 
   it("deterministik", () => {
-    const again = buildShortlist({ ...q, headingCategories: [...q.headingCategories], bodyCategories: [...q.bodyCategories] });
-    expect(again.map((x) => x.font.family)).toEqual(pool.map((x) => x.font.family));
+    expect(buildShortlist(q).map((x) => x.font.family)).toEqual(pool.map((x) => x.font.family));
   });
 });
 
-describe("pilih pasangan font (tahap b, Claude disimulasikan)", () => {
-  it("mengirim logo dan lembar spesimen, memetakan kode ke font", async () => {
-    calls.length = 0;
-    pairsAnswer = {
-      A: { heading: "F01", body: "f02", reason: { id: "a", en: "a" } },
-      B: { heading: "F03", body: "F04", reason: { id: "b", en: "b" } },
-      notes: { id: "n", en: "n" },
-    };
-    const s = await selectFonts({ logoPng: logo, darkBackground: false, companyName: "PT <Uji> Sejahtera", industry: "Keuangan" });
-    expect(calls).toHaveLength(2);
-    expect(calls[0].images).toBe(1);
-    expect(calls[1].images).toBe(1 + s.sheets.length);
-    expect(calls[1].effort).toBe("high");
-    // Data user dibungkus dan dibersihkan dari tanda kurung sudut.
-    expect(calls[0].text).toContain("<data_user>");
-    expect(calls[0].text).toContain("PT Uji Sejahtera");
-    const byCode = new Map(s.shortlist.map((x) => [x.code, x.font.family]));
-    expect(s.packages.A.heading.family).toBe(byCode.get("F01"));
-    expect(s.packages.A.body.family).toBe(byCode.get("F02"));
-    expect(s.sheets.length).toBe(Math.ceil(s.shortlist.length / 10));
-    for (const sh of s.sheets) expect((await sharp(sh).metadata()).width).toBe(1500);
-    expect(s.calls.reduce((a, c) => a + c.usd, 0)).toBeGreaterThan(0);
+describe("validasi jawaban pekerja", () => {
+  it("traits: menerima yang sah, menolak nilai di luar batas atau tag asing", () => {
+    expect(LogoTraitsSchema.safeParse(traits).success).toBe(true);
+    expect(LogoTraitsSchema.safeParse({ ...traits, formality: 7 }).success).toBe(false);
+    expect(LogoTraitsSchema.safeParse({ ...traits, wantTags: [{ tag: "Hebat", weight: 1 }] }).success).toBe(false);
+    expect(LogoTraitsSchema.safeParse({ ...traits, bodyCategories: ["Display"] }).success).toBe(false);
   });
 
-  it("kode tidak dikenal atau font heading saja untuk teks isi diganti otomatis", async () => {
-    calls.length = 0;
-    pairsAnswer = {
-      A: { heading: "Z99", body: "F01", reason: { id: "a", en: "a" } },
-      B: { heading: "F02", body: "nope", reason: { id: "b", en: "b" } },
+  it("pilihan dipetakan ke font; kode asing atau font heading saja untuk teks isi diganti", () => {
+    const items = candidates({ ...traits, headingCategories: ["Sans Serif", "Display"] });
+    const headOnly = items.find((x) => !x.body)!;
+    const body = items.filter((x) => x.body);
+    const pairs = PairsSchema.parse({
+      A: { heading: items[0].code.toLowerCase(), body: body[0].code, reason: { id: "a", en: "a" } },
+      B: { heading: "Z99", body: headOnly.code, reason: { id: "b", en: "b" } },
       notes: { id: "n", en: "n" },
-    };
-    const s = await selectFonts({ logoPng: logo, darkBackground: true, companyName: "Uji" });
-    expect(s.corrections.length).toBeGreaterThanOrEqual(2);
-    expect(s.packages.B.body.headingOnly).toBe(false);
-    expect(s.packages.A.body.headingOnly).toBe(false);
+    });
+    const r = buildResult(traits, items, pairs, ["spesimen-1.png"]);
+    expect(r.packages.A.heading.family).toBe(items[0].font.family);
+    expect(r.packages.A.body.family).toBe(body[0].font.family);
+    expect(r.corrections).toHaveLength(2);
+    expect(r.packages.B.body.headingOnly).toBe(false);
+    expect(describeCandidates(items)).toContain(`${items[0].code}: ${items[0].font.family}`);
   });
 });
 
-describe("biaya Claude", () => {
-  it("menghitung per model, termasuk iterasi fallback", () => {
-    const c = costOf("x", "claude-opus-5-5", { input_tokens: 1_000_000, output_tokens: 100_000 }, 10);
-    expect(c.usd).toBeCloseTo(4 + 2, 5);
-    const f = costOf("x", "claude-opus-5-5", {
-      input_tokens: 2000, output_tokens: 2000,
-      iterations: [
-        { type: "message", model: "claude-opus-5-5", input_tokens: 1000, output_tokens: 1000 },
-        { type: "fallback_message", model: "claude-opus-4-8", input_tokens: 1000, output_tokens: 1000 },
-      ],
-    }, 10);
-    expect(f.fellBack).toBe(true);
-    expect(f.usd).toBeCloseTo((1000 * 4 + 1000 * 20 + 1000 * 5 + 1000 * 25) / 1e6, 8);
+describe("lembar spesimen", () => {
+  it("10 kandidat per lembar, lebar 1500 px", async () => {
+    const items = candidates(traits);
+    const sheets = await specimenSheets(items.map((x) => ({ code: x.code, font: x.font, body: x.body })), "PT <Uji> & Co");
+    expect(sheets.length).toBe(Math.ceil(items.length / 10));
+    for (const s of sheets) expect((await sharp(s).metadata()).width).toBe(1500);
+  });
+});
+
+describe("token Drive dan job", () => {
+  const secret = "x".repeat(40);
+  it("enkripsi token bolak-balik, gagal dengan kunci lain", () => {
+    const s = seal("refresh-token-rahasia", secret);
+    expect(s).not.toContain("rahasia");
+    expect(open(s, secret)).toBe("refresh-token-rahasia");
+    expect(() => open(s, "y".repeat(40))).toThrow();
+  });
+  it("ID job berformat tanggal-acak", () => {
+    expect(newJobId()).toMatch(/^\d{8}-[0-9a-f]{8}$/);
   });
 });

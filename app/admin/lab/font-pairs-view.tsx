@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { EXPRESSIVE_LABEL } from "@/lib/brand/fonts";
-import type { LabFontRef, LabFontResult } from "./actions";
+import type { FontRef, FontSelectResult } from "@/lib/brand/font-select";
 import { loadCatalogFont } from "./font/load-font";
 import styles from "./lab.module.css";
 
@@ -10,7 +10,7 @@ const LETTERFORM: Record<string, string> = { sans: "Sans serif", serif: "Serif",
 const GEOMETRY: Record<string, string> = { geometric: "Geometris", organic: "Organik", mixed: "Campuran" };
 const WEIGHT: Record<string, string> = { light: "Tipis", regular: "Sedang", bold: "Tebal", heavy: "Sangat tebal" };
 
-function useFamily(f: LabFontRef) {
+function useFamily(f: FontRef) {
   const [fam, setFam] = useState<string | null>(null);
   useEffect(() => {
     let off = false;
@@ -22,7 +22,7 @@ function useFamily(f: LabFontRef) {
   return fam ? `"${fam}", system-ui` : "system-ui";
 }
 
-function PairCard({ k, p, name }: { k: "A" | "B"; p: NonNullable<LabFontResult["packages"]>["A"]; name: string }) {
+function PairCard({ k, p, name }: { k: "A" | "B"; p: FontSelectResult["packages"]["A"]; name: string }) {
   const hf = useFamily(p.heading);
   const bf = useFamily(p.body);
   return (
@@ -42,26 +42,25 @@ function PairCard({ k, p, name }: { k: "A" | "B"; p: NonNullable<LabFontResult["
   );
 }
 
-export default function FontPairsView({ r }: { r: LabFontResult }) {
-  const t = r.traits!;
+export default function FontPairsView({ r, jobId, companyName, industry, took }: { r: FontSelectResult; jobId: string; companyName: string; industry?: string; took?: number }) {
+  const t = r.traits;
   return (
     <div className={styles.palette}>
       <div>
         <p className="eyebrow">3d · Analisis logo dan pasangan font</p>
-        <h3 className={styles.h3}>Pasangan font untuk {r.companyName}</h3>
+        <h3 className={styles.h3}>Pasangan font untuk {companyName}</h3>
         <p className={styles.muted}>
-          {r.industry ? `Bidang usaha: ${r.industry}. ` : ""}Biaya Claude ±US${r.totalUsd!.toFixed(3)} ·{" "}
-          {r.calls!.map((c) => `${c.label}: ${c.model}, ${c.inputTokens.toLocaleString("id")} token masuk, ${c.outputTokens.toLocaleString("id")} token keluar, ${(c.ms / 1000).toFixed(1)} dtk${c.fellBack ? " (model cadangan)" : ""}`).join(" · ")}
+          {industry ? `Bidang usaha: ${industry}. ` : ""}Dikerjakan sesi pekerja Claude (job {jobId}{took ? `, ${Math.round(took / 1000)} detik sejak dikirim` : ""}).
         </p>
       </div>
 
-      {r.corrections!.map((c) => <p key={c} className="alert alert-warn">{c}</p>)}
+      {r.corrections.map((c) => <p key={c} className="alert alert-warn">{c}</p>)}
 
       <div className={styles.packages}>
-        <PairCard k="A" p={r.packages!.A} name={r.companyName!} />
-        <PairCard k="B" p={r.packages!.B} name={r.companyName!} />
+        <PairCard k="A" p={r.packages.A} name={companyName} />
+        <PairCard k="B" p={r.packages.B} name={companyName} />
       </div>
-      <p className="alert alert-info">{r.notes!.id}</p>
+      <p className="alert alert-info">{r.notes.id}</p>
 
       <div className={styles.group}>
         <h4>Karakter logo menurut Claude</h4>
@@ -81,11 +80,11 @@ export default function FontPairsView({ r }: { r: LabFontResult }) {
       </div>
 
       <details className={styles.group}>
-        <summary><strong>Shortlist {r.shortlist!.length} kandidat dan lembar spesimen yang dilihat Claude</strong></summary>
+        <summary><strong>Shortlist {r.shortlist.length} kandidat dan lembar spesimen yang dilihat Claude</strong></summary>
         <table className={styles.pairs}>
           <thead><tr><th>Kode</th><th>Font</th><th>Kategori</th><th>Skor</th><th>Peran</th></tr></thead>
           <tbody>
-            {r.shortlist!.map((x) => (
+            {r.shortlist.map((x) => (
               <tr key={x.code}>
                 <td>{x.code}</td><td>{x.family}</td><td>{x.category}</td><td>{x.score.toFixed(2)}</td>
                 <td>{[x.heading && "heading", x.body && "teks isi"].filter(Boolean).join(", ")}</td>
@@ -93,9 +92,9 @@ export default function FontPairsView({ r }: { r: LabFontResult }) {
             ))}
           </tbody>
         </table>
-        {r.sheets!.map((s, i) => (
+        {r.sheets.map((s, i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={i} src={s} alt={`Lembar spesimen ${i + 1}`} className={styles.sheet} />
+          <img key={s} src={`/api/jobs/${jobId}/file/${s}`} alt={`Lembar spesimen ${i + 1}`} className={styles.sheet} loading="lazy" />
         ))}
       </details>
     </div>

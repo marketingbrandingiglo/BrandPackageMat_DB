@@ -1,6 +1,9 @@
 # Changelog
 
 ## Belum dirilis
+- Sesi pekerja Claude (tanpa API key): job di Upstash, bel komentar di PR #1, skrip `npm run worker` (begin/traits/pick/fail), runbook `docs/worker.md`. Lab 3d mengirim job dan memantau status tiap 5 detik. Jalur Claude API dihapus.
+- Google Drive: hubungkan dari Admin (OAuth `drive.file`, token terenkripsi di Upstash), logo dan lembar spesimen disimpan per job, pembersihan harian folder > 90 hari (`/api/cron/cleanup`, Vercel Cron). Halaman publik `/privacy`.
+- Form Lab tidak lagi direset setelah dikirim (logo, nama perusahaan, bidang usaha tetap terisi).
 - SPEC: engine Claude lewat sesi pekerja berlangganan (tanpa API key), penyimpanan Google Drive pemilik, masa simpan 90 hari, paket tidak dipilih langsung dihapus, ZIP dibuat saat unduh, halaman Riwayat. PR saluran kontrol #1. Batas logo 4 MB.
 - Perbaikan upload logo: file tetap terpilih setelah tombol diklik (sebelumnya klik kedua menghasilkan "Pilih file logo terlebih dulu").
 - Tahap 3d: analisis logo oleh Claude (karakter visual -> kriteria font), shortlist 20-30 font dari metadata katalog, lembar spesimen dirender dengan font asli, Claude memilih pasangan heading + teks isi untuk Paket A dan B; tampil di Lab dengan biaya per percobaan. Panduan API key dan model: `docs/claude.md`.

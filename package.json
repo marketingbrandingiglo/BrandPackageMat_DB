@@ -13,10 +13,10 @@
     "check:redis": "node --env-file-if-exists=.env.local scripts/check-redis.mjs",
     "render:test": "tsx scripts/render-test.mts",
     "admin:set-password": "tsx --env-file-if-exists=.env.local scripts/admin-set-password.mts",
-    "fonts:build": "tsx scripts/fonts-build.mts"
+    "fonts:build": "tsx scripts/fonts-build.mts",
+    "worker": "tsx --env-file-if-exists=.env.local scripts/worker.mts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.8.0",
     "@node-rs/argon2": "^2.2.2",
     "@resvg/resvg-js": "^2.6.2",
     "@upstash/ratelimit": "^2.2.0",

@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { checkLogo, chooseFonts, type LabFontResult, type LabLogoResult } from "./actions";
+import { startTransition, useActionState, useState, type FormEvent } from "react";
+import { checkLogo, requestFonts, type LabFontRequest, type LabLogoResult } from "./actions";
 import LogoDropzone from "@/app/_components/logo-dropzone";
-import FontPairsView from "./font-pairs-view";
+import FontJob from "./font-job";
 import PaletteView from "./palette-view";
 import styles from "./lab.module.css";
 
@@ -26,18 +26,27 @@ export interface LabIndustry {
   label: string;
 }
 
-export default function LogoLab({ maxBytes, industries, claudeReady }: { maxBytes: number; industries: LabIndustry[]; claudeReady: boolean }) {
+export default function LogoLab({ maxBytes, industries, workerReady }: { maxBytes: number; industries: LabIndustry[]; workerReady: string | null }) {
   const [state, action, pendingLogo] = useActionState<LabLogoResult, FormData>(checkLogo, {});
-  const [fonts, fontAction, pendingFonts] = useActionState<LabFontResult, FormData>(chooseFonts, {});
+  const [fonts, fontAction, pendingFonts] = useActionState<LabFontRequest, FormData>(requestFonts, {});
   const [fileName, setFileName] = useState<string>("");
   const [company, setCompany] = useState("");
   const [industry, setIndustry] = useState("");
   const pending = pendingLogo || pendingFonts;
+
+  // Kirim lewat startTransition (bukan atribut action) supaya React tidak mereset form:
+  // file logo, nama perusahaan, dan bidang usaha tetap terisi untuk percobaan berikutnya.
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const isFonts = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("data-kind") === "fonts";
+    startTransition(() => (isFonts ? fontAction(fd) : action(fd)));
+  };
   const r = state.report;
 
   return (
     <div className={styles.lab}>
-      <form action={action} className={styles.upload}>
+      <form onSubmit={onSubmit} className={styles.upload}>
         <LogoDropzone name="logo" maxBytes={maxBytes} onChange={(f) => setFileName(f?.name ?? "")} disabled={pending} />
         <button type="submit" className="btn btn-primary" disabled={pending || !fileName}>
           {pendingLogo ? "Memeriksa…" : "Periksa logo dan palet"}
@@ -54,20 +63,19 @@ export default function LogoLab({ maxBytes, industries, claudeReady }: { maxByte
               {industries.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
             </select>
           </label>
-          <button type="submit" formAction={fontAction} className="btn btn-secondary" disabled={pending || !fileName || !company.trim() || !claudeReady}>
-            {pendingFonts ? "Claude sedang memilih…" : "Pilih font dengan Claude"}
+          <button type="submit" data-kind="fonts" className="btn btn-secondary" disabled={pending || !fileName || !company.trim() || !!workerReady}>
+            {pendingFonts ? "Mengirim…" : "Pilih font dengan Claude"}
           </button>
         </div>
         <p className={styles.fontNote}>
-          {claudeReady
-            ? "3d memanggil Claude dua kali (analisis logo, lalu perbandingan spesimen). Perkiraan biaya di bawah US$0,30 per percobaan; butuh sekitar 30-90 detik."
-            : "3d belum aktif: ANTHROPIC_API_KEY belum diisi. Lihat docs/claude.md."}
+          {workerReady ??
+            "3d dikerjakan sesi pekerja Claude (langganan): logo disimpan di Google Drive, pekerja dibangunkan, hasil muncul di sini dalam beberapa menit."}
         </p>
       </form>
 
       {state.error && <p className="alert alert-error" role="alert">{state.error}</p>}
       {fonts.error && <p className="alert alert-error" role="alert">{fonts.error}</p>}
-      {fonts.packages && <FontPairsView r={fonts} />}
+      {fonts.jobId && <FontJob key={fonts.jobId} jobId={fonts.jobId} belled={!!fonts.belled} />}
 
       {r && (
         <div className={styles.result}>

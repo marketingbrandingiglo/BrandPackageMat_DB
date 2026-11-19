@@ -1,11 +1,10 @@
 "use server";
 
-import Anthropic from "@anthropic-ai/sdk";
 import industries from "@/data/industries.json";
-import { claudeConfigured, type CallCost } from "@/lib/ai/claude";
 import { requireSuperAdmin } from "@/lib/auth/server";
-import { selectFonts, type LogoTraits } from "@/lib/brand/font-select";
-import type { CatalogFont } from "@/lib/brand/fonts";
+import { createFolder, DriveError, DriveNotConnected, envFolder, upload } from "@/lib/drive/drive";
+import { ring } from "@/lib/jobs/bell";
+import { currentEnv, enqueue, newJobId, saveJob, type Job } from "@/lib/jobs/jobs";
 import { buildPalette, type Palette } from "@/lib/brand/palette";
 import { analyzeLogo, LogoRejected, type BackgroundStrategy, type LogoWarning } from "@/lib/brand/logo";
 
@@ -69,80 +68,61 @@ export async function checkLogo(_prev: LabLogoResult, form: FormData): Promise<L
   }
 }
 
-/* ---------- Tahap 3d: analisis logo dan pasangan font oleh Claude ---------- */
+/* ---------- Tahap 3d: permintaan pasangan font ke sesi pekerja Claude ---------- */
 
-export interface LabFontRef {
-  family: string;
-  category: string;
-  headingOnly: boolean;
-  regular: string;
-  bold?: string;
-  specimen: string;
-}
-
-export interface LabFontResult {
+export interface LabFontRequest {
   error?: string;
-  companyName?: string;
-  industry?: string;
-  traits?: LogoTraits;
-  shortlist?: { code: string; family: string; category: string; score: number; heading: boolean; body: boolean }[];
-  packages?: Record<"A" | "B", { heading: LabFontRef; body: LabFontRef; reason: { id: string; en: string } }>;
-  notes?: { id: string; en: string };
-  corrections?: string[];
-  sheets?: string[];
-  calls?: CallCost[];
-  totalUsd?: number;
+  jobId?: string;
+  belled?: boolean;
 }
 
-const ref = (f: CatalogFont): LabFontRef => ({
-  family: f.family,
-  category: f.category,
-  headingOnly: f.headingOnly,
-  regular: f.files.regular,
-  bold: f.files.bold,
-  specimen: f.specimen,
-});
-
-/** Lab Tahap 3d: memanggil Claude dua kali (analisis logo, pilih pasangan font). Tidak menyimpan apa pun. */
-export async function chooseFonts(_prev: LabFontResult, form: FormData): Promise<LabFontResult> {
-  await requireSuperAdmin();
+/**
+ * Lab Tahap 3d: simpan logo ke Drive, buat job, bunyikan bel. Hasil dikerjakan sesi pekerja
+ * (beberapa menit) dan dipantau UI lewat /api/jobs/<id>.
+ */
+export async function requestFonts(_prev: LabFontRequest, form: FormData): Promise<LabFontRequest> {
+  const { user } = await requireSuperAdmin();
   const file = form.get("logo");
   const companyName = String(form.get("companyName") ?? "").trim().slice(0, 80);
   const industryId = String(form.get("industry") ?? "");
   const industry = INDUSTRIES.find((x) => x.id === industryId)?.id_label;
   if (!(file instanceof File) || file.size === 0) return { error: "Pilih file logo terlebih dulu." };
   if (!companyName) return { error: "Isi nama perusahaan untuk contoh spesimen." };
-  if (!claudeConfigured()) return { error: "ANTHROPIC_API_KEY belum diisi di .env.local. Lihat docs/claude.md." };
   try {
-    const r = await analyzeLogo(Buffer.from(await file.arrayBuffer()));
-    const s = await selectFonts({
-      logoPng: r.previews.original,
-      darkBackground: r.transparentBackground && r.onLight.strategy !== "original",
-      companyName,
-      industry,
-    });
-    return {
-      companyName,
-      industry,
-      traits: s.traits,
-      shortlist: s.shortlist.map((x) => ({ code: x.code, family: x.font.family, category: x.font.category, score: x.score, heading: x.heading, body: x.body })),
-      packages: {
-        A: { heading: ref(s.packages.A.heading), body: ref(s.packages.A.body), reason: s.packages.A.reason },
-        B: { heading: ref(s.packages.B.heading), body: ref(s.packages.B.body), reason: s.packages.B.reason },
+    const buf = Buffer.from(await file.arrayBuffer());
+    const r = await analyzeLogo(buf);
+    const env = currentEnv();
+    const id = newJobId();
+    const folderId = await createFolder(id, await envFolder(env));
+    const ext = r.kind === "svg" ? "svg" : "png";
+    const logo = await upload(folderId, `logo-asli.${ext}`, r.kind === "svg" ? "image/svg+xml" : "image/png", r.kind === "svg" && r.sanitized ? Buffer.from(r.sanitized.svg) : buf);
+    const preview = await upload(folderId, "logo-pratinjau.png", "image/png", r.previews.original);
+    const now = new Date().toISOString();
+    const job: Job = {
+      id,
+      env,
+      type: "font-select",
+      userId: user.id,
+      userEmail: user.email,
+      status: "queued",
+      step: "Menunggu pekerja Claude",
+      createdAt: now,
+      updatedAt: now,
+      input: { companyName, industry, darkBackground: r.transparentBackground && r.onLight.strategy !== "original" },
+      folderId,
+      files: {
+        logo: { id: logo.id, name: logo.name, mimeType: logo.mimeType, size: logo.size },
+        preview: { id: preview.id, name: preview.name, mimeType: preview.mimeType, size: preview.size },
       },
-      notes: s.notes,
-      corrections: s.corrections,
-      sheets: s.sheets.map(dataUrl),
-      calls: s.calls,
-      totalUsd: s.calls.reduce((a, c) => a + c.usd, 0),
+      belled: false,
     };
+    await enqueue(job);
+    job.belled = await ring(env, id).catch(() => false);
+    if (job.belled) await saveJob(job);
+    return { jobId: id, belled: job.belled };
   } catch (e) {
-    if (e instanceof LogoRejected) return { error: e.message };
-    if (e instanceof Anthropic.AuthenticationError) return { error: "API key Anthropic ditolak. Periksa ANTHROPIC_API_KEY." };
-    if (e instanceof Anthropic.PermissionDeniedError) return { error: "API key tidak punya akses ke model ini." };
-    if (e instanceof Anthropic.RateLimitError) return { error: "Batas pemakaian Claude tercapai. Coba lagi beberapa saat lagi." };
-    if (e instanceof Anthropic.APIError) return { error: `Claude API error ${e.status ?? ""}. Coba lagi.` };
-    if (e instanceof Error && /^(Claude|Jawaban Claude)/.test(e.message)) return { error: e.message };
+    if (e instanceof LogoRejected || e instanceof DriveNotConnected) return { error: e.message };
+    if (e instanceof DriveError) return { error: `Gagal menyimpan ke Google Drive: ${e.message}` };
     throw e;
   }
 }

@@ -49,5 +49,8 @@ Kode: `lib/brand/palette.ts`, konversi warna di `lib/brand/color.ts`. Diuji di L
 
 ## 3d · Analisis logo dan pasangan font
 
-Detail alur, model, dan biaya: `docs/claude.md`. Kode: `lib/brand/font-select.ts` (panggilan Claude), `lib/brand/font-shortlist.ts` (seleksi metadata), `lib/brand/font-specimen.ts` (lembar spesimen). Di Lab: isi nama perusahaan (dan bidang usaha bila mau), lalu klik "Pilih font dengan Claude" setelah memilih logo.
+Dikerjakan **sesi pekerja Claude** (langganan, tanpa API key); alur dan format jawaban di `docs/worker.md`.
 
+- Lab: pilih logo, isi nama perusahaan (dan bidang usaha bila mau), klik "Pilih font dengan Claude". Server menyimpan logo ke Google Drive, membuat job, dan membunyikan bel di PR #1. Lab memantau status tiap 5 detik; hasil muncul dalam beberapa menit.
+- Pekerja: melihat logo → `traits.json` → `lib/brand/font-shortlist.ts` menyusun 20-30 kandidat (jatah min. 3 per kategori heading, min. 14 kandidat teks isi) → `lib/brand/font-specimen.ts` merender lembar spesimen (10 font per gambar, file font katalog) → pekerja melihat spesimen → `picks.json` → `lib/brand/font-select.ts` memvalidasi (zod) dan menyusun hasil; kode tidak dikenal diganti otomatis dan dicatat.
+- Hasil (karakter logo, shortlist, pasangan Paket A/B, alasan, lembar spesimen di Drive) disimpan di job selama 90 hari.
