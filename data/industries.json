@@ -1,25 +1,359 @@
 {
-  "$comment": "Daftar bidang usaha (SPEC bagian 3). Pemetaan ke karakter font dan tone ditambahkan di Tahap 3e.",
-  "industries": [
-    { "id": "it", "id_label": "Teknologi Informasi & Software", "en_label": "IT & Software" },
-    { "id": "cybersecurity", "id_label": "Keamanan Siber", "en_label": "Cybersecurity" },
-    { "id": "telco", "id_label": "Telekomunikasi & Jaringan", "en_label": "Telecommunications & Networking" },
-    { "id": "finance", "id_label": "Keuangan, Perbankan & Asuransi", "en_label": "Finance, Banking & Insurance" },
-    { "id": "consulting", "id_label": "Konsultan & Jasa Profesional", "en_label": "Consulting & Professional Services" },
-    { "id": "healthcare", "id_label": "Kesehatan, Farmasi & Alat Kesehatan", "en_label": "Healthcare & Pharma" },
-    { "id": "education", "id_label": "Pendidikan & Pelatihan", "en_label": "Education & Training" },
-    { "id": "fnb", "id_label": "Makanan & Minuman", "en_label": "Food & Beverage" },
-    { "id": "hospitality", "id_label": "Perhotelan, Pariwisata & Event", "en_label": "Hospitality, Tourism & Events" },
-    { "id": "retail", "id_label": "Ritel & E-commerce", "en_label": "Retail & E-commerce" },
-    { "id": "manufacturing", "id_label": "Manufaktur & Industri", "en_label": "Manufacturing & Industrial" },
-    { "id": "construction", "id_label": "Konstruksi, Properti & Arsitektur", "en_label": "Construction, Property & Architecture" },
-    { "id": "energy", "id_label": "Energi, Pertambangan & Lingkungan", "en_label": "Energy, Mining & Environment" },
-    { "id": "logistics", "id_label": "Logistik & Transportasi", "en_label": "Logistics & Transportation" },
-    { "id": "agriculture", "id_label": "Pertanian, Perikanan & Perkebunan", "en_label": "Agriculture, Fisheries & Plantation" },
-    { "id": "creative", "id_label": "Kreatif, Media & Periklanan", "en_label": "Creative, Media & Advertising" },
-    { "id": "lifestyle", "id_label": "Fashion, Kecantikan & Gaya Hidup", "en_label": "Fashion, Beauty & Lifestyle" },
-    { "id": "automotive", "id_label": "Otomotif", "en_label": "Automotive" },
-    { "id": "nonprofit", "id_label": "Organisasi Nirlaba, Komunitas & Pemerintahan", "en_label": "Non-profit, Community & Government" },
-    { "id": "other", "id_label": "Lainnya", "en_label": "Other", "freeText": true }
-  ]
+ "$comment": "Daftar bidang usaha (SPEC bagian 3) dan pemetaannya ke karakter font dan nada dasar tone of voice (Tahap 3e, disetujui pemilik 2026-11-19). fontWant/fontAvoid = tag karakter Google Fonts; tone.formality: formal | semi-formal | semi-casual | casual.",
+ "industries": [
+  {
+   "id": "it",
+   "id_label": "Teknologi Informasi & Software",
+   "en_label": "IT & Software",
+   "fontWant": [
+    "Innovative",
+    "Competent",
+    "Futuristic"
+   ],
+   "fontAvoid": [
+    "Vintage",
+    "Childlike"
+   ],
+   "tone": {
+    "id": "Jelas, cerdas, solutif",
+    "en": "Clear, smart, solution-oriented",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "cybersecurity",
+   "id_label": "Keamanan Siber",
+   "en_label": "Cybersecurity",
+   "fontWant": [
+    "Competent",
+    "Business",
+    "Futuristic"
+   ],
+   "fontAvoid": [
+    "Playful",
+    "Cute"
+   ],
+   "tone": {
+    "id": "Tegas, tepercaya, waspada",
+    "en": "Firm, trustworthy, vigilant",
+    "formality": "formal"
+   }
+  },
+  {
+   "id": "telco",
+   "id_label": "Telekomunikasi & Jaringan",
+   "en_label": "Telecommunications & Networking",
+   "fontWant": [
+    "Active",
+    "Innovative",
+    "Competent"
+   ],
+   "fontAvoid": [
+    "Vintage"
+   ],
+   "tone": {
+    "id": "Cepat, terhubung, ramah",
+    "en": "Fast, connected, friendly",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "finance",
+   "id_label": "Keuangan, Perbankan & Asuransi",
+   "en_label": "Finance, Banking & Insurance",
+   "fontWant": [
+    "Business",
+    "Competent",
+    "Calm"
+   ],
+   "fontAvoid": [
+    "Playful",
+    "Childlike"
+   ],
+   "tone": {
+    "id": "Tepercaya, hati-hati, menenangkan",
+    "en": "Trustworthy, prudent, reassuring",
+    "formality": "formal"
+   }
+  },
+  {
+   "id": "consulting",
+   "id_label": "Konsultan & Jasa Profesional",
+   "en_label": "Consulting & Professional Services",
+   "fontWant": [
+    "Competent",
+    "Sophisticated",
+    "Business"
+   ],
+   "fontAvoid": [
+    "Childlike",
+    "Playful"
+   ],
+   "tone": {
+    "id": "Berwibawa, analitis, lugas",
+    "en": "Authoritative, analytical, straightforward",
+    "formality": "formal"
+   }
+  },
+  {
+   "id": "healthcare",
+   "id_label": "Kesehatan, Farmasi & Alat Kesehatan",
+   "en_label": "Healthcare & Pharma",
+   "fontWant": [
+    "Calm",
+    "Sincere",
+    "Competent"
+   ],
+   "fontAvoid": [
+    "Loud",
+    "Rugged"
+   ],
+   "tone": {
+    "id": "Peduli, menenangkan, akurat",
+    "en": "Caring, reassuring, accurate",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "education",
+   "id_label": "Pendidikan & Pelatihan",
+   "en_label": "Education & Training",
+   "fontWant": [
+    "Sincere",
+    "Happy",
+    "Competent"
+   ],
+   "fontAvoid": [
+    "Stiff"
+   ],
+   "tone": {
+    "id": "Menyemangati, jelas, sabar",
+    "en": "Encouraging, clear, patient",
+    "formality": "semi-casual"
+   }
+  },
+  {
+   "id": "fnb",
+   "id_label": "Makanan & Minuman",
+   "en_label": "Food & Beverage",
+   "fontWant": [
+    "Happy",
+    "Playful",
+    "Sincere"
+   ],
+   "fontAvoid": [
+    "Stiff"
+   ],
+   "tone": {
+    "id": "Hangat, menggugah selera, akrab",
+    "en": "Warm, appetizing, familiar",
+    "formality": "casual"
+   }
+  },
+  {
+   "id": "hospitality",
+   "id_label": "Perhotelan, Pariwisata & Event",
+   "en_label": "Hospitality, Tourism & Events",
+   "fontWant": [
+    "Sophisticated",
+    "Fancy",
+    "Calm"
+   ],
+   "fontAvoid": [
+    "Rugged"
+   ],
+   "tone": {
+    "id": "Ramah, melayani, berkelas",
+    "en": "Welcoming, attentive, refined",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "retail",
+   "id_label": "Ritel & E-commerce",
+   "en_label": "Retail & E-commerce",
+   "fontWant": [
+    "Happy",
+    "Active",
+    "Excited"
+   ],
+   "fontAvoid": [
+    "Stiff"
+   ],
+   "tone": {
+    "id": "Antusias, praktis, dekat",
+    "en": "Enthusiastic, practical, close",
+    "formality": "casual"
+   }
+  },
+  {
+   "id": "manufacturing",
+   "id_label": "Manufaktur & Industri",
+   "en_label": "Manufacturing & Industrial",
+   "fontWant": [
+    "Competent",
+    "Business",
+    "Rugged"
+   ],
+   "fontAvoid": [
+    "Cute"
+   ],
+   "tone": {
+    "id": "Andal, presisi, lugas",
+    "en": "Reliable, precise, straightforward",
+    "formality": "formal"
+   }
+  },
+  {
+   "id": "construction",
+   "id_label": "Konstruksi, Properti & Arsitektur",
+   "en_label": "Construction, Property & Architecture",
+   "fontWant": [
+    "Competent",
+    "Business",
+    "Sophisticated"
+   ],
+   "fontAvoid": [
+    "Cute",
+    "Playful"
+   ],
+   "tone": {
+    "id": "Kokoh, presisi, tepercaya",
+    "en": "Solid, precise, trustworthy",
+    "formality": "formal"
+   }
+  },
+  {
+   "id": "energy",
+   "id_label": "Energi, Pertambangan & Lingkungan",
+   "en_label": "Energy, Mining & Environment",
+   "fontWant": [
+    "Competent",
+    "Active",
+    "Innovative"
+   ],
+   "fontAvoid": [
+    "Cute"
+   ],
+   "tone": {
+    "id": "Bertanggung jawab, visioner, tegas",
+    "en": "Responsible, visionary, firm",
+    "formality": "formal"
+   }
+  },
+  {
+   "id": "logistics",
+   "id_label": "Logistik & Transportasi",
+   "en_label": "Logistics & Transportation",
+   "fontWant": [
+    "Active",
+    "Competent",
+    "Business"
+   ],
+   "fontAvoid": [
+    "Vintage"
+   ],
+   "tone": {
+    "id": "Cepat, tepat, andal",
+    "en": "Fast, accurate, dependable",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "agriculture",
+   "id_label": "Pertanian, Perikanan & Perkebunan",
+   "en_label": "Agriculture, Fisheries & Plantation",
+   "fontWant": [
+    "Sincere",
+    "Calm",
+    "Vintage"
+   ],
+   "fontAvoid": [
+    "Futuristic"
+   ],
+   "tone": {
+    "id": "Membumi, jujur, berkelanjutan",
+    "en": "Grounded, honest, sustainable",
+    "formality": "semi-casual"
+   }
+  },
+  {
+   "id": "creative",
+   "id_label": "Kreatif, Media & Periklanan",
+   "en_label": "Creative, Media & Advertising",
+   "fontWant": [
+    "Artistic",
+    "Innovative",
+    "Excited"
+   ],
+   "fontAvoid": [
+    "Stiff"
+   ],
+   "tone": {
+    "id": "Berani, ekspresif, segar",
+    "en": "Bold, expressive, fresh",
+    "formality": "casual"
+   }
+  },
+  {
+   "id": "lifestyle",
+   "id_label": "Fashion, Kecantikan & Gaya Hidup",
+   "en_label": "Fashion, Beauty & Lifestyle",
+   "fontWant": [
+    "Sophisticated",
+    "Fancy",
+    "Artistic"
+   ],
+   "fontAvoid": [
+    "Rugged"
+   ],
+   "tone": {
+    "id": "Inspiratif, elegan, personal",
+    "en": "Inspiring, elegant, personal",
+    "formality": "semi-casual"
+   }
+  },
+  {
+   "id": "automotive",
+   "id_label": "Otomotif",
+   "en_label": "Automotive",
+   "fontWant": [
+    "Active",
+    "Loud",
+    "Competent"
+   ],
+   "fontAvoid": [
+    "Cute"
+   ],
+   "tone": {
+    "id": "Dinamis, bertenaga, percaya diri",
+    "en": "Dynamic, powerful, confident",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "nonprofit",
+   "id_label": "Organisasi Nirlaba, Komunitas & Pemerintahan",
+   "en_label": "Non-profit, Community & Government",
+   "fontWant": [
+    "Sincere",
+    "Calm",
+    "Competent"
+   ],
+   "fontAvoid": [
+    "Fancy"
+   ],
+   "tone": {
+    "id": "Empatik, transparan, mengajak",
+    "en": "Empathetic, transparent, inviting",
+    "formality": "semi-formal"
+   }
+  },
+  {
+   "id": "other",
+   "id_label": "Lainnya",
+   "en_label": "Other",
+   "freeText": true
+  }
+ ]
 }

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { buildShortlist, differentCharacter, EXPRESSIVE_TAGS, STYLE_TAGS, stylesOf, type ScoredFont } from "./font-shortlist";
 import { FONTS, type CatalogFont } from "./fonts";
+import { withIndustry } from "./industries";
+import type { Tone } from "./tone";
 
 /**
  * Tahap 3d (SPEC bagian 6.1 dan 6.3), dikerjakan sesi pekerja Claude (docs/worker.md):
@@ -56,6 +58,8 @@ export interface FontSelectResult {
   corrections: string[];
   /** Nama file lembar spesimen di folder job (Drive). */
   sheets: string[];
+  /** Tahap 3e: tone of voice Paket A dan B (job lama bisa tanpa ini). */
+  tone?: Tone;
 }
 
 export const ref = (f: CatalogFont): FontRef => ({
@@ -72,8 +76,9 @@ export function issues(e: z.ZodError): string {
   return e.issues.map((i) => `- ${i.path.join(".") || "(akar)"}: ${i.message}`).join("\n");
 }
 
-export function candidates(traits: LogoTraits): Candidate[] {
-  return buildShortlist(traits).map((x, i) => ({ ...x, code: `F${String(i + 1).padStart(2, "0")}` }));
+/** Kandidat dari karakter logo, ditambah pemetaan bidang usaha (bobot kecil) bila ada. */
+export function candidates(traits: LogoTraits, industryId?: string): Candidate[] {
+  return buildShortlist(withIndustry(traits, industryId)).map((x, i) => ({ ...x, code: `F${String(i + 1).padStart(2, "0")}` }));
 }
 
 /** Daftar kandidat dalam teks, untuk dibaca Claude bersama lembar spesimen. */

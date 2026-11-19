@@ -23,10 +23,11 @@ npm run worker -- pending
 
 Kerjakan job satu per satu, urut dari yang terlama. Untuk job `font-select` (3d):
 
-1. `npm run worker -- begin <env> <id>` → mencetak data user dan path `logo.png`. **Buka logo itu dengan Read** dan amati.
+1. `npm run worker -- begin <env> <id>` → mencetak data user, pemetaan bidang usaha (nada dasar dan karakter font dari aplikasi), dan path `logo.png`. **Buka logo itu dengan Read** dan amati.
 2. Tulis `traits.json` di folder kerja yang disebut (bentuk di bawah). `npm run worker -- traits <env> <id>` → validasi, shortlist 20-36 kandidat (termasuk kandidat kontras untuk Paket B), lembar spesimen `sheet-N.png`. Bila ada pesan `GAGAL`, perbaiki JSON lalu ulangi.
-3. **Buka semua lembar spesimen dengan Read**, bandingkan dengan logo, tulis `picks.json`. `npm run worker -- pick <env> <id>` → hasil disimpan, job selesai.
-4. Bila job tidak bisa dikerjakan (logo rusak, Drive putus, dll.): `npm run worker -- fail <env> <id> "<alasan singkat untuk user>"`.
+3. **Buka semua lembar spesimen dengan Read**, bandingkan dengan logo, tulis `picks.json`. `npm run worker -- pick <env> <id>` → pasangan font disimpan.
+4. Tulis `tone.json` (tone of voice Paket A dan B, Indonesia + Inggris). `npm run worker -- tone <env> <id>` → job selesai.
+5. Bila job tidak bisa dikerjakan (logo rusak, Drive putus, dll.): `npm run worker -- fail <env> <id> "<alasan singkat untuk user>"`.
 
 Job yang tertinggal di status `working` (sesi sebelumnya terputus) juga muncul di `pending`: lanjutkan dari `begin`.
 
@@ -71,6 +72,42 @@ Amati bentuk huruf (bila ada), geometris/organik, ketebalan, formalitas, energi.
 - **Paket B wajib beda karakter** (keputusan pemilik 2026-11-19): heading B harus beda **kategori** (mis. serif vs sans) atau beda **gaya** (mis. Geometric vs Humanist) dari heading A, dan B tidak memakai font yang sama dengan A. Kandidat bertanda `[KONTRAS untuk Paket B]` disediakan untuk ini. Tetap pantas untuk logo dan bidang usahanya. `pick` menolak pilihan yang melanggar; pilih ulang lalu jalankan lagi.
 - Heading + teks isi harus nyaman berdampingan (kontras cukup, atau satu family bila memang paling tepat). Teks isi hanya dari kandidat "boleh untuk teks isi". A dan B tidak boleh sama persis.
 - Kode asing atau font "heading saja" untuk teks isi diganti otomatis dan dicatat sebagai koreksi; sebaiknya tidak terjadi.
+
+### `tone.json` (tone of voice, Tahap 3e)
+
+Tone of voice adalah **hipotesis** dari kesan logo dan nada dasar bidang usaha (dicetak oleh `begin` dan `pick`). Tulis **Indonesia (`id`) dan Inggris (`en`)** sekaligus; isinya setara, bukan terjemahan kata per kata. Jangan mengarang fakta, angka, klien, atau layanan perusahaan; contoh kalimat tetap umum.
+
+```json
+{
+  "A": {
+    "summary": { "id": "Nuansa paket dalam satu kalimat", "en": "..." },
+    "personality": [
+      { "trait": { "id": "Solutif", "en": "Solution-minded" }, "desc": { "id": "Penjelasan singkat", "en": "..." } },
+      { "trait": { "id": "...", "en": "..." }, "desc": { "id": "...", "en": "..." } },
+      { "trait": { "id": "...", "en": "..." }, "desc": { "id": "...", "en": "..." } }
+    ],
+    "voice": {
+      "address": { "id": "Menyapa \"Anda\"; menyebut diri \"kami\"", "en": "..." },
+      "formality": "formal | semi-formal | semi-casual | casual",
+      "sentences": { "id": "Kalimat pendek dan aktif, satu gagasan per kalimat", "en": "..." }
+    },
+    "do": [{ "id": "...", "en": "..." }, { "id": "...", "en": "..." }, { "id": "...", "en": "..." }],
+    "dont": [{ "id": "...", "en": "..." }, { "id": "...", "en": "..." }, { "id": "...", "en": "..." }],
+    "examples": {
+      "taglines": [{ "id": "maks. 80 karakter", "en": "..." }, { "id": "...", "en": "..." }],
+      "emailOpening": { "id": "Kalimat pembuka email", "en": "..." },
+      "cta": { "id": "Kalimat ajakan", "en": "..." },
+      "about": { "id": "Tentang kami, 2-3 kalimat", "en": "..." }
+    }
+  },
+  "B": { "...": "bentuk sama dengan A" },
+  "basis": { "id": "Dasar hipotesis: kesan logo ... dan bidang usaha ...", "en": "..." }
+}
+```
+
+- **Paket A**: nada dasar bidang usaha yang selaras dengan kesan logo (aman). **Paket B**: nuansa berbeda (mis. lebih hangat, lebih berani, atau lebih formal), tetap pantas untuk bidang usahanya; selaras dengan karakter font Paket B.
+- `personality` tepat 3; `do` dan `dont` 3-4 butir; `taglines` tepat 2. Ringkasan dan tagline B tidak boleh sama dengan A (`tone` menolak).
+- Nama perusahaan boleh dipakai di contoh. Bidang usaha "Lainnya": pakai teks bidang usaha dari user sebagai data.
 
 ## Setup sesi pekerja (sekali, oleh pemilik)
 

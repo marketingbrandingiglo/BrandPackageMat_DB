@@ -1,7 +1,7 @@
 "use server";
 
-import industries from "@/data/industries.json";
 import { requireSuperAdmin } from "@/lib/auth/server";
+import { INDUSTRIES } from "@/lib/brand/industries";
 import { createFolder, DriveError, DriveNotConnected, envFolder, upload } from "@/lib/drive/drive";
 import { ring } from "@/lib/jobs/bell";
 import { currentEnv, enqueue, newJobId, saveJob, type Job } from "@/lib/jobs/jobs";
@@ -28,8 +28,6 @@ export interface LabLogoResult {
   /** Tahap 3b: palet dari warna logo. */
   palette?: Palette;
 }
-
-const INDUSTRIES: { id: string; id_label: string }[] = industries.industries;
 
 const dataUrl = (b: Buffer) => `data:image/png;base64,${b.toString("base64")}`;
 
@@ -85,9 +83,12 @@ export async function requestFonts(_prev: LabFontRequest, form: FormData): Promi
   const file = form.get("logo");
   const companyName = String(form.get("companyName") ?? "").trim().slice(0, 80);
   const industryId = String(form.get("industry") ?? "");
-  const industry = INDUSTRIES.find((x) => x.id === industryId)?.id_label;
+  const known = INDUSTRIES.find((x) => x.id === industryId);
+  const other = String(form.get("industryOther") ?? "").trim().replace(/\s+/g, " ").slice(0, 60);
+  const industry = known?.freeText ? (other ? `Lainnya: ${other}` : undefined) : known?.id_label;
   if (!(file instanceof File) || file.size === 0) return { error: "Pilih file logo terlebih dulu." };
   if (!companyName) return { error: "Isi nama perusahaan untuk contoh spesimen." };
+  if (known?.freeText && !other) return { error: "Bidang usaha \"Lainnya\": isi keterangan bidang usahanya." };
   try {
     const buf = Buffer.from(await file.arrayBuffer());
     const r = await analyzeLogo(buf);
@@ -108,7 +109,7 @@ export async function requestFonts(_prev: LabFontRequest, form: FormData): Promi
       step: "Menunggu pekerja Claude",
       createdAt: now,
       updatedAt: now,
-      input: { companyName, industry, darkBackground: r.transparentBackground && r.onLight.strategy !== "original" },
+      input: { companyName, industry, industryId: known?.id, darkBackground: r.transparentBackground && r.onLight.strategy !== "original" },
       folderId,
       files: {
         logo: { id: logo.id, name: logo.name, mimeType: logo.mimeType, size: logo.size },

@@ -304,7 +304,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 
 1. Nilai harga token Claude per model; sumber kurs final.
 2. Daftar 300 font terkurasi: disusun Claude Code (kategori, tag, dukungan huruf Indonesia, bobot), **ditinjau pemilik**.
-3. Pemetaan bidang usaha ke karakter font dan tone.
+3. ~~Pemetaan bidang usaha ke karakter font dan tone~~: diputuskan 2026-11-19 (`data/industries.json`, bagian 18).
 4. **Isi tengah cap**: logo dikonversi monokrom bila bersih, atau inisial/ornamen bila tidak. Diputuskan saat Tahap 4.
 5. **Gambar di email signature** (logo, ikon sosial media): file hasil hanya disimpan sementara (90 hari), sehingga signature tidak boleh bergantung pada URL milik aplikasi. Usulan: tempatkan placeholder URL, sertakan file gambar di ZIP, dan jelaskan di `BACA-SAYA` cara mengunggahnya ke Gmail/Outlook atau hosting sendiri; sosial media berupa tautan teks secara default.
 6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
@@ -329,3 +329,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Tahap 3d (2026-11-13): model utama `claude-opus-5-5` (US$4/20 per juta token), model ringan `claude-haiku-5-5`; keduanya bisa diganti lewat env var. Shortlist berupa satu kumpulan maks. 30 kandidat; Claude memilih dari lembar spesimen (10 font per gambar). Bila model utama menolak, API memakai model cadangan otomatis.
 - Engine Claude dan penyimpanan (2026-11-19): aplikasi dipakai pemilik dan tim (prototype). Claude dijalankan lewat **sesi pekerja berlangganan** yang dibangunkan komentar di PR saluran kontrol (tanpa API key; jalur API Tahap 3d dihapus). Penyimpanan file di **Google Drive pemilik** (Vercel Blob penuh; Cloudflare R2 dipertimbangkan tetapi tidak dipilih). Logo dan hasil disimpan **90 hari**; paket tidak dipilih langsung dihapus saat user memilih, kedua paket disimpan 90 hari bila belum dipilih; ZIP dibuat saat diunduh, tidak disimpan. Halaman **Riwayat**: user melihat miliknya, super admin melihat semua. Batas logo diturunkan menjadi **4 MB**.
 - Font Paket B (2026-11-19): **Paket B wajib beda karakter** dari Paket A: heading berbeda kategori (mis. serif vs sans) atau gaya (mis. Geometric vs Humanist), tanpa font yang sama. Shortlist menambah maks. 6 kandidat kontras (total maks. 36).
+- Tahap 3e (2026-11-19): pemetaan 19 bidang usaha ke karakter font (dicari/dihindari) dan nada dasar disetujui; tag bidang usaha menambah kriteria font dengan bobot kecil (logo tetap utama). Tone of voice per paket ditulis sesi pekerja dalam Indonesia dan Inggris sekaligus (ringkasan, 3 sifat, cara bicara, lakukan/hindari, contoh: 2 tagline, pembuka email, CTA, tentang kami); Paket A selaras, Paket B nuansa berbeda; ditandai hipotesis.

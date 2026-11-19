@@ -100,7 +100,8 @@
 }
 
 /* ---------- 3d · Pasangan font ---------- */
-.fontFields { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; width: 100%; }
+.fontFields { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; width: 100%; }
+.fontFields label { flex: 1 1 220px; }
 .fontFields label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
 .fontFields .input { height: 44px; font-size: 16px; }
 .fontFields :global(.btn) { height: 44px; }
@@ -124,3 +125,16 @@ details.group summary { cursor: pointer; }
 .jobStatus { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--iglo-red-tint); border-top-color: var(--iglo-red); animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 3e · Tone of voice ---------- */
+.toneHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.langToggle { display: inline-flex; border: 1px solid var(--card-border); border-radius: 999px; overflow: hidden; }
+.langToggle button { font: inherit; font-size: 13px; padding: 6px 14px; border: 0; background: #fff; cursor: pointer; }
+.langToggle button[aria-pressed="true"] { background: var(--iglo-red); color: #fff; }
+.toneCard { border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; background: #fff; font-size: 14px; line-height: 1.55; }
+.toneCard h5 { margin: 16px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.toneCard ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.toneCard p { margin: 0 0 6px; }
+.toneSummary { font-size: 16px; font-weight: 600; }
+.doDont { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .doDont { grid-template-columns: 1fr; } }

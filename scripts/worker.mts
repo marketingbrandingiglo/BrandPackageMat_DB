@@ -6,10 +6,11 @@
  *   npm run worker -- pending
  *   npm run worker -- begin <env> <id>      # unduh logo, tampilkan data job
  *   npm run worker -- traits <env> <id>     # validasi traits.json, buat shortlist + lembar spesimen
- *   npm run worker -- pick <env> <id>       # validasi picks.json, simpan hasil, job selesai
+ *   npm run worker -- pick <env> <id>       # validasi picks.json, simpan pasangan font
+ *   npm run worker -- tone <env> <id>       # validasi tone.json (3e), job selesai
  *   npm run worker -- fail <env> <id> "<alasan untuk user>"
  *
- * File kerja ada di luar repo: <tmp>/bpa-worker/<env>-<id>/ (logo.png, traits.json, sheet-N.png, picks.json).
+ * File kerja ada di luar repo: <tmp>/bpa-worker/<env>-<id>/ (logo.png, traits.json, sheet-N.png, picks.json, tone.json).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import os from "node:os";
@@ -18,6 +19,8 @@ import sharp from "sharp";
 import { download, driveStatus, upload } from "../lib/drive/drive";
 import { buildResult, candidates, checkPackages, describe, issues, LogoTraitsSchema, PairsSchema, type FontSelectResult } from "../lib/brand/font-select";
 import { specimenSheets } from "../lib/brand/font-specimen";
+import { FORMALITY_LABEL, industryById } from "../lib/brand/industries";
+import { checkTone, ToneSchema } from "../lib/brand/tone";
 import { failJob, finishJob, getJob, queued, saveJob, startJob, type Job, type JobEnv } from "../lib/jobs/jobs";
 import { redis } from "../lib/redis";
 
@@ -58,6 +61,17 @@ const userData = (job: Job) =>
     `Bidang usaha: ${(job.input.industry || "tidak disebutkan").replace(/[<>]/g, "")}`,
     "</data_user>",
   ].join("\n");
+
+/** Pemetaan bidang usaha dari aplikasi (bukan data user). */
+function industryBaseline(job: Job): string {
+  const ind = industryById(job.input.industryId);
+  if (!ind?.tone) return "Pemetaan bidang usaha: tidak ada (bidang usaha kosong atau Lainnya); simpulkan dari logo dan teks bidang usaha.";
+  return [
+    `Pemetaan bidang usaha "${ind.id_label}" (dari aplikasi):`,
+    `- Nada dasar: ${ind.tone.id} (${FORMALITY_LABEL[ind.tone.formality].id})`,
+    `- Karakter font dicari: ${ind.fontWant?.join(", ")}; dihindari: ${ind.fontAvoid?.join(", ")} (ditambahkan otomatis ke shortlist dengan bobot kecil; logo tetap penentu utama)`,
+  ].join("\n");
+}
 
 async function main() {
   switch (cmd) {
@@ -105,6 +119,7 @@ async function main() {
       const logo = await sharp(png).flatten({ background: bg }).extend({ top: 40, bottom: 40, left: 40, right: 40, background: bg }).png().toBuffer();
       writeFileSync(path.join(dir, "logo.png"), logo);
       console.log(userData(job));
+      console.log(`\n${industryBaseline(job)}`);
       console.log(`\nLogo: ${path.join(dir, "logo.png")}`);
       console.log(`Tulis karakter logo ke: ${path.join(dir, "traits.json")}`);
       console.log(`Lalu: npm run worker -- traits ${job.env} ${job.id}`);
@@ -115,7 +130,7 @@ async function main() {
       const dir = workDir(job.env, job.id);
       const parsed = LogoTraitsSchema.safeParse(readJson(path.join(dir, "traits.json")));
       if (!parsed.success) die(`traits.json tidak sesuai format:\n${issues(parsed.error)}`);
-      const items = candidates(parsed.data);
+      const items = candidates(parsed.data, job.input.industryId);
       const sheets = await specimenSheets(
         items.map((x) => ({ code: x.code, font: x.font, body: x.body, contrast: x.contrast })),
         job.input.companyName.trim().slice(0, 40) || "Nama Perusahaan",
@@ -137,7 +152,7 @@ async function main() {
       if (!traits.success) die(`traits.json tidak sesuai format:\n${issues(traits.error)}`);
       const pairs = PairsSchema.safeParse(readJson(path.join(dir, "picks.json")));
       if (!pairs.success) die(`picks.json tidak sesuai format:\n${issues(pairs.error)}`);
-      const items = candidates(traits.data);
+      const items = candidates(traits.data, job.input.industryId);
       const broken = checkPackages(pairs.data, items);
       if (broken.length) die(`picks.json belum memenuhi aturan Paket B:\n- ${broken.join("\n- ")}`);
       const names: string[] = [];
@@ -148,9 +163,26 @@ async function main() {
         names.push(name);
       }
       const result = buildResult(traits.data, items, pairs.data, names);
-      await finishJob(job, result);
-      console.log(`Selesai. Paket A: ${result.packages.A.heading.family} + ${result.packages.A.body.family}; Paket B: ${result.packages.B.heading.family} + ${result.packages.B.body.family}.`);
+      job.result = result;
+      job.step = "Menulis tone of voice";
+      await saveJob(job);
+      console.log(`Font tersimpan. Paket A: ${result.packages.A.heading.family} + ${result.packages.A.body.family}; Paket B: ${result.packages.B.heading.family} + ${result.packages.B.body.family}.`);
       if (result.corrections.length) console.log(`Koreksi otomatis:\n${result.corrections.join("\n")}`);
+      console.log(`\n${userData(job)}\n\n${industryBaseline(job)}\nKesan logo: ${traits.data.impression.id} (formalitas ${traits.data.formality}/5, energi ${traits.data.energy}/5)`);
+      console.log(`\nTulis tone of voice (3e) ke: ${path.join(dir, "tone.json")}`);
+      console.log(`Lalu: npm run worker -- tone ${job.env} ${job.id}`);
+      break;
+    }
+    case "tone": {
+      const job = await loadJob();
+      if (!job.result) die("pasangan font belum disimpan; jalankan pick dulu");
+      const dir = workDir(job.env, job.id);
+      const parsed = ToneSchema.safeParse(readJson(path.join(dir, "tone.json")));
+      if (!parsed.success) die(`tone.json tidak sesuai format:\n${issues(parsed.error)}`);
+      const broken = checkTone(parsed.data);
+      if (broken.length) die(`tone.json belum memenuhi aturan:\n- ${broken.join("\n- ")}`);
+      await finishJob(job, { ...job.result, tone: parsed.data });
+      console.log(`Selesai. Tone A: ${parsed.data.A.summary.id} | Tone B: ${parsed.data.B.summary.id}`);
       break;
     }
     case "fail": {
@@ -162,7 +194,7 @@ async function main() {
       break;
     }
     default:
-      die("perintah: status | pending | begin | traits | pick | fail");
+      die("perintah: status | pending | begin | traits | pick | tone | fail");
   }
 }
 

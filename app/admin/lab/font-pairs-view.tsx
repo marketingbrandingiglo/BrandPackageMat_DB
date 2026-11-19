@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { EXPRESSIVE_LABEL } from "@/lib/brand/fonts";
 import type { FontRef, FontSelectResult } from "@/lib/brand/font-select";
 import { loadCatalogFont } from "./font/load-font";
+import ToneView from "./tone-view";
 import styles from "./lab.module.css";
 
 const LETTERFORM: Record<string, string> = { sans: "Sans serif", serif: "Serif", slab: "Slab serif", script: "Script", display: "Display", mixed: "Campuran", none: "Tanpa huruf" };
@@ -47,7 +48,7 @@ export default function FontPairsView({ r, jobId, companyName, industry, took }:
   return (
     <div className={styles.palette}>
       <div>
-        <p className="eyebrow">3d · Analisis logo dan pasangan font</p>
+        <p className="eyebrow">3d-3e · Pasangan font dan tone of voice</p>
         <h3 className={styles.h3}>Pasangan font untuk {companyName}</h3>
         <p className={styles.muted}>
           {industry ? `Bidang usaha: ${industry}. ` : ""}Dikerjakan sesi pekerja Claude (job {jobId}{took ? `, ${Math.round(took / 1000)} detik sejak dikirim` : ""}).
@@ -61,6 +62,8 @@ export default function FontPairsView({ r, jobId, companyName, industry, took }:
         <PairCard k="B" p={r.packages.B} name={companyName} />
       </div>
       <p className="alert alert-info">{r.notes.id}</p>
+
+      {r.tone && <ToneView tone={r.tone} />}
 
       <div className={styles.group}>
         <h4>Karakter logo menurut Claude</h4>

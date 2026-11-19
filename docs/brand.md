@@ -54,3 +54,10 @@ Dikerjakan **sesi pekerja Claude** (langganan, tanpa API key); alur dan format j
 - Lab: pilih logo, isi nama perusahaan (dan bidang usaha bila mau), klik "Pilih font dengan Claude". Server menyimpan logo ke Google Drive, membuat job, dan membunyikan bel di PR #1. Lab memantau status tiap 5 detik; hasil muncul dalam beberapa menit.
 - Pekerja: melihat logo → `traits.json` → `lib/brand/font-shortlist.ts` menyusun 20-36 kandidat (jatah min. 3 per kategori heading, min. 14 kandidat teks isi, plus maks. 6 kandidat kontras dari kategori/gaya lain untuk Paket B) → `lib/brand/font-specimen.ts` merender lembar spesimen (10 font per gambar, file font katalog) → pekerja melihat spesimen → `picks.json` → `lib/brand/font-select.ts` memvalidasi (zod) dan menyusun hasil; kode tidak dikenal diganti otomatis dan dicatat. **Paket B wajib beda karakter** dari Paket A (kategori atau gaya heading berbeda, tanpa font yang sama); pilihan yang melanggar ditolak dan pekerja memilih ulang.
 - Hasil (karakter logo, shortlist, pasangan Paket A/B, alasan, lembar spesimen di Drive) disimpan di job selama 90 hari.
+
+## 3e · Tone of voice dan pemetaan bidang usaha
+
+- **Pemetaan** (disetujui pemilik 2026-11-19) di `data/industries.json`: tiap bidang usaha punya `fontWant`/`fontAvoid` (tag karakter Google Fonts) dan `tone` (nada dasar Indonesia/Inggris + formalitas). "Lainnya" tanpa pemetaan; teks bebasnya dipakai pekerja sebagai data.
+- **Font**: tag bidang usaha ditambahkan ke kriteria logo dengan bobot 0,4 (`withIndustry`, `lib/brand/industries.ts`); tag yang diinginkan logo tidak ikut dihindari. Logo tetap penentu utama.
+- **Tone of voice** (`lib/brand/tone.ts`): ditulis sesi pekerja setelah pasangan font, Indonesia + Inggris sekaligus, per paket: ringkasan nuansa, 3 sifat kepribadian, cara bicara (sapaan, formalitas, kalimat), lakukan/hindari (3-4), contoh (2 tagline, pembuka email, CTA, tentang kami). Paket A selaras nada dasar; Paket B nuansa berbeda. Ditandai sebagai hipotesis.
+- Lab: tombol "Pilih font dan tone dengan Claude"; hasil tone tampil di bawah pasangan font dengan pilihan bahasa Indonesia/English.

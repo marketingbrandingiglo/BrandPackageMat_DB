@@ -21,7 +21,10 @@ export interface JobFile {
 
 export interface FontSelectInput {
   companyName: string;
+  /** Label bidang usaha (atau isi bebas bila "Lainnya"), data dari user. */
   industry?: string;
+  /** ID di data/industries.json, untuk pemetaan font dan nada dasar. */
+  industryId?: string;
   /** True bila logo perlu latar gelap agar terbaca. */
   darkBackground: boolean;
 }

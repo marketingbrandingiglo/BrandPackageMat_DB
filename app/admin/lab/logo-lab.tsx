@@ -63,13 +63,19 @@ export default function LogoLab({ maxBytes, industries, workerReady }: { maxByte
               {industries.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
             </select>
           </label>
+          {industry === "other" && (
+            <label>
+              <span>Keterangan bidang usaha</span>
+              <input className="input" name="industryOther" maxLength={60} placeholder="mis. Jasa kebersihan gedung" />
+            </label>
+          )}
           <button type="submit" data-kind="fonts" className="btn btn-secondary" disabled={pending || !fileName || !company.trim() || !!workerReady}>
-            {pendingFonts ? "Mengirim…" : "Pilih font dengan Claude"}
+            {pendingFonts ? "Mengirim…" : "Pilih font dan tone dengan Claude"}
           </button>
         </div>
         <p className={styles.fontNote}>
           {workerReady ??
-            "3d dikerjakan sesi pekerja Claude (langganan): logo disimpan di Google Drive, pekerja dibangunkan, hasil muncul di sini dalam beberapa menit."}
+            "3d-3e dikerjakan sesi pekerja Claude (langganan): pasangan font dan tone of voice Paket A/B. Logo disimpan di Google Drive, pekerja dibangunkan, hasil muncul di sini dalam beberapa menit."}
         </p>
       </form>
 
