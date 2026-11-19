@@ -25,11 +25,15 @@ describe("katalog font", () => {
   });
 
   it("file statis (bukan variable) dan memuat huruf Latin dasar", () => {
-    for (const f of FONTS) {
-      for (const rel of [f.files.regular, f.files.bold].filter(Boolean) as string[]) {
+    for (const fam of FONTS) {
+      for (const rel of [fam.files.regular, fam.files.bold].filter(Boolean) as string[]) {
         const font = fontkit.create(readFileSync(path.join(LIB, rel))) as unknown as fontkit.Font & { directory: { tables: Record<string, unknown> } };
         expect(font.directory.tables.fvar, rel).toBeUndefined();
         for (const ch of "AZaz09.,!?") expect(font.hasGlyphForCodePoint(ch.codePointAt(0)!), `${rel} ${ch}`).toBe(true);
+        // Nama di dalam file sama dengan katalog (dipakai resvg dan muncul di PDF/Illustrator).
+        const f = font as unknown as { familyName: string; subfamilyName: string; postscriptName: string };
+        expect(f.familyName, rel).toBe(fam.family);
+        expect(f.subfamilyName, rel).toBe(rel === fam.files.bold ? "Bold" : "Regular");
       }
     }
   });

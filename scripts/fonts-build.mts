@@ -12,13 +12,15 @@
  * Sumber: repo github.com/google/fonts (file + METADATA.pb) dan metadata fonts.google.com
  * (kategori, popularitas). Variable font dijadikan statis (Regular 400, Bold 700; sumbu lain
  * di nilai default) karena PDFKit dan resvg hanya memakai instance default. Semua file
- * dipangkas ke aksara Latin (rentang "latin" Google Fonts).
+ * dipangkas ke aksara Latin (rentang "latin" Google Fonts). Nama family/style di dalam file ditulis
+ * ulang sesuai katalog ("<Family>" / Regular|Bold), lib/fonts/sfnt-names.ts.
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import subsetFont from "subset-font";
 import * as fontkit from "fontkit";
 import type { CatalogFont } from "../lib/brand/fonts";
+import { setFontNames } from "../lib/fonts/sfnt-names";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const LIST = path.join(ROOT, "data/fonts/families.txt");
@@ -158,19 +160,19 @@ async function buildFamily(name: string, meta: MetaFamily, tags: Map<string, Rec
     const axes = fontkit.create(src).variationAxes;
     const w = axes.wght;
     const regW = w ? Math.min(w.max, Math.max(w.min, 400)) : null;
-    outputs.push([regularPath, await makeStatic(src, regW)]);
+    outputs.push([regularPath, setFontNames(await makeStatic(src, regW), name, "Regular")]);
     if (w && w.min <= 700 && w.max >= 700) {
-      outputs.push([boldPath, await makeStatic(src, 700)]);
+      outputs.push([boldPath, setFontNames(await makeStatic(src, 700), name, "Bold")]);
       hasBold = true;
     }
   } else {
     const byW = new Map(normal.map((f) => [f.weight, f]));
     const reg = byW.get(400) ?? [...byW.values()].sort((a, b) => Math.abs(a.weight - 400) - Math.abs(b.weight - 400))[0];
     if (!reg) throw new Error("tidak ada file style normal");
-    outputs.push([regularPath, await makeStatic(await download(reg.filename), null)]);
+    outputs.push([regularPath, setFontNames(await makeStatic(await download(reg.filename), null), name, "Regular")]);
     const bold = byW.get(700);
     if (bold && bold !== reg) {
-      outputs.push([boldPath, await makeStatic(await download(bold.filename), null)]);
+      outputs.push([boldPath, setFontNames(await makeStatic(await download(bold.filename), null), name, "Bold")]);
       hasBold = true;
     }
   }
