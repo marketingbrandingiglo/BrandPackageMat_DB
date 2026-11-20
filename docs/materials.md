@@ -49,3 +49,15 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 - **Model 2 (Paket B)**: satu lingkaran Ø 40 mm (garis 1 mm), logo di dalamnya dengan jarak aman 4 mm dari lingkaran.
 - Logo SVG tetap vektor: warna gelap/berwarna menjadi tinta, warna terang (mis. huruf putih di dalam bentuk) menjadi putih kertas (`svgInk`). Logo PNG menjadi gambar satu warna (bagian terang transparan, `pngInk`) dan diberi catatan bahwa cap tidak sepenuhnya vektor.
 - Desain, bukan stempel yang sah secara hukum. Output: `cap-<A|B>.svg`, `.pdf`, pratinjau.
+
+## 4d · Kop surat
+
+`lib/materials/letterhead.ts`. A4 210 × 297 mm; header dan footer sama di setiap halaman.
+
+- **Header**: logo, nama perusahaan (font heading), alamat utama, telepon utama. Paket A: logo kiri, teks rata kanan berwarna utama, garis warna utama. Paket B: nama perusahaan kiri (lebih besar), logo kanan, garis tebal aksen + garis tipis warna utama.
+- **Footer**: kontak lain (email, sosial media maks. 3). Paket A rata tengah dengan garis tipis abu; Paket B rata kiri dengan garis warna utama.
+- **DOCX** (pustaka `docx`, versi dipatok 9.15.3): header/footer asli Word (tabel tanpa garis untuk logo + teks), logo SVG dengan PNG cadangan (PNG untuk logo PNG), gaya **Normal** (font teks isi, warna teks gelap, 11 pt), **Heading 1/2** (font heading), **Perihal**; kerangka surat dengan placeholder sesuai bahasa (kota/tanggal, nomor, perihal, penerima, salam, isi, penutup, nama/jabatan). Ukuran A4 memakai nilai standar Word (11906 × 16838 twip). Margin: atas 50 mm, bawah 30 mm, kiri/kanan 25 mm, header/footer 12 mm.
+- **PDF/SVG**: kertas kop (header + footer saja) untuk dicetak; tanpa bleed, semua elemen di dalam margin printer kantor.
+- Diverifikasi dengan merender DOCX lewat LibreOffice (font brand terpasang); pengujian akhir di Microsoft Word oleh pemilik.
+- Output: `kop-surat-<A|B>.docx`, `kop-surat-<A|B>.svg`, `.pdf`, pratinjau.
+

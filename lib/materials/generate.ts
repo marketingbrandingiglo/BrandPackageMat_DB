@@ -11,12 +11,13 @@ import { businessCard, CARD_SIZE } from "./business-card";
 import type { CheckIssue } from "./checks";
 import { envelope, ENVELOPE_SIZE } from "./envelope";
 import { idCard, ID_SIZE } from "./id-card";
+import { letterheadDocx, letterheadSvg, LETTERHEAD_SIZE } from "./letterhead";
 import { stamp } from "./stamp";
 import { kitFonts, type BrandKit } from "./kit";
 import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
 /**
- * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
+ * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
  * folder job (Google Drive). Render dilakukan kode aplikasi (bukan Claude).
  */
 export type { MaterialKey, MaterialPackage, Materials } from "./types";
@@ -112,6 +113,11 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
     }
     const cap = await stamp(kit);
     set("stamp", pkg, await store(job, kit, `cap-${pkg}`, cap.size, [{ name: "cap", svg: cap.svg, issues: cap.issues }], `${name} - cap ${pkg}`, false));
+    const kop = letterheadSvg(kit);
+    const kopPkg = await store(job, kit, `kop-surat-${pkg}`, LETTERHEAD_SIZE, [{ name: "kop", ...kop }], `${name} - kop surat ${pkg}`, false);
+    await put(job, `kop-surat-${pkg}.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", await letterheadDocx(kit));
+    kopPkg.files.unshift(`kop-surat-${pkg}.docx`);
+    set("letterhead", pkg, kopPkg);
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }

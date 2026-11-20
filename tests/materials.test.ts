@@ -7,6 +7,8 @@ import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
 import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
 import { idCard, ID_SIZE } from "@/lib/materials/id-card";
 import { pngInk, stamp, svgInk } from "@/lib/materials/stamp";
+import { letterheadDocx, letterheadSvg, LETTERHEAD_SIZE } from "@/lib/materials/letterhead";
+import { inflateRawSync } from "node:zlib";
 import { checkLayout } from "@/lib/materials/checks";
 import { formatPhone, kitFonts, socialLine, type BrandKit } from "@/lib/materials/kit";
 import { placeLogo } from "@/lib/materials/logo";
@@ -192,5 +194,63 @@ describe("cap", () => {
     const k = await kit("B");
     const png = { ...k, logo: { ...k.logo, kind: "png" as const, svg: undefined } };
     expect((await stamp(png)).issues.some((i) => i.code === "note")).toBe(true);
+  });
+});
+
+/** Ambil isi file dari arsip ZIP (DOCX) tanpa pustaka tambahan. */
+function zipEntry(zip: Buffer, name: string): string | null {
+  let i = 0;
+  while ((i = zip.indexOf(Buffer.from([0x50, 0x4b, 0x03, 0x04]), i)) >= 0) {
+    const method = zip.readUInt16LE(i + 8);
+    const size = zip.readUInt32LE(i + 18);
+    const nameLen = zip.readUInt16LE(i + 26);
+    const extra = zip.readUInt16LE(i + 28);
+    const n = zip.toString("utf8", i + 30, i + 30 + nameLen);
+    const start = i + 30 + nameLen + extra;
+    if (n === name) {
+      const raw = zip.subarray(start, start + size);
+      return (method === 8 ? inflateRawSync(raw) : raw).toString("utf8");
+    }
+    i = start;
+  }
+  return null;
+}
+
+describe("kop surat", () => {
+  for (const pkg of ["A", "B"] as const) {
+    it(`Paket ${pkg}: kertas kop A4 lolos pengecekan; DOCX berisi header/footer, font dan warna brand`, async () => {
+      const k = await kit(pkg);
+      const l = letterheadSvg(k);
+      expect(l.issues).toEqual([]);
+      expect(LETTERHEAD_SIZE).toEqual({ widthMm: 210, heightMm: 297 });
+      expect(l.svg).toContain("PT Uji &lt;Sejahtera&gt; &amp; Co");
+      const { warnings } = await svgToPdf(l.svg, { ...LETTERHEAD_SIZE, fonts: kitFonts(k) });
+      expect(warnings.filter((w) => w.source === "font")).toEqual([]);
+
+      const docx = await letterheadDocx(k);
+      expect(docx.subarray(0, 2).toString()).toBe("PK");
+      const header = zipEntry(docx, "word/header1.xml")!;
+      const footer = zipEntry(docx, "word/footer1.xml")!;
+      const styles = zipEntry(docx, "word/styles.xml")!;
+      const body = zipEntry(docx, "word/document.xml")!;
+      expect(header).toContain("PT Uji &lt;Sejahtera&gt; &amp; Co");
+      expect(header).toContain("Telp +62 812-3456-7890");
+      expect(footer).toContain("halo@uji.co.id");
+      expect(footer).toContain("Instagram @uji.id");
+      expect(styles).toContain(k.fonts.body.family);
+      expect(styles).toContain(k.fonts.heading.family);
+      expect(body).toContain("Dengan hormat,");
+      expect(body).toMatch(/<w:pgSz w:w="11906" w:h="16838"/); // A4 standar Word
+      // Logo SVG ikut dengan PNG cadangan.
+      expect(docx.includes(Buffer.from("word/media/"))).toBe(true);
+    });
+  }
+
+  it("bahasa Inggris dan tanpa sosial media", async () => {
+    const k = { ...(await kit("A", { socials: [], email: "" })), lang: "en" as const };
+    const docx = await letterheadDocx(k);
+    expect(zipEntry(docx, "word/document.xml")).toContain("Sincerely,");
+    expect(zipEntry(docx, "word/header1.xml")).toContain("Tel +62");
+    expect(letterheadSvg(k).svg).not.toContain('id="footer"');
   });
 });

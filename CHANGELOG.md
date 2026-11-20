@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 4d: kop surat Paket A dan B: DOCX dengan header/footer asli Word, gaya paragraf berfont dan berwarna brand, kerangka surat berplaceholder (Indonesia/Inggris); PDF kertas kop untuk dicetak. Pustaka `docx` 9.15.3.
 - Tahap 4c: cap perusahaan satu warna (warna utama gelap), tanpa ornamen dan teks: model 1 (Paket A) logo saja, model 2 (Paket B) logo di dalam satu lingkaran Ø 40 mm. Logo SVG tetap vektor, PNG satu warna.
 - Tahap 4b: ID card portrait dan landscape (depan/belakang, area lubang tali dicek otomatis) dan amplop DL, Paket A dan B. Lab membuat semua materi sekaligus dengan tab per materi. Modul `svgdoc.ts` (kerangka SVG cetak) dan `types.ts` (tipe materi untuk klien).
 - Tahap 4a: fondasi materi (`lib/materials/`: kit, ukur/bungkus teks, logo vektor bersarang, pengecekan otomatis area aman/tabrakan/kontras), kartu nama Paket A dan B (SVG depan/belakang + PDF 2 halaman + pratinjau), panel materi di Lab, unduhan bernama `<Perusahaan>_<file>`. Detail: `docs/materials.md`.
