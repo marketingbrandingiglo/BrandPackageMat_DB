@@ -50,6 +50,8 @@ export interface Materials {
   items: Partial<Record<MaterialKey, Record<PackageKey, MaterialPackage>>>;
   /** Tahap 5: paket yang memakai visual dekoratif. */
   visual?: Record<PackageKey, boolean>;
+  /** Tahap 6b: ID putaran pembuatan; hasil tugas tersimpan terpisah (generate.ts). */
+  run?: string;
 }
 
 /** Nama file logo yang dirujuk relatif oleh signature.html (Tahap 4f). */

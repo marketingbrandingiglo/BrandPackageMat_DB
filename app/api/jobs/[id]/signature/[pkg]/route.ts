@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import { getCurrentUser } from "@/lib/auth/server";
 import { download } from "@/lib/drive/drive";
 import { currentEnv, getJob } from "@/lib/jobs/jobs";
+import { findJobFile } from "@/lib/materials/generate";
 import { SIGNATURE_LOGO_FILE } from "@/lib/materials/types";
 
 /**
@@ -15,8 +16,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string; pk
   if (pkg !== "A" && pkg !== "B") return new Response("not found", { status: 404 });
   const job = await getJob(currentEnv(), id);
   if (!job || (job.userId !== cu.user.id && cu.user.role !== "superadmin")) return new Response("not found", { status: 404 });
-  const html = job.files[`email-signature-${pkg}.html`];
-  const logo = job.files[`logo-email-${pkg}.png`];
+  const html = await findJobFile(job, `email-signature-${pkg}.html`);
+  const logo = await findJobFile(job, `logo-email-${pkg}.png`);
   if (!html || !logo) return new Response("not found", { status: 404 });
   const company = job.input.companyName.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) || "Perusahaan";
   const folder = `${company}_email-signature-${pkg}`;

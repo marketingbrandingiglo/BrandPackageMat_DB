@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth/server";
 import { download } from "@/lib/drive/drive";
 import { currentEnv, getJob } from "@/lib/jobs/jobs";
+import { findJobFile } from "@/lib/materials/generate";
 
 /** File job dari Drive (lembar spesimen dll.), hanya untuk pemilik job atau super admin. */
 export async function GET(req: Request, ctx: { params: Promise<{ id: string; name: string }> }) {
@@ -9,7 +10,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string; nam
   const { id, name } = await ctx.params;
   const job = await getJob(currentEnv(), id);
   if (!job || (job.userId !== cu.user.id && cu.user.role !== "superadmin")) return new Response("not found", { status: 404 });
-  const f = job.files[name];
+  const f = await findJobFile(job, name);
   if (!f) return new Response("not found", { status: 404 });
   const buf = await download(f.id);
   const headers: Record<string, string> = { "content-type": f.mimeType, "cache-control": "private, max-age=3600" };

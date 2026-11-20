@@ -369,3 +369,16 @@ describe("guideline", () => {
 function escape(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+
+describe("kop surat: kontak tambahan", () => {
+  it("alamat dan telepon tambahan di footer SVG dan DOCX, maks. 2 masing-masing", async () => {
+    const k = await kit("A", { extraAddresses: ["Jl. Pemuda 10, Surabaya", "Jl. Dua", "Jl. Tiga"], extraPhones: ["0215551234"] });
+    const svg = letterheadSvg(k);
+    expect(svg.issues).toEqual([]);
+    expect(svg.svg).toContain("Jl. Pemuda 10, Surabaya");
+    expect(svg.svg).toContain("+62 21 5551 234");
+    expect(svg.svg).not.toContain("Jl. Tiga");
+    const doc = zipEntry(await letterheadDocx(k), "word/footer1.xml");
+    expect(doc).toContain("Jl. Pemuda 10, Surabaya");
+  });
+});

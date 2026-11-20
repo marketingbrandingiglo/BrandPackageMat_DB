@@ -5,7 +5,7 @@ import { currentEnv, getJob, JOB_TTL_SECONDS } from "@/lib/jobs/jobs";
 import styles from "@/app/home.module.css";
 import JobProgress from "./job-progress";
 
-/** Tahap 6b (awal, 6a): status job milik user. Perbandingan paket menyusul di 6b-6c. */
+/** Halaman hasil job milik user: status pekerja, pembuatan materi (6b), perbandingan paket. */
 export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { user } = await requireUser();
   const lang = await getLang();

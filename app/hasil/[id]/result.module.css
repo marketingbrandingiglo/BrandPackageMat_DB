@@ -3,3 +3,27 @@
 .status { display: flex; align-items: center; gap: 10px; margin: 0; }
 .spinner { width: 18px; height: 18px; border: 2px solid var(--iglo-red-tint); border-top-color: var(--iglo-red); border-radius: 50%; animation: spin 0.9s linear infinite; flex: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.bar { height: 8px; background: var(--n10); border-radius: 999px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--iglo-red); transition: width 0.4s; }
+.tasks { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tasks th, .tasks td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--card-border); }
+.tasks th { color: var(--muted); font-weight: 600; }
+.tasks td[data-state="pending"] { color: var(--muted); }
+.tasks td[data-state="running"] { color: var(--info); font-weight: 600; }
+.tasks td[data-state="done"] { color: var(--success); font-weight: 600; }
+.tasks td[data-state="error"] { color: var(--error); font-weight: 600; }
+.result { display: grid; gap: 20px; }
+.h2 { font-size: 24px; margin: 0 0 6px; }
+.muted { color: var(--muted); margin: 0; font-size: 14px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tabs button { border: 1px solid var(--card-border); background: #fff; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 14px; cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--iglo-red); border-color: var(--iglo-red); color: #fff; font-weight: 600; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.pkgCol { display: grid; gap: 12px; align-content: start; padding: 20px; background: #fff; border: 1px solid var(--card-border); border-radius: var(--radius-card); }
+.pkgCol .alert { margin: 0; }
+.previews { display: grid; gap: 12px; }
+.previews img { width: 100%; height: auto; border-radius: 6px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); background: #fff; }
+.compare[data-kind="idPortrait"] .previews { grid-template-columns: 1fr 1fr; }
+.compare[data-kind="guideline"] .previews, .compare[data-kind="presentation"] .previews { grid-template-columns: 1fr 1fr; }
+.compare[data-kind="stamp"] .previews img { max-width: 220px; box-shadow: none; }
+@media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }

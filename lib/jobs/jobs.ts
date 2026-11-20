@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { appEnv } from "@/lib/env";
 import { APP_KEY_PREFIX, redis } from "@/lib/redis";
 import type { VisualTask } from "@/lib/brand/visual-types";
-import type { CompanyData } from "@/lib/materials/types";
+import type { CompanyData, Materials } from "@/lib/materials/types";
 
 /**
  * Job untuk sesi pekerja Claude (SPEC bagian 8). Disimpan di Upstash per environment,
@@ -59,6 +59,8 @@ export interface Job<R = unknown> {
   error?: string;
   /** Tahap 5: visual dekoratif (opsional, diminta terpisah setelah job selesai). */
   visual?: VisualTask;
+  /** Tahap 4/6b: putaran materi terakhir (hasil per tugas di hash terpisah). */
+  materials?: Materials;
 }
 
 export const currentEnv = (): JobEnv => (appEnv() === "production" ? "prod" : "dev");

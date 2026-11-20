@@ -111,3 +111,12 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 | Guideline sampul | pita atas 34 mm | pita atas 32 mm |
 
 Di Lab, kotak "Pakai visual dekoratif" muncul bila visual job sudah selesai; materi dibuat ulang dengan atau tanpa visual.
+
+## Tahap 6b · Materi otomatis per tugas
+
+`lib/materials/generate.ts`. Setelah pekerja selesai (dan visual bila diminta), halaman hasil `/hasil/<id>` memanggil `startMaterials` (data kontak dan bahasa dari form, disimpan di `job.materials` dengan ID putaran `run`), lalu menjalankan **18 tugas** (9 materi × Paket A/B) lewat `POST /api/jobs/<id>/materials`, maks. 4 sekaligus, dengan progres per tugas.
+
+- Hasil tiap tugas disimpan di hash Upstash `bpa:<env>:job:<id>:mat` (field `<materi>:<paket>`: paket materi, file Drive milik tugas, galat). Tulis per field bersifat atomik, jadi tugas paralel tidak saling menimpa data job. File putaran lama dihapus setelah tugas baru tersimpan.
+- Tugas yang gagal bisa diulang (tombol "Coba lagi yang gagal"); tugas yang sudah selesai di putaran yang sama dilewati.
+- `findJobFile` mencari file di file job lalu di file tugas (rute unduh dan email signature).
+- Lab memakai jalur yang sama secara berurutan (`makeMaterials`).

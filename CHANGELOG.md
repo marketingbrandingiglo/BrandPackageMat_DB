@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 6b: materi dibuat otomatis di halaman hasil setelah pekerja selesai: 18 tugas (materi × paket) paralel dengan progres per materi, hasil per tugas di Upstash, ulang tugas yang gagal; hasil Paket A dan B berdampingan per materi; catatan bila visual dekoratif tidak tersedia.
 - Tahap 6a: form brand package 3 langkah di beranda (logo + cek logo, nama, bidang usaha; email, alamat dan telepon bertanda utama, sosial media; ringkasan + visual dekoratif opsional), tombol bahasa ID/EN di header (antarmuka dan bahasa materi), halaman status `/hasil/<id>`. Alamat/telepon tambahan di footer kop surat. Pekerja langsung membuat visual setelah tone bila diminta.
 - Tahap 5: visual dekoratif SVG per paket dari sesi pekerja Claude (perintah `visual-begin/check/save/fail`, bel `🛎️ visual`), validator (palet paket, tanpa teks/gambar/script/filter, maks. 150 KB, maks. 3 penolakan), cache 90 hari, panel di Lab; dipakai di belakang kartu nama dan ID card, sampul dan penutup PPT, sampul guideline.
 - Tahap 4g: guideline PDF Paket A dan B (6 halaman: sampul, logo, warna, tipografi, tone of voice, contoh kalimat dan catatan), pratinjau di Lab.
