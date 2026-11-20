@@ -6,7 +6,7 @@ import { buildPalette } from "@/lib/brand/palette";
 import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
 import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
 import { idCard, ID_SIZE } from "@/lib/materials/id-card";
-import { pngInk, stamp, STAMP_SIZE, svgInk } from "@/lib/materials/stamp";
+import { pngInk, stamp, svgInk } from "@/lib/materials/stamp";
 import { checkLayout } from "@/lib/materials/checks";
 import { formatPhone, kitFonts, socialLine, type BrandKit } from "@/lib/materials/kit";
 import { placeLogo } from "@/lib/materials/logo";
@@ -160,26 +160,37 @@ describe("cap", () => {
     expect(data[3 * 4 + 3]).toBe(0);
   });
 
-  for (const pkg of ["A", "B"] as const) {
-    it(`Paket ${pkg}: nama di jalur busur, satu warna, PDF dengan font benar`, async () => {
-      const k = await kit(pkg);
-      const s = await stamp(k);
-      expect(s.issues).toEqual([]);
-      expect(s.svg).toContain("<textPath");
-      expect(s.svg).toContain("PT UJI &lt;SEJAHTERA&gt; &amp; CO");
-      expect(s.previewSvg).not.toContain("<textPath");
-      const colors = new Set(s.svg.match(/#[0-9A-Fa-f]{6}/g)!.map((c) => c.toUpperCase()));
-      colors.delete("#FFFFFF");
-      expect(colors.size).toBe(1);
-      const { warnings } = await svgToPdf(s.svg, { ...STAMP_SIZE, fonts: kitFonts(k) });
-      expect(warnings.filter((w) => w.source === "font")).toEqual([]);
-    });
-  }
+  it("model 1 (Paket A): logo saja, sisi terpanjang 40 mm, tanpa lingkaran/teks/ornamen", async () => {
+    const k = await kit("A");
+    const s1 = await stamp(k);
+    expect(s1.issues).toEqual([]);
+    expect(s1.size).toEqual({ widthMm: 40, heightMm: 40 / 3 });
+    expect(s1.svg).not.toMatch(/<circle cx="20"|<text|<polygon|textPath/);
+    const colors = new Set(s1.svg.match(/#[0-9A-Fa-f]{6}/g)!.map((c) => c.toUpperCase()));
+    colors.delete("#FFFFFF");
+    expect(colors.size).toBe(1);
+    const { warnings } = await svgToPdf(s1.svg, { ...s1.size, fonts: kitFonts(k) });
+    expect(warnings).toEqual([]);
+    const tall = await stamp({ ...k, logo: { ...k.logo, aspect: 0.5 } });
+    expect(tall.size).toEqual({ widthMm: 20, heightMm: 40 });
+  });
 
-  it("nama sangat panjang diberi peringatan, logo PNG diberi catatan", async () => {
-    const k = await kit("A", { name: "PT Nama Perusahaan Yang Sangat Sangat Panjang Sekali Untuk Sebuah Cap Bulat Indonesia" });
-    expect((await stamp(k)).issues.some((i) => i.message.includes("terlalu panjang"))).toBe(true);
-    const png = { ...(await kit("B")), logo: { ...(await kit("B")).logo, kind: "png" as const, svg: undefined } };
+  it("model 2 (Paket B): satu lingkaran Ø 40 mm + logo dengan jarak aman, tanpa teks/ornamen", async () => {
+    const k = await kit("B");
+    const s2 = await stamp(k);
+    expect(s2.size).toEqual({ widthMm: 40, heightMm: 40 });
+    expect(/<g id="lingkaran">(.*?)<\/g>/.exec(s2.svg)![1].match(/<circle /g)).toHaveLength(1);
+    expect(s2.svg).toContain('stroke-width="1"');
+    expect(s2.svg).not.toMatch(/<text|<polygon|textPath/);
+    // Logo (rasio 3:1) muat di dalam lingkaran dengan jarak 4 mm: sudut kotak logo <= radius 15.
+    const m = /<svg x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)"/.exec(s2.svg)!;
+    const [x, y, w, h] = m.slice(1).map(Number);
+    expect(Math.hypot(x + w - 20, y + h - 20)).toBeLessThanOrEqual(15.001);
+  });
+
+  it("logo PNG diberi catatan", async () => {
+    const k = await kit("B");
+    const png = { ...k, logo: { ...k.logo, kind: "png" as const, svg: undefined } };
     expect((await stamp(png)).issues.some((i) => i.code === "note")).toBe(true);
   });
 });

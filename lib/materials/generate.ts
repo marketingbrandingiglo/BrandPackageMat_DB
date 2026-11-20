@@ -11,7 +11,7 @@ import { businessCard, CARD_SIZE } from "./business-card";
 import type { CheckIssue } from "./checks";
 import { envelope, ENVELOPE_SIZE } from "./envelope";
 import { idCard, ID_SIZE } from "./id-card";
-import { stamp, STAMP_SIZE } from "./stamp";
+import { stamp } from "./stamp";
 import { kitFonts, type BrandKit } from "./kit";
 import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
@@ -111,7 +111,7 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
       set(o === "landscape" ? "idLandscape" : "idPortrait", pkg, await store(job, kit, `id-card-${o}-${pkg}`, ID_SIZE[o], [{ name: "depan", ...id.front }, { name: "belakang", ...id.back }], `${name} - ID card ${o} ${pkg}`));
     }
     const cap = await stamp(kit);
-    set("stamp", pkg, await store(job, kit, `cap-${pkg}`, STAMP_SIZE, [{ name: "cap", ...cap }], `${name} - cap ${pkg}`, false));
+    set("stamp", pkg, await store(job, kit, `cap-${pkg}`, cap.size, [{ name: "cap", svg: cap.svg, issues: cap.issues }], `${name} - cap ${pkg}`, false));
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }

@@ -43,12 +43,9 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 
 ## 4c · Cap perusahaan
 
-`lib/materials/stamp.ts`. Keputusan pemilik (2026-11-20): isi tengah **selalu logo**, busur bawah **tanpa teks** (ornamen saja), warna **warna utama versi gelap** (`primaryText`, sama dengan warna teks warna utama).
+`lib/materials/stamp.ts`. Keputusan pemilik (2026-11-20): satu warna **warna utama versi gelap** (`primaryText`), latar transparan, **tanpa ornamen dan tanpa teks** (nama perusahaan sering sudah menjadi bagian logo).
 
-- Bulat Ø 40 mm, satu warna, latar transparan, tanpa bleed. Desain, bukan stempel yang sah secara hukum.
-- **Nama perusahaan** (huruf kapital, font heading paket) melingkar di busur atas sebagai teks di jalur (`textPath`): terbuka di Illustrator sebagai *Type on a Path* yang bisa diedit. Ukuran huruf mengisi busur ±150° (2,1-3,6 mm); nama panjang boleh sampai ±228°, lebih dari itu diberi peringatan.
-- **Logo di tengah**: SVG tetap vektor, warna gelap/berwarna menjadi tinta dan warna terang (mis. huruf putih di dalam bentuk) menjadi putih kertas (`svgInk`). PNG menjadi gambar satu warna (bagian terang transparan, `pngInk`) dan diberi catatan bahwa cap tidak sepenuhnya vektor.
-- Paket A: cincin ganda tipis + cincin dalam, tiga bintang di bawah. Paket B: cincin luar tebal + cincin dalam, deret titik di bawah, bintang di kiri dan kanan (hilang bila tertimpa nama panjang).
-- Pratinjau PNG memakai versi huruf satu per satu (`previewSvg`), karena resvg kurang rapi untuk teks di jalur; PDF dan SVG memakai teks di jalur.
-- Output: `cap-<A|B>.svg`, `.pdf`, pratinjau.
-
+- **Model 1 (Paket A)**: logo saja, sisi terpanjang 40 mm (ukuran dokumen mengikuti rasio logo).
+- **Model 2 (Paket B)**: satu lingkaran Ø 40 mm (garis 1 mm), logo di dalamnya dengan jarak aman 4 mm dari lingkaran.
+- Logo SVG tetap vektor: warna gelap/berwarna menjadi tinta, warna terang (mis. huruf putih di dalam bentuk) menjadi putih kertas (`svgInk`). Logo PNG menjadi gambar satu warna (bagian terang transparan, `pngInk`) dan diberi catatan bahwa cap tidak sepenuhnya vektor.
+- Desain, bukan stempel yang sah secara hukum. Output: `cap-<A|B>.svg`, `.pdf`, pratinjau.
