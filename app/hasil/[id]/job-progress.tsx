@@ -202,7 +202,7 @@ function MaterialsView({ jobId, m, lang, missingVisual }: { jobId: string; m: Ma
                   <img key={n} src={`/api/jobs/${jobId}/file/${n}${v}`} alt={`${T.labels[tab]} ${p}`} loading="lazy" />
                 ))}
               </div>
-              {pk?.issues.length ? pk.issues.map((i) => <p key={i} className="alert alert-warn">{i}</p>) : <p className={styles.muted}>{T.checksOk}</p>}
+              {pk?.issues.length ? pk.issues.map((i, n) => <p key={`${n}-${i}`} className="alert alert-warn">{i}</p>) : <p className={styles.muted}>{T.checksOk}</p>}
             </section>
           );
         })}

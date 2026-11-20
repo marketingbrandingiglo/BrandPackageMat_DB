@@ -254,6 +254,8 @@ export async function runMaterialTask(job: FontJob, key: MaterialKey, pkg: Packa
   try {
     const kit = await kitFor(job, pkg);
     const out = await build(job, key, kit, sink);
+    // Peringatan yang sama (mis. font tanpa Bold di tiap halaman PDF) cukup sekali.
+    out.issues = [...new Set(out.issues)];
     rec = { run: m.run, pkg: out, refs: sink.refs, finishedAt: new Date().toISOString() };
   } catch (e) {
     console.error(`[materi] ${job.id} ${key}:${pkg} gagal:`, e);

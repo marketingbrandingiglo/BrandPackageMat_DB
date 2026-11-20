@@ -90,7 +90,7 @@ export default function MaterialsPanel({ jobId, initial, visualReady }: { jobId:
                       ))}
                     </div>
                     {p.issues.length ? (
-                      p.issues.map((i) => <p key={i} className="alert alert-warn">{i}</p>)
+                      p.issues.map((i, n) => <p key={`${n}-${i}`} className="alert alert-warn">{i}</p>)
                     ) : (
                       <p className={styles.muted}>Pengecekan otomatis: area aman, tabrakan teks, kontras, dan font lolos.</p>
                     )}
