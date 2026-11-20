@@ -120,3 +120,11 @@ Di Lab, kotak "Pakai visual dekoratif" muncul bila visual job sudah selesai; mat
 - Tugas yang gagal bisa diulang (tombol "Coba lagi yang gagal"); tugas yang sudah selesai di putaran yang sama dilewati.
 - `findJobFile` mencari file di file job lalu di file tugas (rute unduh dan email signature).
 - Lab memakai jalur yang sama secara berurutan (`makeMaterials`).
+
+## Tahap 6c-6d · Pilih paket, unduh, Riwayat
+
+- **Pilih paket** (`choosePackage`): file Drive paket lain (materi dan visual) langsung dihapus, field hash paket itu dibuang, `job.chosen` diisi. Sebelum memilih, data kontak bisa diubah (`updateContact`), lalu putaran materi baru dibuat.
+- **Unduh** (`GET /api/jobs/<id>/zip`, hanya setelah memilih): ZIP dibuat saat diunduh dan dialirkan (JSZip `generateNodeStream`), tidak disimpan, sehingga tidak terkena batas respons 4,5 MB. Parameter `g` = kelompok dipisah koma (kosong = semua; 1 = per materi; 2-7 = checklist).
+- Struktur (SPEC bagian 9): `<Perusahaan>_BrandPackage_<A|B>/01_Guideline ... 08_Cap` + `BACA-SAYA.txt` (EN: folder berbahasa Inggris + `README.txt`). Nama file `<Perusahaan>_<file>`; email signature tetap `signature.html` + `logo-email.png`. Pratinjau PNG tidak ikut.
+- Nama ZIP: semua `..._A.zip`, per materi `..._A_Kartu-Nama.zip`, checklist `..._A_Pilihan.zip` (EN `_Selection.zip`). Kelompok di `lib/materials/groups.ts`, isi BACA-SAYA di `lib/materials/readme.ts` (tautan unduh font, cara memakai tiap file, catatan cetak dan CMYK, logo PNG).
+- **Riwayat** (`/riwayat`): user melihat job miliknya, super admin melihat semua (kolom pengguna); status, tanggal dibuat, tersedia hingga (90 hari).

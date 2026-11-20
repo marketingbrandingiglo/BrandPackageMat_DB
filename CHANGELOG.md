@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 6d: unduh paket terpilih (semua, per materi, checklist) sebagai ZIP yang dialirkan saat diunduh dengan struktur folder SPEC dan BACA-SAYA/README; halaman Riwayat; tautan Buat baru dan Riwayat di header; header rapi di layar sempit.
 - Tahap 6c: tab Ringkasan (font, warna, tone per paket), pratinjau email signature, ubah data kontak sebelum memilih (materi dibuat ulang), pilih Paket A/B dengan konfirmasi, file paket lain langsung dihapus dari Drive.
 - Tahap 6b: materi dibuat otomatis di halaman hasil setelah pekerja selesai: 18 tugas (materi × paket) paralel dengan progres per materi, hasil per tugas di Upstash, ulang tugas yang gagal; hasil Paket A dan B berdampingan per materi; catatan bila visual dekoratif tidak tersedia.
 - Tahap 6a: form brand package 3 langkah di beranda (logo + cek logo, nama, bidang usaha; email, alamat dan telepon bertanda utama, sosial media; ringkasan + visual dekoratif opsional), tombol bahasa ID/EN di header (antarmuka dan bahasa materi), halaman status `/hasil/<id>`. Alamat/telepon tambahan di footer kop surat. Pekerja langsung membuat visual setelah tone bila diminta.

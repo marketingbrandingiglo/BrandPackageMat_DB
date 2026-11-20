@@ -1,0 +1,12 @@
+.wrap { overflow-x: auto; background: #fff; border: 1px solid var(--card-border); border-radius: var(--radius-card); }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+.table th, .table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+.table th { color: var(--muted); font-weight: 600; font-size: 13px; }
+.table tr:last-child td { border-bottom: 0; }
+.table :global(.btn) { height: 34px; font-size: 13px; padding: 0 12px; }
+.name { font-weight: 600; text-decoration: none; }
+.muted { color: var(--muted); }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--n10); color: var(--muted); }
+.badge[data-kind="chosen"] { background: var(--success-bg); color: #006b45; }
+.badge[data-kind="choose"] { background: var(--info-bg); color: #075a9c; }
+.badge[data-kind="failed"] { background: var(--error-bg); color: #b4191a; }

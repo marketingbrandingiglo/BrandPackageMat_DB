@@ -6,6 +6,7 @@ import { SOCIAL_PLATFORMS } from "@/lib/brand-form";
 import { DICT, type Lang } from "@/lib/i18n/dict";
 import { MATERIAL_KEYS, SIGNATURE_LOGO_FILE, type CompanyData, type MaterialKey, type Materials, type PackageKey } from "@/lib/materials/types";
 import { chooseFinal, updateContact } from "./actions";
+import { GROUP_KEYS, GROUPS, type GroupKey } from "@/lib/materials/groups";
 import formStyles from "@/app/brand-form.module.css";
 import styles from "./result.module.css";
 
@@ -111,6 +112,39 @@ function ContactEditor({ jobId, company, lang, onSaved, onCancel }: { jobId: str
   );
 }
 
+const groupOf = (k: MaterialKey): GroupKey => GROUPS.find((g) => GROUP_KEYS[g].includes(k))!;
+
+/** Tahap 6d: unduh semua dan checklist (2 sampai 7 materi) untuk paket terpilih. */
+function Downloads({ jobId, lang }: { jobId: string; lang: Lang }) {
+  const T = DICT[lang].mat;
+  const [pick, setPick] = useState<GroupKey[]>([]);
+  const ok = pick.length >= 2 && pick.length < GROUPS.length;
+  return (
+    <div className={styles.downloads}>
+      <div className={styles.dlRow}>
+        <a className="btn btn-primary" href={`/api/jobs/${jobId}/zip`}>{T.dlAll}</a>
+        <p className={styles.muted}>{T.fontNote}</p>
+      </div>
+      <details className={styles.pick}>
+        <summary>{T.pickTitle}</summary>
+        <p className={styles.muted}>{T.pickHint}</p>
+        <div className={styles.pickList}>
+          {GROUPS.map((g) => (
+            <label key={g}>
+              <input type="checkbox" checked={pick.includes(g)} onChange={(e) => setPick(e.target.checked ? [...pick, g] : pick.filter((x) => x !== g))} /> {T.groups[g]}
+            </label>
+          ))}
+        </div>
+        {ok ? (
+          <a className="btn btn-secondary" href={`/api/jobs/${jobId}/zip?g=${GROUPS.filter((g) => pick.includes(g)).join(",")}`}>{T.dlPick}</a>
+        ) : (
+          <button type="button" className="btn btn-secondary" disabled>{T.dlPick}</button>
+        )}
+      </details>
+    </div>
+  );
+}
+
 /** Tahap 6c: perbandingan Paket A dan B, ubah kontak, pilih paket. */
 export default function MaterialsView({ jobId, m, lang, missingVisual, chosen, company, onRebuild, onChosen }: {
   jobId: string;
@@ -159,6 +193,7 @@ export default function MaterialsView({ jobId, m, lang, missingVisual, chosen, c
           {company && !editing && <button type="button" className="btn btn-secondary" onClick={() => setEditing(true)}>{T.editContact}</button>}
         </div>
       )}
+      {chosen && <Downloads jobId={jobId} lang={lang} />}
       {editing && company && <ContactEditor jobId={jobId} company={company} lang={lang} onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); onRebuild(); }} />}
       {missingVisual.length > 0 && <p className="alert alert-warn">{T.noVisual(missingVisual.map((p) => `${T.pkg} ${p}`).join(lang === "en" ? " and " : " dan "))}</p>}
 
@@ -187,6 +222,9 @@ export default function MaterialsView({ jobId, m, lang, missingVisual, chosen, c
               <div className={styles.colHead}>
                 <p className="eyebrow">{T.pkg} {p}</p>
                 {!chosen && !editing && <button type="button" className="btn btn-primary" onClick={() => setConfirm(p)}>{T.choose(p)}</button>}
+                {chosen && tab !== "overview" && (
+                  <a className="btn btn-secondary" href={`/api/jobs/${jobId}/zip?g=${groupOf(tab)}`}>{T.dlOne(T.groups[groupOf(tab)])}</a>
+                )}
               </div>
               {tab === "overview" ? (
                 <Overview m={m} p={p} lang={lang} />

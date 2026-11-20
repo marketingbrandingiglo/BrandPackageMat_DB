@@ -18,6 +18,8 @@ export default function AppHeader({ user, lang = "id" }: { user: PublicUser; lan
       </Link>
       <nav className={styles.nav}>
         <LangToggle lang={lang} label={t.lang} />
+        <Link href="/" className={styles.link}>{t.newBrand}</Link>
+        <Link href="/riwayat" className={styles.link}>{t.history}</Link>
         {user.role === "superadmin" && (
           <>
             <Link href="/admin/lab" className={styles.link}>Lab</Link>
