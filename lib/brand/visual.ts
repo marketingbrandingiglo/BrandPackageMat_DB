@@ -5,7 +5,8 @@ import type { Palette } from "./palette";
 import { sanitizeSvg, SvgRejected } from "./svg-sanitize";
 import type { VisualPkg } from "./visual-types";
 
-export * from "./visual-types";
+export { VISUAL_MAX_ATTEMPTS } from "./visual-types";
+export type { VisualAsset, VisualPkg, VisualTask } from "./visual-types";
 
 /**
  * Tahap 5 (SPEC bagian 7): satu aset dekoratif SVG per paket, ditulis sesi pekerja Claude.

@@ -28,7 +28,8 @@ import { FORMALITY_LABEL, industryById } from "../lib/brand/industries";
 import { checkTone, ToneSchema } from "../lib/brand/tone";
 import { failJob, finishJob, getJob, queued, saveJob, startJob, type Job, type JobEnv } from "../lib/jobs/jobs";
 import { redis } from "../lib/redis";
-import { allowedColors, validateVisual, visualPreview, VISUAL_MAX_ATTEMPTS, type VisualPkg } from "../lib/brand/visual";
+import { allowedColors, validateVisual, visualPreview } from "../lib/brand/visual";
+import { VISUAL_MAX_ATTEMPTS, type VisualPkg } from "../lib/brand/visual-types";
 import { dequeueVisual, queuedVisual } from "../lib/jobs/jobs";
 import { cacheVisual, completeIfReady, jobPalette, PKGS, storeVisual } from "../lib/jobs/visual";
 import { z } from "zod";
@@ -96,6 +97,17 @@ function ensureLatestCode() {
   } catch {
     console.warn("Peringatan: tidak bisa memeriksa versi kode (git fetch gagal). Pastikan sudah git pull origin dev.");
   }
+}
+
+/** Lembar pratinjau: kanvas penuh + potongan lebar (pita) + potongan tinggi (panel). */
+export async function checkSheet(svg: string): Promise<Buffer> {
+  const full = visualPreview(svg, 600);
+  const wide = await sharp(full).extract({ left: 0, top: 200, width: 600, height: 200 }).png().toBuffer();
+  const tall = await sharp(full).extract({ left: 210, top: 0, width: 180, height: 600 }).resize({ height: 380 }).png().toBuffer();
+  return sharp({ create: { width: 1260, height: 640, channels: 4, background: "#9a9a9a" } })
+    .composite([{ input: full, left: 20, top: 20 }, { input: wide, left: 640, top: 20 }, { input: tall, left: 640, top: 240 }])
+    .png()
+    .toBuffer();
 }
 
 async function main() {
@@ -292,13 +304,7 @@ async function main() {
           continue;
         }
         // Pratinjau: kanvas penuh + potongan rasio lebar dan tinggi (aset dipotong sesuai area materi).
-        const full = visualPreview(res.svg, 600);
-        const wide = await sharp(full).extract({ left: 0, top: 200, width: 600, height: 200 }).png().toBuffer();
-        const tall = await sharp(full).extract({ left: 210, top: 0, width: 180, height: 600 }).png().toBuffer();
-        const sheet = await sharp({ create: { width: 1060, height: 640, channels: 4, background: "#9a9a9a" } })
-          .composite([{ input: full, left: 20, top: 20 }, { input: wide, left: 640, top: 20 }, { input: tall, left: 640, top: 240 }])
-          .png()
-          .toBuffer();
+        const sheet = await checkSheet(res.svg);
         writeFileSync(path.join(dir, `check-${p}.png`), sheet);
         console.log(`Paket ${p}: lolos validasi (${res.colors.length} warna, ${Math.round(res.ink * 100)}% kanvas terisi). Pratinjau: ${path.join(dir, `check-${p}.png`)}`);
         if (save) {
@@ -332,4 +338,4 @@ async function main() {
   }
 }
 
-await main();
+if (process.argv[1]?.endsWith("worker.mts")) await main();
