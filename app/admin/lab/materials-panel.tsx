@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { MATERIAL_KEYS, MATERIAL_LABEL, type MaterialKey, type Materials } from "@/lib/materials/types";
+import { useActionState, useEffect, useState } from "react";
+import { MATERIAL_KEYS, MATERIAL_LABEL, SIGNATURE_LOGO_FILE, type MaterialKey, type Materials } from "@/lib/materials/types";
 import { makeMaterials, type LabMaterialsResult } from "./actions";
 import styles from "./lab.module.css";
 
@@ -9,6 +9,26 @@ const SOCIALS = [
   ["instagram", "Instagram"],
   ["linkedin", "LinkedIn"],
 ] as const;
+
+/** Pratinjau email signature: HTML dari Drive, logo diarahkan ke file job (hanya untuk tampilan Lab). */
+function SignaturePreview({ htmlUrl, logoUrl }: { htmlUrl: string; logoUrl: string }) {
+  const [doc, setDoc] = useState<string>();
+  useEffect(() => {
+    let live = true;
+    fetch(htmlUrl)
+      .then((r) => r.text())
+      .then((html) => {
+        const sig = /<!-- signature: mulai -->([\s\S]*)<!-- signature: selesai -->/.exec(html)?.[1] ?? "";
+        const body = sig.split(`src="${SIGNATURE_LOGO_FILE}"`).join(`src="${logoUrl}"`);
+        if (live) setDoc(`<!DOCTYPE html><html><body style="margin:0;padding:20px;background:#fff">${body}</body></html>`);
+      })
+      .catch(() => live && setDoc("<p>Pratinjau gagal dimuat.</p>"));
+    return () => {
+      live = false;
+    };
+  }, [htmlUrl, logoUrl]);
+  return <iframe title="Pratinjau email signature" sandbox="allow-same-origin" srcDoc={doc ?? ""} className={styles.signatureFrame} />;
+}
 
 /** Lab Tahap 4: data perusahaan contoh -> materi Paket A dan B (SVG + PDF), pratinjau, unduh. */
 export default function MaterialsPanel({ jobId, initial }: { jobId: string; initial?: Materials }) {
@@ -21,7 +41,7 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
 
   return (
     <div className={styles.group}>
-      <h4>Materi (Tahap 4) · kartu nama, ID card, amplop, cap, kop surat, template PPT</h4>
+      <h4>Materi (Tahap 4) · kartu nama, ID card, amplop, cap, kop surat, template PPT, email signature</h4>
       <form action={action} className={styles.materialsForm}>
         <input type="hidden" name="jobId" value={jobId} />
         <input type="hidden" name="lang" value={lang} />
@@ -56,6 +76,9 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
                   <div key={k} className={styles.materialCard} data-kind={tab}>
                     <p className="eyebrow">Paket {k}</p>
                     <div className={styles.previewRow}>
+                      {tab === "emailSignature" && (
+                        <SignaturePreview htmlUrl={`${file(p.files[0])}?v=${encodeURIComponent(m.generatedAt)}`} logoUrl={`${file(p.files[1])}?v=${encodeURIComponent(m.generatedAt)}`} />
+                      )}
                       {p.previews.map((n) => (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img key={`${n}-${m.generatedAt}`} src={`${file(n)}?v=${encodeURIComponent(m.generatedAt)}`} alt={n} className={styles.cardPreview} />
@@ -67,7 +90,12 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
                       <p className={styles.muted}>Pengecekan otomatis: area aman, tabrakan teks, kontras, dan font lolos.</p>
                     )}
                     <p className={styles.downloads}>
-                      {p.files.map((n) => (
+                      {tab === "emailSignature" ? (
+                        <>
+                          <a href={`/api/jobs/${jobId}/signature/${k}`} className="btn btn-secondary">ZIP (HTML + logo)</a>
+                          <a href={file(p.files[1], true)} className="btn btn-secondary">Logo PNG</a>
+                        </>
+                      ) : p.files.map((n) => (
                         <a key={n} href={file(n, true)} className="btn btn-secondary">
                           {n.endsWith(".pptx") ? "PPTX (PowerPoint)" : n.endsWith(".docx") ? "DOCX (Word)" : n.endsWith(".pdf") ? (p.previews.length > 1 ? "PDF (2 halaman)" : n.startsWith("kop-surat") ? "PDF (kertas kop)" : "PDF") : n.includes("-depan") ? "SVG depan" : n.includes("-belakang") ? "SVG belakang" : "SVG"}
                         </a>

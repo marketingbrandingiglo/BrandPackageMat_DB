@@ -9,6 +9,7 @@ import { SPECS } from "@/lib/brand/specs";
 import { svgToPdf, svgToPng } from "@/lib/render/svg";
 import { businessCard, CARD_SIZE } from "./business-card";
 import type { CheckIssue } from "./checks";
+import { emailSignature } from "./email-signature";
 import { envelope, ENVELOPE_SIZE } from "./envelope";
 import { idCard, ID_SIZE } from "./id-card";
 import { letterheadDocx, letterheadSvg, LETTERHEAD_SIZE } from "./letterhead";
@@ -18,7 +19,7 @@ import { kitFonts, type BrandKit } from "./kit";
 import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
 /**
- * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat, 4e template PPT) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
+ * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat, 4e template PPT, 4f email signature) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
  * folder job (Google Drive). Render dilakukan kode aplikasi (bukan Claude).
  */
 export type { MaterialKey, MaterialPackage, Materials } from "./types";
@@ -129,6 +130,10 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
       pptPrev.push(n);
     }
     set("presentation", pkg, { files: [`template-ppt-${pkg}.pptx`], previews: pptPrev, issues: [] });
+    const sig = await emailSignature(kit);
+    await put(job, `email-signature-${pkg}.html`, "text/html; charset=utf-8", Buffer.from(sig.html));
+    await put(job, `logo-email-${pkg}.png`, "image/png", sig.logo.png);
+    set("emailSignature", pkg, { files: [`email-signature-${pkg}.html`, `logo-email-${pkg}.png`], previews: [], issues: sig.issues });
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }

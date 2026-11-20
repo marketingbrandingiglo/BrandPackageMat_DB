@@ -26,7 +26,7 @@ export interface MaterialPackage {
   issues: string[];
 }
 
-export const MATERIAL_KEYS = ["businessCard", "idLandscape", "idPortrait", "envelope", "stamp", "letterhead", "presentation"] as const;
+export const MATERIAL_KEYS = ["businessCard", "idLandscape", "idPortrait", "envelope", "stamp", "letterhead", "presentation", "emailSignature"] as const;
 export type MaterialKey = (typeof MATERIAL_KEYS)[number];
 export const MATERIAL_LABEL: Record<MaterialKey, string> = {
   businessCard: "Kartu nama",
@@ -36,6 +36,7 @@ export const MATERIAL_LABEL: Record<MaterialKey, string> = {
   stamp: "Cap",
   letterhead: "Kop surat",
   presentation: "Template PPT",
+  emailSignature: "Email signature",
 };
 
 export interface Materials {
@@ -44,3 +45,6 @@ export interface Materials {
   generatedAt: string;
   items: Partial<Record<MaterialKey, Record<PackageKey, MaterialPackage>>>;
 }
+
+/** Nama file logo yang dirujuk relatif oleh signature.html (Tahap 4f). */
+export const SIGNATURE_LOGO_FILE = "logo-email.png";

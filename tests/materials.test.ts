@@ -4,6 +4,7 @@ import { ref } from "@/lib/brand/font-select";
 import { FONTS } from "@/lib/brand/fonts";
 import { buildPalette } from "@/lib/brand/palette";
 import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
+import { emailSignature, socialUrl } from "@/lib/materials/email-signature";
 import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
 import { idCard, ID_SIZE } from "@/lib/materials/id-card";
 import { pngInk, stamp, svgInk } from "@/lib/materials/stamp";
@@ -283,5 +284,46 @@ describe("template PPT", () => {
     const pptx = await presentationPptx(k);
     expect(/<p:cSld name="([^"]+)"/.exec(zipEntry(pptx, "ppt/slideLayouts/slideLayout2.xml")!)?.[1]).toBe("Title");
     expect(zipEntry(pptx, "ppt/slides/slide5.xml")).toContain("Thank you");
+  });
+});
+
+describe("email signature", () => {
+  for (const pkg of ["A", "B"] as const) {
+    it(`Paket ${pkg}: HTML tabel inline, lebar maks 600, logo relatif 2x, teks di-escape`, async () => {
+      const k = await kit(pkg, { socials: [{ platform: "instagram", handle: "uji.id" }, { platform: "linkedin", handle: "uji-sejahtera" }] });
+      const s = await emailSignature(k);
+      expect(s.issues).toEqual([]);
+      expect(s.html).toContain('src="logo-email.png"');
+      expect(s.html).not.toMatch(/data:image|<script|<link|<style/i);
+      expect(s.html).toContain("max-width:600px");
+      expect(s.html).toContain("PT Uji &lt;Sejahtera&gt; &amp; Co");
+      expect(s.html).toContain("mailto:halo@uji.co.id");
+      expect(s.html).toContain('href="tel:+6281234567890"');
+      expect(s.html).toContain("https://www.instagram.com/uji.id");
+      expect(s.html).toContain("https://www.linkedin.com/company/uji-sejahtera");
+      expect(s.html).toContain(pkg === "A" ? "'Montserrat', Arial" : "'Playfair Display', Georgia");
+      const sig = /<!-- signature: mulai -->([\s\S]*)<!-- signature: selesai -->/.exec(s.html)![1];
+      expect(sig).toContain("Nama Lengkap");
+      const meta = await sharp(s.logo.png).metadata();
+      expect(meta.width).toBe(s.logo.width * 2);
+      expect(s.logo.width).toBeLessThanOrEqual(pkg === "A" ? 120 : 170);
+      expect(s.html).toContain(`width="${s.logo.width}" height="${s.logo.height}"`);
+    });
+  }
+  it("bahasa Inggris, logo PNG, tanpa telepon dan email diberi catatan", async () => {
+    const k = await kit("A", { phone: "", email: "", socials: [] });
+    k.lang = "en";
+    k.logo = { ...k.logo, kind: "png", svg: undefined, png: await sharp({ create: { width: 400, height: 100, channels: 4, background: "#0B6E4F" } }).png().toBuffer(), aspect: 4 };
+    const s = await emailSignature(k);
+    expect(s.html).toContain("Full Name");
+    expect(s.html).toContain('lang="en"');
+    expect(s.issues).toHaveLength(1);
+    expect(s.logo.height).toBeLessThanOrEqual(56);
+  });
+  it("tautan sosial media", () => {
+    expect(socialUrl({ platform: "tiktok", handle: "@uji" })).toBe("https://www.tiktok.com/@uji");
+    expect(socialUrl({ platform: "linkedin", handle: "in/budi" })).toBe("https://www.linkedin.com/in/budi");
+    expect(socialUrl({ platform: "whatsapp", handle: "0812 3456 7890" })).toBe("https://wa.me/6281234567890");
+    expect(socialUrl({ platform: "instagram", handle: "https://instagram.com/x" })).toBe("https://instagram.com/x");
   });
 });

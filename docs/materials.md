@@ -72,3 +72,14 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 - **Pratinjau**: layout didefinisikan sekali sebagai data; data yang sama dipakai untuk PPTX dan pratinjau SVG/PNG (server tidak punya PowerPoint/LibreOffice). Dicek lokal dengan merender PPTX lewat LibreOffice: hasilnya sama dengan pratinjau. Pengujian akhir di PowerPoint oleh pemilik.
 - Output: `template-ppt-<A|B>.pptx`, pratinjau 5 slide.
 
+## 4f · Email signature
+
+`lib/materials/email-signature.ts`. HTML berbasis tabel dengan gaya inline (tanpa `<style>`, script, atau gambar base64), lebar maks. 600 px.
+
+- **Logo**: file `logo-email.png` dirujuk relatif (`src="logo-email.png"`), dibuat 2x ukuran tampil supaya tajam di layar retina (Paket A maks. 120 × 56 px, Paket B maks. 170 × 48 px). Logo SVG dirender ulang, logo PNG dipangkas tepinya.
+- **Font**: font brand disebut pertama, lalu cadangan web-safe: Arial (sans/display/handwriting), Georgia (serif), Courier New (monospace). Klien email umumnya menampilkan cadangannya.
+- **Isi**: nama dan jabatan (placeholder), nama perusahaan, telepon (`tel:`), email (`mailto:`), alamat, sosial media sebagai tautan teks. Bagian kosong dilewati; tanpa telepon dan email diberi catatan.
+- Paket A: logo kiri, garis vertikal warna utama, teks kanan. Paket B: logo atas, nama, pita aksen + warna utama, kontak.
+- File `signature.html` memuat panduan singkat (Indonesia/Inggris) di atas kotak signature; yang disalin hanya isi kotak.
+- **Unduhan**: ZIP `<Perusahaan>_email-signature-<A|B>.zip` (folder berisi `signature.html` + `logo-email.png`) dibuat saat diunduh (`/api/jobs/<id>/signature/<A|B>`), tidak disimpan. Di Drive tersimpan `email-signature-<A|B>.html` dan `logo-email-<A|B>.png`.
+- Pratinjau Lab: iframe dari HTML yang sama, logo diarahkan ke file job. Pengujian di Gmail, Outlook, dan Apple Mail oleh pemilik.

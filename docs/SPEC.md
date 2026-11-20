@@ -144,7 +144,7 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 
 **PPTX**: theme asli (warna tema, font tema major/minor, slide master dengan logo, layout: judul, bagian, isi, dua kolom, penutup). Dibuat dengan memodifikasi XML theme di dalam file. Verifikasi render lewat LibreOffice; pengujian akhir di PowerPoint oleh pemilik.
 
-**Email signature (HTML)**: HTML berbasis tabel dengan inline CSS. Font Google tidak tampil di klien email, jadi pakai **font cadangan web-safe** (mis. Arial/Georgia). Gambar (logo, ikon) harus berupa URL yang di-host. Lihat risiko di bagian 17.
+**Email signature (HTML)**: HTML berbasis tabel dengan inline CSS. Font Google tidak tampil di klien email, jadi pakai **font cadangan web-safe** (mis. Arial/Georgia). Logo disertakan sebagai file `logo-email.png` di samping `signature.html` (dirujuk relatif), sosial media berupa tautan teks (keputusan 2026-11-20, bagian 18).
 
 **Cap**: bulat, vektor **satu warna**, latar transparan. Ini desain, bukan stempel yang sah secara hukum.
 
@@ -306,7 +306,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 2. Daftar 300 font terkurasi: disusun Claude Code (kategori, tag, dukungan huruf Indonesia, bobot), **ditinjau pemilik**.
 3. ~~Pemetaan bidang usaha ke karakter font dan tone~~: diputuskan 2026-11-19 (`data/industries.json`, bagian 18).
 4. ~~Isi tengah cap~~: diputuskan 2026-11-20 (bagian 18).
-5. **Gambar di email signature** (logo, ikon sosial media): file hasil hanya disimpan sementara (90 hari), sehingga signature tidak boleh bergantung pada URL milik aplikasi. Usulan: tempatkan placeholder URL, sertakan file gambar di ZIP, dan jelaskan di `BACA-SAYA` cara mengunggahnya ke Gmail/Outlook atau hosting sendiri; sosial media berupa tautan teks secara default.
+5. ~~Gambar di email signature~~: diputuskan 2026-11-20 (bagian 18).
 6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
 7. Ambang peringatan resolusi logo.
 8. Aset visual AI dipakai di materi mana (usulan: sampul PPT, sisi belakang ID card, sisi belakang kartu nama).
@@ -333,3 +333,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Tahap 4 (2026-11-19): dikerjakan bertahap 4a-4g (kartu nama; ID card + amplop; cap; kop surat; PPTX; email signature; guideline) dengan titik uji di Lab. Materi dirender kode aplikasi dari hasil job 3d-3e. Kartu nama: depan = orang dan kontak, belakang = logo; layout Paket A dan B berbeda.
 - Cap (2026-11-20): isi **selalu logo** (SVG tetap vektor; PNG menjadi gambar satu warna dengan catatan), warna **warna utama versi gelap**, **tanpa ornamen dan tanpa teks** (revisi pemilik: nama perusahaan sering sudah ada di logo). Model 1 (Paket A): logo saja, sisi terpanjang 40 mm. Model 2 (Paket B): logo di dalam satu lingkaran Ø 40 mm, jarak aman 4 mm.
 - Kop surat (2026-11-20): header = logo, nama perusahaan, alamat dan telepon utama; footer = email dan sosial media. DOCX berisi kerangka surat dengan placeholder; PDF berupa kertas kop kosong (header + footer) untuk dicetak.
+- Email signature (2026-11-20): pilihan a. ZIP berisi `signature.html` + `logo-email.png` (logo dirujuk relatif, bukan URL aplikasi dan bukan base64). Halaman HTML memuat panduan singkat; signature ditempel dari browser (Outlook desktop dan Apple Mail ikut membawa logo; Gmail dan Outlook web: logo disisipkan lewat Sisipkan gambar). Sosial media tautan teks. Font brand disebut pertama lalu cadangan web-safe (Arial, Georgia, atau Courier New). Paket A: logo kiri + garis warna utama; Paket B: logo atas + pita aksen.

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 4f: email signature HTML Paket A dan B (tabel + gaya inline, lebar maks. 600 px, font cadangan web-safe), logo PNG 2x sebagai file terpisah, unduhan ZIP dibuat saat diunduh, pratinjau di Lab.
 - Tahap 4e: template PPT 16:9 Paket A dan B: theme asli (warna dan font tema brand), slide master dengan layout Judul/Bagian/Isi/Dua kolom/Penutup berlogo, 5 slide contoh, pratinjau. Pustaka `pptxgenjs` 4.0.1 dan `jszip` 3.10.2.
 - Tahap 4d: kop surat Paket A dan B: DOCX dengan header/footer asli Word, gaya paragraf berfont dan berwarna brand, kerangka surat berplaceholder (Indonesia/Inggris); PDF kertas kop untuk dicetak. Pustaka `docx` 9.15.3.
 - Tahap 4c: cap perusahaan satu warna (warna utama gelap), tanpa ornamen dan teks: model 1 (Paket A) logo saja, model 2 (Paket B) logo di dalam satu lingkaran Ø 40 mm. Logo SVG tetap vektor, PNG satu warna.
