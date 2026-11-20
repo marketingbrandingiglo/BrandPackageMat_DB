@@ -50,6 +50,7 @@ const id = {
     address: "Isi minimal satu alamat.",
     phone: "Isi minimal satu nomor telepon yang valid.",
     generic: "Terjadi kesalahan. Coba lagi.",
+    tooMany: (m: number) => `Batas pembuatan tercapai (10 per jam). Coba lagi dalam ${m} menit.`,
   },
   job: {
     eyebrow: "Proses",
@@ -164,6 +165,7 @@ const en: typeof id = {
     address: "Enter at least one address.",
     phone: "Enter at least one valid phone number.",
     generic: "Something went wrong. Please try again.",
+    tooMany: (m: number) => `Generation limit reached (10 per hour). Try again in ${m} minutes.`,
   },
   job: {
     eyebrow: "Progress",

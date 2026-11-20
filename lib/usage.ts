@@ -40,7 +40,12 @@ export async function track(ref: UsageRef, field: UsageField, by = 1): Promise<v
   }
 }
 
-const num = (h: Record<string, unknown> | null): Usage => Object.fromEntries(USAGE_FIELDS.map((f) => [f, Number(h?.[f] ?? 0)])) as Usage;
+/** Rata-rata durasi pekerja per job selesai, dalam detik (null bila belum ada). */
+export function avgWorkerSeconds(u: Usage): number | null {
+  return u.done ? Math.round(u.workerMs / u.done / 1000) : null;
+}
+
+export const num = (h: Record<string, unknown> | null): Usage => Object.fromEntries(USAGE_FIELDS.map((f) => [f, Number(h?.[f] ?? 0)])) as Usage;
 
 export interface UsageReport {
   total: Usage;

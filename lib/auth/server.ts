@@ -32,6 +32,20 @@ export function loginLimiters() {
   return limiters;
 }
 
+let genLimiters: { job: Ratelimit; rebuild: Ratelimit } | undefined;
+
+/**
+ * Pembatasan endpoint generate (SPEC bagian 12), per user: maks. 10 brand package baru dan
+ * 10 kali buat ulang materi (ubah data kontak) per jam. Lab super admin tidak dibatasi.
+ */
+export function generateLimiters() {
+  genLimiters ??= {
+    job: new Ratelimit({ redis: redis(), limiter: Ratelimit.slidingWindow(10, "1 h"), prefix: key("ratelimit", "generate_job") }),
+    rebuild: new Ratelimit({ redis: redis(), limiter: Ratelimit.slidingWindow(10, "1 h"), prefix: key("ratelimit", "generate_rebuild") }),
+  };
+  return genLimiters;
+}
+
 export async function clientMeta(): Promise<{ ip: string | null; userAgent: string | null }> {
   const h = await headers();
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;

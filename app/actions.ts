@@ -1,6 +1,6 @@
 "use server";
 
-import { requireUser } from "@/lib/auth/server";
+import { generateLimiters, requireUser } from "@/lib/auth/server";
 import { analyzeLogo, LogoRejected, type LogoWarning } from "@/lib/brand/logo";
 import { DriveError, DriveNotConnected } from "@/lib/drive/drive";
 import { DICT, LOGO_WARNING_EN } from "@/lib/i18n/dict";
@@ -48,6 +48,8 @@ export async function submitBrand(form: FormData): Promise<SubmitResult> {
   if (!(file instanceof File) || file.size === 0) return { error: DICT[lang].err.logo, field: "logo" };
   const p = await parseBrandForm(form, lang);
   if ("error" in p) return p;
+  const lim = await generateLimiters().job.limit(user.id);
+  if (!lim.success) return { error: DICT[lang].err.tooMany(Math.max(1, Math.ceil((lim.reset - Date.now()) / 60000))) };
   try {
     const { id } = await createBrandJob({ user, sessionId: session.id, logo: Buffer.from(await file.arrayBuffer()), companyName: p.companyName, industryId: p.industryId, industryOther: p.industryOther, company: p.company, lang, wantVisual: p.wantVisual });
     return { jobId: id };

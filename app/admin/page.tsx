@@ -5,7 +5,7 @@ import { toPublic } from "@/lib/auth/users";
 import { driveStatus } from "@/lib/drive/drive";
 import { bellConfigured } from "@/lib/jobs/bell";
 import { currentEnv, queued } from "@/lib/jobs/jobs";
-import { usageReport, type Usage } from "@/lib/usage";
+import { avgWorkerSeconds, usageReport, type Usage } from "@/lib/usage";
 import { CreateUserForm, UserRow } from "./forms";
 import styles from "./admin.module.css";
 
@@ -113,8 +113,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 }
 
 function dur(u: Usage) {
-  if (!u.done) return "—";
-  const s = Math.round(u.workerMs / u.done / 1000);
+  const s = avgWorkerSeconds(u);
+  if (s === null) return "—";
   return s >= 60 ? `${Math.floor(s / 60)} mnt ${s % 60} dtk` : `${s} dtk`;
 }
 

@@ -1,6 +1,7 @@
 "use server";
 
-import { requireUser } from "@/lib/auth/server";
+import { generateLimiters, requireUser } from "@/lib/auth/server";
+import { DICT } from "@/lib/i18n/dict";
 import { DriveError, DriveNotConnected } from "@/lib/drive/drive";
 import { getLang } from "@/lib/i18n/server";
 import { currentEnv, getJob, saveJob } from "@/lib/jobs/jobs";
@@ -36,6 +37,8 @@ export async function updateContact(jobId: string, form: FormData): Promise<{ er
   if (job.chosen) return { error: lang === "en" ? "A package has already been chosen." : "Paket sudah dipilih." };
   const c = parseContact(form, lang, job.input.companyName);
   if ("error" in c) return c;
+  const lim = await generateLimiters().rebuild.limit(user.id);
+  if (!lim.success) return { error: DICT[lang].err.tooMany(Math.max(1, Math.ceil((lim.reset - Date.now()) / 60000))) };
   job.input.company = c.company;
   await saveJob(job);
   await beginMaterials(job as Parameters<typeof beginMaterials>[0], c.company, job.materials.lang, Boolean(job.materials.visual?.A || job.materials.visual?.B));
