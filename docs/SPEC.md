@@ -305,7 +305,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 1. Nilai harga token Claude per model; sumber kurs final.
 2. Daftar 300 font terkurasi: disusun Claude Code (kategori, tag, dukungan huruf Indonesia, bobot), **ditinjau pemilik**.
 3. ~~Pemetaan bidang usaha ke karakter font dan tone~~: diputuskan 2026-11-19 (`data/industries.json`, bagian 18).
-4. **Isi tengah cap**: logo dikonversi monokrom bila bersih, atau inisial/ornamen bila tidak. Diputuskan saat Tahap 4.
+4. ~~Isi tengah cap~~: diputuskan 2026-11-20 (bagian 18).
 5. **Gambar di email signature** (logo, ikon sosial media): file hasil hanya disimpan sementara (90 hari), sehingga signature tidak boleh bergantung pada URL milik aplikasi. Usulan: tempatkan placeholder URL, sertakan file gambar di ZIP, dan jelaskan di `BACA-SAYA` cara mengunggahnya ke Gmail/Outlook atau hosting sendiri; sosial media berupa tautan teks secara default.
 6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
 7. Ambang peringatan resolusi logo.
@@ -331,3 +331,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Font Paket B (2026-11-19): **Paket B wajib beda karakter** dari Paket A: heading berbeda kategori (mis. serif vs sans) atau gaya (mis. Geometric vs Humanist), tanpa font yang sama. Shortlist menambah maks. 6 kandidat kontras (total maks. 36).
 - Tahap 3e (2026-11-19): pemetaan 19 bidang usaha ke karakter font (dicari/dihindari) dan nada dasar disetujui; tag bidang usaha menambah kriteria font dengan bobot kecil (logo tetap utama). Tone of voice per paket ditulis sesi pekerja dalam Indonesia dan Inggris sekaligus (ringkasan, 3 sifat, cara bicara, lakukan/hindari, contoh: 2 tagline, pembuka email, CTA, tentang kami); Paket A selaras, Paket B nuansa berbeda; ditandai hipotesis.
 - Tahap 4 (2026-11-19): dikerjakan bertahap 4a-4g (kartu nama; ID card + amplop; cap; kop surat; PPTX; email signature; guideline) dengan titik uji di Lab. Materi dirender kode aplikasi dari hasil job 3d-3e. Kartu nama: depan = orang dan kontak, belakang = logo; layout Paket A dan B berbeda.
+- Cap (2026-11-20): isi tengah **selalu logo** (SVG tetap vektor; PNG menjadi gambar satu warna dengan catatan), busur atas nama perusahaan, busur bawah **tanpa teks** (ornamen saja), warna **warna utama versi gelap**.

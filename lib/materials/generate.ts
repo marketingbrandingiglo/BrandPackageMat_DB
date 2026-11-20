@@ -11,11 +11,12 @@ import { businessCard, CARD_SIZE } from "./business-card";
 import type { CheckIssue } from "./checks";
 import { envelope, ENVELOPE_SIZE } from "./envelope";
 import { idCard, ID_SIZE } from "./id-card";
+import { stamp, STAMP_SIZE } from "./stamp";
 import { kitFonts, type BrandKit } from "./kit";
 import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
 /**
- * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
+ * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
  * folder job (Google Drive). Render dilakukan kode aplikasi (bukan Claude).
  */
 export type { MaterialKey, MaterialPackage, Materials } from "./types";
@@ -43,11 +44,13 @@ async function put(job: FontJob, name: string, mime: string, data: Buffer) {
 interface Side {
   name: string;
   svg: string;
+  /** SVG khusus pratinjau PNG (opsional, mis. cap). */
+  previewSvg?: string;
   issues: CheckIssue[];
 }
 
 /** Simpan satu materi: SVG per sisi, PDF (semua sisi), pratinjau per sisi. */
-async function store(job: FontJob, kit: BrandKit, base: string, size: { widthMm: number; heightMm: number }, sides: Side[], title: string): Promise<MaterialPackage> {
+async function store(job: FontJob, kit: BrandKit, base: string, size: { widthMm: number; heightMm: number }, sides: Side[], title: string, bleed = true): Promise<MaterialPackage> {
   const fonts = kitFonts(kit);
   const { pdf, warnings } = await svgToPdf(sides.map((s) => s.svg), { ...size, fonts, title });
   const files: string[] = [];
@@ -58,7 +61,8 @@ async function store(job: FontJob, kit: BrandKit, base: string, size: { widthMm:
     files.push(svgName);
     const prevName = sides.length > 1 ? `pratinjau-${base}-${s.name}.png` : `pratinjau-${base}.png`;
     const width = Math.round(size.widthMm * 12.2);
-    await put(job, prevName, "image/png", await trimmed(svgToPng(s.svg, fonts, width), size.widthMm, size.heightMm));
+    const png = svgToPng(s.previewSvg ?? s.svg, fonts, width);
+    await put(job, prevName, "image/png", bleed ? await trimmed(png, size.widthMm, size.heightMm) : png);
     previews.push(prevName);
   }
   await put(job, `${base}.pdf`, "application/pdf", pdf);
@@ -106,6 +110,8 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
       const id = idCard(kit, o);
       set(o === "landscape" ? "idLandscape" : "idPortrait", pkg, await store(job, kit, `id-card-${o}-${pkg}`, ID_SIZE[o], [{ name: "depan", ...id.front }, { name: "belakang", ...id.back }], `${name} - ID card ${o} ${pkg}`));
     }
+    const cap = await stamp(kit);
+    set("stamp", pkg, await store(job, kit, `cap-${pkg}`, STAMP_SIZE, [{ name: "cap", ...cap }], `${name} - cap ${pkg}`, false));
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }

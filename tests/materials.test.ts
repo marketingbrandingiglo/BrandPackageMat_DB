@@ -6,6 +6,7 @@ import { buildPalette } from "@/lib/brand/palette";
 import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
 import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
 import { idCard, ID_SIZE } from "@/lib/materials/id-card";
+import { pngInk, stamp, STAMP_SIZE, svgInk } from "@/lib/materials/stamp";
 import { checkLayout } from "@/lib/materials/checks";
 import { formatPhone, kitFonts, socialLine, type BrandKit } from "@/lib/materials/kit";
 import { placeLogo } from "@/lib/materials/logo";
@@ -136,5 +137,49 @@ describe("ID card dan amplop", () => {
     }
     expect(envelope(k).issues).toEqual([]);
     expect(envelope(k).svg).toContain(">To<");
+  });
+});
+
+describe("cap", () => {
+  it("logo SVG satu warna: warna gelap jadi tinta, warna terang jadi putih kertas", () => {
+    const out = svgInk(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect fill="#1D4ED8" width="10" height="10"/><text fill="white">A</text><circle style="fill:#F59E0B"/><path fill="url(#g)"/></svg>`, "#123456");
+    expect(out).toContain('fill="#123456"');
+    expect(out).toContain('fill="#FFFFFF"');
+    expect(out).toContain("fill:#123456");
+    expect(out).toContain('fill="url(#g)"');
+    expect(out).not.toContain("#1D4ED8");
+  });
+
+  it("logo PNG satu warna: terang transparan, gelap tinta", async () => {
+    const src = await sharp({ create: { width: 4, height: 2, channels: 4, background: "#FFFFFF" } })
+      .composite([{ input: await sharp({ create: { width: 2, height: 2, channels: 4, background: "#D31F25" } }).png().toBuffer(), left: 0, top: 0 }])
+      .png()
+      .toBuffer();
+    const { data } = await sharp(await pngInk(src, "#112233")).raw().toBuffer({ resolveWithObject: true });
+    expect([data[0], data[1], data[2], data[3]]).toEqual([0x11, 0x22, 0x33, 255]);
+    expect(data[3 * 4 + 3]).toBe(0);
+  });
+
+  for (const pkg of ["A", "B"] as const) {
+    it(`Paket ${pkg}: nama di jalur busur, satu warna, PDF dengan font benar`, async () => {
+      const k = await kit(pkg);
+      const s = await stamp(k);
+      expect(s.issues).toEqual([]);
+      expect(s.svg).toContain("<textPath");
+      expect(s.svg).toContain("PT UJI &lt;SEJAHTERA&gt; &amp; CO");
+      expect(s.previewSvg).not.toContain("<textPath");
+      const colors = new Set(s.svg.match(/#[0-9A-Fa-f]{6}/g)!.map((c) => c.toUpperCase()));
+      colors.delete("#FFFFFF");
+      expect(colors.size).toBe(1);
+      const { warnings } = await svgToPdf(s.svg, { ...STAMP_SIZE, fonts: kitFonts(k) });
+      expect(warnings.filter((w) => w.source === "font")).toEqual([]);
+    });
+  }
+
+  it("nama sangat panjang diberi peringatan, logo PNG diberi catatan", async () => {
+    const k = await kit("A", { name: "PT Nama Perusahaan Yang Sangat Sangat Panjang Sekali Untuk Sebuah Cap Bulat Indonesia" });
+    expect((await stamp(k)).issues.some((i) => i.message.includes("terlalu panjang"))).toBe(true);
+    const png = { ...(await kit("B")), logo: { ...(await kit("B")).logo, kind: "png" as const, svg: undefined } };
+    expect((await stamp(png)).issues.some((i) => i.code === "note")).toBe(true);
   });
 });

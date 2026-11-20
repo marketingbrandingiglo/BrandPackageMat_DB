@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 4c: cap perusahaan Ø 40 mm Paket A dan B: satu warna (warna utama gelap), nama perusahaan di jalur busur atas (bisa diedit di Illustrator), ornamen di busur bawah, logo di tengah (SVG tetap vektor, PNG satu warna).
 - Tahap 4b: ID card portrait dan landscape (depan/belakang, area lubang tali dicek otomatis) dan amplop DL, Paket A dan B. Lab membuat semua materi sekaligus dengan tab per materi. Modul `svgdoc.ts` (kerangka SVG cetak) dan `types.ts` (tipe materi untuk klien).
 - Tahap 4a: fondasi materi (`lib/materials/`: kit, ukur/bungkus teks, logo vektor bersarang, pengecekan otomatis area aman/tabrakan/kontras), kartu nama Paket A dan B (SVG depan/belakang + PDF 2 halaman + pratinjau), panel materi di Lab, unduhan bernama `<Perusahaan>_<file>`. Detail: `docs/materials.md`.
 - Font: nama family/style di dalam file ditulis ulang sesuai katalog (PDF menyebut font yang benar).

@@ -41,3 +41,14 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 - Paket A: pita warna utama di bawah. Paket B: panel warna utama di kiri, garis aksen, segitiga warna utama di sudut kanan atas.
 - Output: `amplop-<A|B>.svg`, `.pdf`, pratinjau.
 
+## 4c · Cap perusahaan
+
+`lib/materials/stamp.ts`. Keputusan pemilik (2026-11-20): isi tengah **selalu logo**, busur bawah **tanpa teks** (ornamen saja), warna **warna utama versi gelap** (`primaryText`, sama dengan warna teks warna utama).
+
+- Bulat Ø 40 mm, satu warna, latar transparan, tanpa bleed. Desain, bukan stempel yang sah secara hukum.
+- **Nama perusahaan** (huruf kapital, font heading paket) melingkar di busur atas sebagai teks di jalur (`textPath`): terbuka di Illustrator sebagai *Type on a Path* yang bisa diedit. Ukuran huruf mengisi busur ±150° (2,1-3,6 mm); nama panjang boleh sampai ±228°, lebih dari itu diberi peringatan.
+- **Logo di tengah**: SVG tetap vektor, warna gelap/berwarna menjadi tinta dan warna terang (mis. huruf putih di dalam bentuk) menjadi putih kertas (`svgInk`). PNG menjadi gambar satu warna (bagian terang transparan, `pngInk`) dan diberi catatan bahwa cap tidak sepenuhnya vektor.
+- Paket A: cincin ganda tipis + cincin dalam, tiga bintang di bawah. Paket B: cincin luar tebal + cincin dalam, deret titik di bawah, bintang di kiri dan kanan (hilang bila tertimpa nama panjang).
+- Pratinjau PNG memakai versi huruf satu per satu (`previewSvg`), karena resvg kurang rapi untuk teks di jalur; PDF dan SVG memakai teks di jalur.
+- Output: `cap-<A|B>.svg`, `.pdf`, pratinjau.
+

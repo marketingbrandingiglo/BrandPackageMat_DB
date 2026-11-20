@@ -6,7 +6,7 @@ import type { Box } from "./text";
  * bertabrakan, kontras teks terhadap latar. Satuan mm.
  */
 export interface CheckIssue {
-  code: "outside-safe-area" | "overlap" | "low-contrast";
+  code: "outside-safe-area" | "overlap" | "low-contrast" | "note";
   message: string;
 }
 

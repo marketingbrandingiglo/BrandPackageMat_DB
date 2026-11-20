@@ -21,7 +21,7 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
 
   return (
     <div className={styles.group}>
-      <h4>Materi (Tahap 4) · kartu nama, ID card, amplop</h4>
+      <h4>Materi (Tahap 4) · kartu nama, ID card, amplop, cap</h4>
       <form action={action} className={styles.materialsForm}>
         <input type="hidden" name="jobId" value={jobId} />
         <input type="hidden" name="lang" value={lang} />

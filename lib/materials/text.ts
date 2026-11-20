@@ -104,3 +104,16 @@ export function text(id: string, value: string, x: number, y: number, s: TextSty
 }
 
 export const r = (n: number) => String(Math.round(n * 1000) / 1000);
+
+/** Lebar maju tiap huruf (mm), termasuk kerning, untuk menempatkan huruf satu per satu (mis. teks melingkar). */
+export function advances(text: string, s: TextStyle): number[] {
+  const f = font(fileOf(s)) as unknown as { unitsPerEm: number; layout(t: string, features?: string[]): { positions: { xAdvance: number }[]; glyphs: { codePoints: number[] }[] } };
+  const run = f.layout(text);
+  // Tanpa ligatur (teks huruf kapital), satu glyph = satu karakter; bila tidak, bagi rata.
+  const chars = [...text];
+  if (run.glyphs.length !== chars.length) {
+    const w = measure(text, s) / chars.length;
+    return chars.map(() => w);
+  }
+  return run.positions.map((p) => (p.xAdvance / f.unitsPerEm) * s.size);
+}
