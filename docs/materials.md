@@ -83,3 +83,17 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 - File `signature.html` memuat panduan singkat (Indonesia/Inggris) di atas kotak signature; yang disalin hanya isi kotak.
 - **Unduhan**: ZIP `<Perusahaan>_email-signature-<A|B>.zip` (folder berisi `signature.html` + `logo-email.png`) dibuat saat diunduh (`/api/jobs/<id>/signature/<A|B>`), tidak disimpan. Di Drive tersimpan `email-signature-<A|B>.html` dan `logo-email-<A|B>.png`.
 - Pratinjau Lab: iframe dari HTML yang sama, logo diarahkan ke file job. Pengujian di Gmail, Outlook, dan Apple Mail oleh pemilik.
+
+## 4g · Guideline
+
+`lib/materials/guideline.ts`. PDF A4 portrait per paket, satu SVG per halaman (dirender ke PDF dengan font paket ditanam; teks guideline memakai font heading dan teks isi paket itu sendiri). Bahasa mengikuti pilihan materi.
+
+1. **Sampul**: logo, nama perusahaan, "Panduan Brand · Paket A/B", nuansa tone, tanggal, catatan bahwa isinya usulan. Paket A putih dengan pita warna utama; Paket B berlatar warna utama dengan logo di pelat putih.
+2. **Logo**: logo di latar putih dengan **area bebas** (garis putus-putus, x = seperempat tinggi logo) dan di latar terang paket; ukuran minimum (cetak/layar, menurut bentuk logo); daftar hal yang dihindari.
+3. **Warna**: warna utama dan warna logo, aksen paket, netral; tiap warna HEX/RGB/CMYK. Pasangan teks dan latar dengan rasio kontras WCAG. Catatan bahwa CMYK hanya acuan dan perlu proof.
+4. **Tipografi**: font judul dan teks isi (kategori, contoh Regular/Bold, tautan unduh Google Fonts, lisensi), hierarki teks dokumen (pt), dan font cadangan di email signature.
+5. **Tone of voice**: ringkasan, 3 sifat, cara bicara (sapaan, formalitas, kalimat), lakukan/hindari, dasar hipotesis. Job tanpa tone: halaman berisi catatan.
+6. **Contoh kalimat** (tagline, pembuka email, CTA, tentang kami) dan **isi paket + catatan** (font harus terpasang, bleed dan area aman, CMYK acuan, cap bukan stempel sah; logo PNG: saran mengganti dengan versi vektor).
+
+- Pengecekan otomatis: teks di area aman, tidak bertabrakan, kontras cukup, isi tidak melewati batas bawah halaman.
+- Output: `guideline-<A|B>.pdf`, pratinjau 6 halaman.

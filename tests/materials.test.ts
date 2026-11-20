@@ -5,6 +5,8 @@ import { FONTS } from "@/lib/brand/fonts";
 import { buildPalette } from "@/lib/brand/palette";
 import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
 import { emailSignature, socialUrl } from "@/lib/materials/email-signature";
+import { guideline, GUIDELINE_SIZE } from "@/lib/materials/guideline";
+import { TONE_SAMPLE } from "./fixtures/tone-sample";
 import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
 import { idCard, ID_SIZE } from "@/lib/materials/id-card";
 import { pngInk, stamp, svgInk } from "@/lib/materials/stamp";
@@ -327,3 +329,43 @@ describe("email signature", () => {
     expect(socialUrl({ platform: "instagram", handle: "https://instagram.com/x" })).toBe("https://instagram.com/x");
   });
 });
+
+describe("guideline", () => {
+  for (const pkg of ["A", "B"] as const) {
+    it(`Paket ${pkg}: 6 halaman lolos pengecekan, PDF dengan font paket`, async () => {
+      const k = await kit(pkg);
+      const g = guideline(k, { tone: TONE_SAMPLE, generatedAt: new Date("2026-11-20T03:00:00Z") });
+      expect(g.pages).toHaveLength(6);
+      expect(g.issues).toEqual([]);
+      const all = g.pages.join("");
+      expect(all).toContain("PT Uji &lt;Sejahtera&gt; &amp; Co");
+      expect(all).toContain(`HEX ${k.palette.primary.hex.toUpperCase()}`);
+      expect(all).toContain("CMYK");
+      expect(all).toContain(`fonts.google.com/specimen/${k.fonts.heading.family.replace(/ /g, "+")}`);
+      expect(all).toContain(escape(TONE_SAMPLE[pkg].examples.taglines[0].id));
+      expect(all).toContain("20 November 2026");
+      const { pdf, warnings } = await svgToPdf(g.pages, { ...GUIDELINE_SIZE, fonts: kitFonts(k) });
+      expect(warnings.filter((w) => w.source === "font")).toEqual([]);
+      expect(pdf.toString("latin1").match(/\/Type \/Page\b/g)).toHaveLength(6);
+    });
+  }
+  it("bahasa Inggris, tanpa tone, logo PNG: catatan tone dan saran logo vektor", async () => {
+    const k = await kit("A");
+    k.lang = "en";
+    k.logo = { ...k.logo, kind: "png", svg: undefined };
+    const g = guideline(k);
+    expect(g.issues).toEqual([]);
+    const all = g.pages.join("");
+    expect(all).toContain("Brand Guidelines");
+    expect(all).toContain("No tone of voice for this job");
+    expect(all).toContain("vector version");
+  });
+  it("nama perusahaan sangat panjang tetap di area aman", async () => {
+    const k = await kit("B", { name: "PT Perusahaan Dengan Nama Yang Sangat Panjang Sekali Untuk Menguji Sampul Guideline Tbk" });
+    expect(guideline(k, { tone: TONE_SAMPLE }).issues).toEqual([]);
+  });
+});
+
+function escape(s: string) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}

@@ -41,7 +41,7 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
 
   return (
     <div className={styles.group}>
-      <h4>Materi (Tahap 4) · kartu nama, ID card, amplop, cap, kop surat, template PPT, email signature</h4>
+      <h4>Materi (Tahap 4) · kartu nama, ID card, amplop, cap, kop surat, template PPT, email signature, guideline</h4>
       <form action={action} className={styles.materialsForm}>
         <input type="hidden" name="jobId" value={jobId} />
         <input type="hidden" name="lang" value={lang} />
@@ -97,7 +97,7 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
                         </>
                       ) : p.files.map((n) => (
                         <a key={n} href={file(n, true)} className="btn btn-secondary">
-                          {n.endsWith(".pptx") ? "PPTX (PowerPoint)" : n.endsWith(".docx") ? "DOCX (Word)" : n.endsWith(".pdf") ? (p.previews.length > 1 ? "PDF (2 halaman)" : n.startsWith("kop-surat") ? "PDF (kertas kop)" : "PDF") : n.includes("-depan") ? "SVG depan" : n.includes("-belakang") ? "SVG belakang" : "SVG"}
+                          {n.endsWith(".pptx") ? "PPTX (PowerPoint)" : n.endsWith(".docx") ? "DOCX (Word)" : n.endsWith(".pdf") ? (n.startsWith("guideline") ? `PDF (${p.previews.length} halaman)` : p.previews.length > 1 ? "PDF (2 halaman)" : n.startsWith("kop-surat") ? "PDF (kertas kop)" : "PDF") : n.includes("-depan") ? "SVG depan" : n.includes("-belakang") ? "SVG belakang" : "SVG"}
                         </a>
                       ))}
                     </p>

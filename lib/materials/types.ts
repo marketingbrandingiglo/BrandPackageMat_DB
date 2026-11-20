@@ -26,7 +26,7 @@ export interface MaterialPackage {
   issues: string[];
 }
 
-export const MATERIAL_KEYS = ["businessCard", "idLandscape", "idPortrait", "envelope", "stamp", "letterhead", "presentation", "emailSignature"] as const;
+export const MATERIAL_KEYS = ["businessCard", "idLandscape", "idPortrait", "envelope", "stamp", "letterhead", "presentation", "emailSignature", "guideline"] as const;
 export type MaterialKey = (typeof MATERIAL_KEYS)[number];
 export const MATERIAL_LABEL: Record<MaterialKey, string> = {
   businessCard: "Kartu nama",
@@ -37,6 +37,7 @@ export const MATERIAL_LABEL: Record<MaterialKey, string> = {
   letterhead: "Kop surat",
   presentation: "Template PPT",
   emailSignature: "Email signature",
+  guideline: "Guideline",
 };
 
 export interface Materials {

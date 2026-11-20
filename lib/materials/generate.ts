@@ -11,6 +11,7 @@ import { businessCard, CARD_SIZE } from "./business-card";
 import type { CheckIssue } from "./checks";
 import { emailSignature } from "./email-signature";
 import { envelope, ENVELOPE_SIZE } from "./envelope";
+import { guideline, GUIDELINE_SIZE } from "./guideline";
 import { idCard, ID_SIZE } from "./id-card";
 import { letterheadDocx, letterheadSvg, LETTERHEAD_SIZE } from "./letterhead";
 import { presentationPptx, presentationPreviews } from "./presentation";
@@ -19,7 +20,7 @@ import { kitFonts, type BrandKit } from "./kit";
 import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
 /**
- * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat, 4e template PPT, 4f email signature) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
+ * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat, 4e template PPT, 4f email signature, 4g guideline) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
  * folder job (Google Drive). Render dilakukan kode aplikasi (bukan Claude).
  */
 export type { MaterialKey, MaterialPackage, Materials } from "./types";
@@ -134,6 +135,21 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
     await put(job, `email-signature-${pkg}.html`, "text/html; charset=utf-8", Buffer.from(sig.html));
     await put(job, `logo-email-${pkg}.png`, "image/png", sig.logo.png);
     set("emailSignature", pkg, { files: [`email-signature-${pkg}.html`, `logo-email-${pkg}.png`], previews: [], issues: sig.issues });
+    const gl = guideline(kit, { tone: r.tone, generatedAt: new Date() });
+    const glFonts = kitFonts(kit);
+    const glPdf = await svgToPdf(gl.pages, { ...GUIDELINE_SIZE, fonts: glFonts, title: `${name} - guideline ${pkg}` });
+    await put(job, `guideline-${pkg}.pdf`, "application/pdf", glPdf.pdf);
+    const glPrev: string[] = [];
+    for (const [i, svg] of gl.pages.entries()) {
+      const n = `pratinjau-guideline-${pkg}-${i + 1}.png`;
+      await put(job, n, "image/png", svgToPng(svg, glFonts, 700));
+      glPrev.push(n);
+    }
+    set("guideline", pkg, {
+      files: [`guideline-${pkg}.pdf`],
+      previews: glPrev,
+      issues: [...gl.issues.map((i) => i.message), ...glPdf.warnings.filter((w) => w.source === "font").map((w) => `PDF: ${w.message}`), ...(r.tone ? [] : ["Tone of voice belum ada untuk job ini; halaman tone berisi catatan."])],
+    });
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }
