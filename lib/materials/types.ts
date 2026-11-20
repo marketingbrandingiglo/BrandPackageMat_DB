@@ -52,6 +52,15 @@ export interface Materials {
   visual?: Record<PackageKey, boolean>;
   /** Tahap 6b: ID putaran pembuatan; hasil tugas tersimpan terpisah (generate.ts). */
   run?: string;
+  /** Tahap 6c: ringkasan per paket untuk perbandingan (font, warna, tone). */
+  overview?: Record<PackageKey, PackageOverview>;
+}
+
+export interface PackageOverview {
+  heading: { family: string; category: string };
+  body: { family: string; category: string };
+  colors: { hex: string; name: { id: string; en: string } }[];
+  tone?: { summary: { id: string; en: string }; traits: { id: string; en: string }[]; tagline: { id: string; en: string } };
 }
 
 /** Nama file logo yang dirujuk relatif oleh signature.html (Tahap 4f). */

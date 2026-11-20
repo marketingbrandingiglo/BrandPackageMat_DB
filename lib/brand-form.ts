@@ -7,22 +7,17 @@ export const SOCIAL_PLATFORMS = ["instagram", "linkedin", "facebook", "x", "tikt
 
 const clean = (v: FormDataEntryValue | null, max: number) => String(v ?? "").trim().replace(/\s+/g, " ").slice(0, max);
 
-/** Validasi seluruh isi form (dipakai juga untuk tes). */
-export function parseBrandForm(form: FormData, lang: "id" | "en") {
+/** Validasi data kontak (langkah 2 form; juga untuk "ubah data kontak" sebelum memilih paket). */
+export type FieldError = { error: string; field: string };
+
+export function parseContact(form: FormData, lang: "id" | "en", companyName: string): FieldError | { company: CompanyData } {
   const E = DICT[lang].err;
-  const companyName = clean(form.get("companyName"), 80);
-  const industryId = clean(form.get("industry"), 40);
-  const industryOther = clean(form.get("industryOther"), 60);
   const email = clean(form.get("email"), 120);
   const pick = (name: string, max: number) => form.getAll(name).map((v) => clean(v, max));
   const addresses = pick("address", 160);
   const phones = pick("phone", 30);
   const ai = Number(form.get("addressPrimary") ?? 0);
   const pi = Number(form.get("phonePrimary") ?? 0);
-  const known = INDUSTRIES.find((x) => x.id === industryId);
-  if (!companyName) return { error: E.company, field: "companyName" };
-  if (!known) return { error: E.industry, field: "industry" };
-  if (known.freeText && !industryOther) return { error: E.industryOther, field: "industryOther" };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: E.email, field: "email" };
   const addrList = addresses.map((v, i) => ({ v, primary: i === ai })).filter((x) => x.v);
   const phoneList = phones.map((v, i) => ({ v, primary: i === pi })).filter((x) => x.v);
@@ -41,6 +36,20 @@ export function parseBrandForm(form: FormData, lang: "id" | "en") {
     extraAddresses: addrList.filter((x) => x !== mainA).map((x) => x.v).slice(0, 2),
     extraPhones: phoneList.filter((x) => x !== mainP).map((x) => x.v).slice(0, 2),
   };
-  return { companyName, industryId, industryOther, company, wantVisual: form.get("wantVisual") === "on" };
+  return { company };
 }
 
+/** Validasi seluruh isi form (dipakai juga untuk tes). */
+export function parseBrandForm(form: FormData, lang: "id" | "en"): FieldError | { companyName: string; industryId: string; industryOther: string; company: CompanyData; wantVisual: boolean } {
+  const E = DICT[lang].err;
+  const companyName = clean(form.get("companyName"), 80);
+  const industryId = clean(form.get("industry"), 40);
+  const industryOther = clean(form.get("industryOther"), 60);
+  const known = INDUSTRIES.find((x) => x.id === industryId);
+  if (!companyName) return { error: E.company, field: "companyName" };
+  if (!known) return { error: E.industry, field: "industry" };
+  if (known.freeText && !industryOther) return { error: E.industryOther, field: "industryOther" };
+  const c = parseContact(form, lang, companyName);
+  if ("error" in c) return c;
+  return { companyName, industryId, industryOther, company: c.company, wantVisual: form.get("wantVisual") === "on" };
+}

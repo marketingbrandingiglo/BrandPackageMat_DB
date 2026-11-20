@@ -34,6 +34,8 @@ export type { MaterialKey, MaterialPackage, Materials } from "./types";
 type FontJob = Job<FontSelectResult> & { materials?: Materials };
 export const PACKAGES: PackageKey[] = ["A", "B"];
 export const TASKS = MATERIAL_KEYS.flatMap((key) => PACKAGES.map((pkg) => ({ key, pkg })));
+/** Tugas yang berlaku untuk job: hanya paket terpilih bila user sudah memilih. */
+const tasksOf = (job: Job) => (job.chosen ? TASKS.filter((t) => t.pkg === job.chosen!.pkg) : TASKS);
 
 /** Hasil satu tugas di hash. */
 interface TaskRecord {
@@ -230,8 +232,28 @@ async function build(job: FontJob, key: MaterialKey, kit: BrandKit, sink: Sink):
  */
 export async function beginMaterials(job: FontJob, company: CompanyData, lang: Lang, useVisual: boolean): Promise<Materials> {
   if (job.status !== "done" || !job.result) throw new Error("Job belum selesai.");
+  if (job.chosen) throw new Error("Paket sudah dipilih; materi tidak bisa dibuat ulang.");
   const v = useVisual && job.visual?.status === "done";
+  const { rep } = await logoOf(job);
+  const pal = buildPalette(rep.colors);
+  const r = job.result;
+  const overview = Object.fromEntries(
+    PACKAGES.map((p) => {
+      const sw = [pal.primary, ...pal.packages[p].supporting, pal.neutrals[0]];
+      const tone = r.tone?.[p];
+      return [
+        p,
+        {
+          heading: { family: r.packages[p].heading.family, category: r.packages[p].heading.category },
+          body: { family: r.packages[p].body.family, category: r.packages[p].body.category },
+          colors: sw.map((x) => ({ hex: x.hex, name: x.name })),
+          tone: tone && { summary: tone.summary, traits: tone.personality.map((x) => x.trait), tagline: tone.examples.taglines[0] },
+        },
+      ];
+    }),
+  ) as Materials["overview"];
   job.materials = {
+    overview,
     lang,
     company,
     generatedAt: new Date().toISOString(),
@@ -247,6 +269,7 @@ export async function beginMaterials(job: FontJob, company: CompanyData, lang: L
 export async function runMaterialTask(job: FontJob, key: MaterialKey, pkg: PackageKey): Promise<{ ok: boolean; error?: string }> {
   const m = job.materials;
   if (!m?.run) throw new Error("Putaran materi belum dimulai.");
+  if (job.chosen && job.chosen.pkg !== pkg) throw new Error("Paket ini sudah dihapus.");
   const prev = (await redis().hget<TaskRecord>(hashKey(job), field(key, pkg))) ?? undefined;
   if (prev?.run === m.run && prev.pkg) return { ok: true };
   const sink = new Sink(job.folderId);
@@ -278,7 +301,7 @@ export async function loadMaterials(job: FontJob): Promise<{ materials?: Materia
   if (!m.run) return { materials: m, tasks };
   const recs = await readTasks(job);
   const items: Materials["items"] = {};
-  for (const { key, pkg } of TASKS) {
+  for (const { key, pkg } of tasksOf(job)) {
     const r = recs[field(key, pkg)];
     if (r?.run === m.run && r.pkg) {
       items[key] = { ...(items[key] ?? ({} as Record<PackageKey, MaterialPackage>)), [pkg]: r.pkg };
@@ -293,4 +316,32 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
   await beginMaterials(job, company, lang, useVisual);
   for (const { key, pkg } of TASKS) await runMaterialTask(job, key, pkg);
   return (await loadMaterials(job)).materials!;
+}
+
+/**
+ * Tahap 6c: user memilih paket. File paket lain (materi dan visual) langsung dihapus dari Drive
+ * (SPEC bagian 9); data teks (font, tone) tetap di job untuk riwayat.
+ */
+export async function choosePackage(job: FontJob, pkg: PackageKey): Promise<void> {
+  if (job.chosen) throw new Error("Paket sudah dipilih.");
+  const other: PackageKey = pkg === "A" ? "B" : "A";
+  job.chosen = { pkg, at: new Date().toISOString() };
+  await saveJob(job as Job);
+  const recs = await readTasks(job);
+  const del: string[] = [];
+  for (const key of MATERIAL_KEYS) {
+    const f = field(key, other);
+    for (const ref of Object.values(recs[f]?.refs ?? {})) await remove(ref.id).catch(() => {});
+    if (recs[f]) del.push(f);
+  }
+  if (del.length) await redis().hdel(hashKey(job), ...del);
+  const va = job.visual?.result?.[other];
+  if (va) {
+    for (const n of [va.file, va.preview]) {
+      const f = job.files[n];
+      if (f) await remove(f.id).catch(() => {});
+      delete job.files[n];
+    }
+  }
+  await saveJob(job as Job);
 }

@@ -14,7 +14,7 @@ export interface FormIndustry {
   freeText?: boolean;
 }
 
-const SOCIAL_LABEL: Record<(typeof SOCIAL_PLATFORMS)[number], string> = {
+export const SOCIAL_LABEL: Record<(typeof SOCIAL_PLATFORMS)[number], string> = {
   instagram: "Instagram",
   linkedin: "LinkedIn",
   facebook: "Facebook",
@@ -28,7 +28,7 @@ const MAX_ROWS = 3;
 const LEVEL = { hard: "alert-error", warn: "alert-warn", info: "alert-info" } as const;
 
 /** Daftar isian berulang (alamat/telepon) dengan tepat satu "utama". */
-function MultiField({ name, label, ph, t, rows, setRows, primary, setPrimary, type = "text" }: {
+export function MultiField({ name, label, ph, t, rows, setRows, primary, setPrimary, type = "text", defaults = [] }: {
   name: string;
   label: string;
   ph: string;
@@ -38,13 +38,15 @@ function MultiField({ name, label, ph, t, rows, setRows, primary, setPrimary, ty
   primary: number;
   setPrimary: (i: number) => void;
   type?: string;
+  /** Nilai awal per baris (form ubah kontak). */
+  defaults?: string[];
 }) {
   return (
     <fieldset className={styles.multi}>
       <legend>{label}</legend>
       {rows.map((key, i) => (
         <div key={key} className={styles.row}>
-          <input className="input" name={name} type={type} placeholder={ph} maxLength={name === "address" ? 160 : 30} aria-label={`${label} ${i + 1}`} />
+          <input className="input" name={name} type={type} placeholder={ph} maxLength={name === "address" ? 160 : 30} aria-label={`${label} ${i + 1}`} defaultValue={defaults[key] ?? ""} />
           <label className={styles.primary}>
             <input type="radio" name={`${name}Primary`} value={i} checked={primary === i} onChange={() => setPrimary(i)} /> {t.f.primary}
           </label>
@@ -166,7 +168,7 @@ export default function BrandForm({ lang, industries, maxBytes }: { lang: Lang; 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {check.preview && <img src={check.preview} alt="" className={styles.checkLogo} />}
               <div>
-                {check.warnings?.length ? check.warnings.map((w) => <p key={w.message} className={`alert ${LEVEL[w.level]}`}>{w.message}</p>) : <p className="alert alert-success">{t.check.ok}</p>}
+                {check.warnings?.length ? check.warnings.map((w) => <p key={w.message} className={`alert ${LEVEL[w.level]}`}>{w.message}</p>) : <p className="alert alert-ok">{t.check.ok}</p>}
                 {check.warnings?.some((w) => w.level !== "info") && <p className={styles.muted}>{t.check.continueAnyway}</p>}
               </div>
             </div>

@@ -10,5 +10,5 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   if (!job || (job.userId !== cu.user.id && cu.user.role !== "superadmin")) return Response.json({ error: "not found" }, { status: 404 });
   const { id, status, step, createdAt, startedAt, finishedAt, error, result, belled, input, visual } = job;
   const { materials, tasks } = await loadMaterials(job as Parameters<typeof loadMaterials>[0]);
-  return Response.json({ id, status, step, createdAt, startedAt, finishedAt, error, result, belled, materials, tasks, visual, companyName: input.companyName, industry: input.industry, wantVisual: input.wantVisual }, { headers: { "cache-control": "no-store" } });
+  return Response.json({ id, status, step, createdAt, startedAt, finishedAt, error, result, belled, materials, tasks, visual, companyName: input.companyName, industry: input.industry, wantVisual: input.wantVisual, chosen: job.chosen, company: input.company }, { headers: { "cache-control": "no-store" } });
 }

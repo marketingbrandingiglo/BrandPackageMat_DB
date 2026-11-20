@@ -61,6 +61,8 @@ export interface Job<R = unknown> {
   visual?: VisualTask;
   /** Tahap 4/6b: putaran materi terakhir (hasil per tugas di hash terpisah). */
   materials?: Materials;
+  /** Tahap 6c: paket yang dipilih user; file paket lain sudah dihapus. */
+  chosen?: { pkg: "A" | "B"; at: string };
 }
 
 export const currentEnv = (): JobEnv => (appEnv() === "production" ? "prod" : "dev");

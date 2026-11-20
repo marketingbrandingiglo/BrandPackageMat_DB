@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { VisualTask } from "@/lib/brand/visual-types";
 import { DICT, type Lang } from "@/lib/i18n/dict";
-import { MATERIAL_KEYS, type MaterialKey, type Materials } from "@/lib/materials/types";
+import { MATERIAL_KEYS, type CompanyData, type Materials } from "@/lib/materials/types";
 import { startMaterials } from "./actions";
+import MaterialsView from "./materials-view";
 import styles from "./result.module.css";
 
 type TaskState = "pending" | "running" | "done" | "error";
@@ -16,11 +17,14 @@ interface JobView {
   wantVisual?: boolean;
   materials?: Materials;
   tasks?: Record<string, { state: "pending" | "done" | "error"; error?: string }>;
+  chosen?: { pkg: "A" | "B" };
+  company?: CompanyData;
 }
 const STUCK_MS = 6 * 60 * 1000;
 const CONCURRENCY = 4;
 const PKGS = ["A", "B"] as const;
-const TASKS = MATERIAL_KEYS.flatMap((key) => PKGS.map((pkg) => ({ key, pkg, id: `${key}:${pkg}` })));
+const ALL_TASKS = MATERIAL_KEYS.flatMap((key) => PKGS.map((pkg) => ({ key, pkg, id: `${key}:${pkg}` })));
+const tasksFor = (j?: JobView) => (j?.chosen ? ALL_TASKS.filter((x) => x.pkg === j.chosen!.pkg) : ALL_TASKS);
 
 const fetchJob = async (id: string): Promise<JobView | null> => {
   const res = await fetch(`/api/jobs/${id}`, { cache: "no-store" }).catch(() => null);
@@ -76,6 +80,7 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
       }
       const j = await fetchJob(jobId);
       if (!j) return;
+      const TASKS = tasksFor(j);
       const state: Record<string, TaskState> = {};
       for (const x of TASKS) state[x.id] = j.tasks?.[x.id]?.state === "done" ? "done" : "pending";
       setTaskErrors({});
@@ -104,6 +109,7 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
   }, [jobId]);
 
   const ready = workerDone(job);
+  const TASKS = tasksFor(job);
   const hasMaterials = job?.materials?.run && TASKS.every((x) => job.tasks?.[x.id]?.state === "done");
   useEffect(() => {
     if (ready && !hasMaterials) runTasks();
@@ -114,7 +120,23 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
   const busy = job.status === "queued" || job.status === "working";
   const vis = job.visual;
 
-  if (hasMaterials && job.materials) return <MaterialsView jobId={jobId} m={job.materials} lang={lang} missingVisual={job.wantVisual ? PKGS.filter((p) => !job.materials!.visual?.[p]) : []} />;
+  const reload = async () => {
+    const j = await fetchJob(jobId);
+    if (j) setJob(j);
+  };
+  if (hasMaterials && job.materials)
+    return (
+      <MaterialsView
+        jobId={jobId}
+        m={job.materials}
+        lang={lang}
+        chosen={job.chosen?.pkg}
+        company={job.company}
+        missingVisual={job.wantVisual ? PKGS.filter((p) => (!job.chosen || job.chosen.pkg === p) && !job.materials!.visual?.[p]) : []}
+        onRebuild={reload}
+        onChosen={reload}
+      />
+    );
 
   const doneCount = TASKS.filter((x) => tasks[x.id] === "done").length;
   const failed = TASKS.some((x) => tasks[x.id] === "error");
@@ -146,7 +168,7 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
               {MATERIAL_KEYS.map((key) => (
                 <tr key={key}>
                   <td>{T.mat.labels[key]}</td>
-                  {PKGS.map((p) => {
+                  {PKGS.filter((p) => !job.chosen || job.chosen.pkg === p).map((p) => {
                     const st = tasks[`${key}:${p}`] ?? "pending";
                     return <td key={p} data-state={st}>{T.mat[st]}</td>;
                   })}
@@ -167,46 +189,6 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
         </>
       )}
       {error && <p className="alert alert-error">{error}</p>}
-    </div>
-  );
-}
-
-/** Tahap 6b: hasil per materi, Paket A dan B berdampingan (pemilihan dan unduh di 6c-6d). */
-function MaterialsView({ jobId, m, lang, missingVisual }: { jobId: string; m: Materials; lang: Lang; missingVisual: string[] }) {
-  const T = DICT[lang].mat;
-  const [tab, setTab] = useState<MaterialKey>("guideline");
-  const v = `?v=${encodeURIComponent(m.generatedAt)}`;
-  const order: MaterialKey[] = ["guideline", ...MATERIAL_KEYS.filter((x) => x !== "guideline")];
-  return (
-    <div className={styles.result}>
-      <div>
-        <h2 className={styles.h2}>{T.ready}</h2>
-        <p className={styles.muted}>{T.readyLead}</p>
-      </div>
-      {missingVisual.length > 0 && <p className="alert alert-warn">{T.noVisual(missingVisual.map((p) => `${T.pkg} ${p}`).join(lang === "en" ? " and " : " dan "))}</p>}
-      <div className={styles.tabs} role="tablist">
-        {order.map((key) => (
-          <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{T.labels[key]}</button>
-        ))}
-      </div>
-      <div className={styles.compare} data-kind={tab}>
-        {PKGS.map((p) => {
-          const pk = m.items[tab]?.[p];
-          return (
-            <section key={p} className={styles.pkgCol}>
-              <p className="eyebrow">{T.pkg} {p}</p>
-              {tab === "emailSignature" && <p className={styles.muted}>{T.signatureNote}</p>}
-              <div className={styles.previews}>
-                {pk?.previews.map((n) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={n} src={`/api/jobs/${jobId}/file/${n}${v}`} alt={`${T.labels[tab]} ${p}`} loading="lazy" />
-                ))}
-              </div>
-              {pk?.issues.length ? pk.issues.map((i, n) => <p key={`${n}-${i}`} className="alert alert-warn">{i}</p>) : <p className={styles.muted}>{T.checksOk}</p>}
-            </section>
-          );
-        })}
-      </div>
     </div>
   );
 }
