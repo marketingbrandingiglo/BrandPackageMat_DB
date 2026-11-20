@@ -6,7 +6,7 @@ import { createFolder, DriveError, DriveNotConnected, envFolder, upload } from "
 import { ring } from "@/lib/jobs/bell";
 import { currentEnv, enqueue, getJob, newJobId, saveJob, type Job } from "@/lib/jobs/jobs";
 import type { FontSelectResult } from "@/lib/brand/font-select";
-import { makeBusinessCards, type Materials } from "@/lib/materials/generate";
+import { makeMaterials as buildMaterials, type Materials } from "@/lib/materials/generate";
 import type { CompanyData, Lang } from "@/lib/materials/kit";
 import { buildPalette, type Palette } from "@/lib/brand/palette";
 import { analyzeLogo, LogoRejected, type BackgroundStrategy, type LogoWarning } from "@/lib/brand/logo";
@@ -140,7 +140,7 @@ export interface LabMaterialsResult {
 
 const SOCIAL_FIELDS = ["instagram", "linkedin", "facebook", "x", "tiktok", "youtube", "whatsapp"] as const;
 
-/** Lab 4a: buat kartu nama Paket A dan B dari job yang selesai. */
+/** Lab Tahap 4: buat semua materi yang tersedia untuk Paket A dan B dari job yang selesai. */
 export async function makeMaterials(_prev: LabMaterialsResult, form: FormData): Promise<LabMaterialsResult> {
   await requireSuperAdmin();
   const jobId = String(form.get("jobId") ?? "");
@@ -158,7 +158,7 @@ export async function makeMaterials(_prev: LabMaterialsResult, form: FormData): 
   };
   const lang: Lang = form.get("lang") === "en" ? "en" : "id";
   try {
-    return { materials: await makeBusinessCards(job, company, lang) };
+    return { materials: await buildMaterials(job, company, lang) };
   } catch (e) {
     if (e instanceof DriveNotConnected) return { error: e.message };
     if (e instanceof DriveError) return { error: `Google Drive: ${e.message}` };

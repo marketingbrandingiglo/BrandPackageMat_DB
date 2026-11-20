@@ -7,21 +7,9 @@ import type { FontFamily } from "@/lib/render/fonts";
  * Semua bahan untuk membuat materi satu paket (Tahap 4): data perusahaan, logo, palet,
  * pasangan font, bahasa. Dibuat dari hasil job 3d-3e + data perusahaan.
  */
-export type Lang = "id" | "en";
-export type PackageKey = "A" | "B";
+import type { CompanyData, Lang, PackageKey, Social } from "./types";
 
-export interface Social {
-  platform: "instagram" | "linkedin" | "facebook" | "x" | "tiktok" | "youtube" | "whatsapp";
-  handle: string;
-}
-
-export interface CompanyData {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  socials: Social[];
-}
+export type { CompanyData, Lang, PackageKey, Social } from "./types";
 
 export interface KitLogo {
   kind: "svg" | "png";
@@ -94,9 +82,25 @@ export function kitColors(kit: BrandKit): KitColors {
   };
 }
 
-export const PLACEHOLDER: Record<Lang, { name: string; title: string; phone: string; photo: string }> = {
-  id: { name: "Nama Lengkap", title: "Jabatan", phone: "Telp", photo: "Foto" },
-  en: { name: "Full Name", title: "Job Title", phone: "Tel", photo: "Photo" },
+export const PLACEHOLDER: Record<Lang, { name: string; title: string; phone: string; photo: string; idNumber: string; found: string; to: string }> = {
+  id: {
+    name: "Nama Lengkap",
+    title: "Jabatan",
+    phone: "Telp",
+    photo: "Foto",
+    idNumber: "No. ID 0000 0000",
+    found: "Bila menemukan kartu ini, mohon kembalikan ke alamat di atas.",
+    to: "Kepada Yth.",
+  },
+  en: {
+    name: "Full Name",
+    title: "Job Title",
+    phone: "Tel",
+    photo: "Photo",
+    idNumber: "ID No. 0000 0000",
+    found: "If found, please return this card to the address above.",
+    to: "To",
+  },
 };
 
 const SOCIAL_LABEL: Record<Social["platform"], string> = {

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 4b: ID card portrait dan landscape (depan/belakang, area lubang tali dicek otomatis) dan amplop DL, Paket A dan B. Lab membuat semua materi sekaligus dengan tab per materi. Modul `svgdoc.ts` (kerangka SVG cetak) dan `types.ts` (tipe materi untuk klien).
 - Tahap 4a: fondasi materi (`lib/materials/`: kit, ukur/bungkus teks, logo vektor bersarang, pengecekan otomatis area aman/tabrakan/kontras), kartu nama Paket A dan B (SVG depan/belakang + PDF 2 halaman + pratinjau), panel materi di Lab, unduhan bernama `<Perusahaan>_<file>`. Detail: `docs/materials.md`.
 - Font: nama family/style di dalam file ditulis ulang sesuai katalog (PDF menyebut font yang benar).
 - Tahap 3e: pemetaan bidang usaha ke karakter font dan nada dasar (`data/industries.json`), tag bidang usaha ikut menyusun shortlist font, tone of voice Paket A/B (Indonesia + Inggris) ditulis sesi pekerja (`npm run worker -- tone`) dan tampil di Lab. Lab: isi bebas untuk bidang usaha "Lainnya".

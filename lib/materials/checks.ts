@@ -20,7 +20,8 @@ export interface Area {
 const inside = (b: Box, a: Area, tol = 0.05) => b.x >= a.x - tol && b.y >= a.y - tol && b.x + b.w <= a.x + a.w + tol && b.y + b.h <= a.y + a.h + tol;
 const overlaps = (a: Box, b: Box, gap = 0) => a.x < b.x + b.w + gap && b.x < a.x + a.w + gap && a.y < b.y + b.h + gap && b.y < a.y + a.h + gap;
 
-export function checkLayout(boxes: Box[], safe: Area): CheckIssue[] {
+/** `obstacles`: area yang tidak boleh ditimpa teks/logo (mis. lubang tali ID card); hanya dicek tabrakannya. */
+export function checkLayout(boxes: Box[], safe: Area, obstacles: Box[] = []): CheckIssue[] {
   const out: CheckIssue[] = [];
   for (const b of boxes) {
     if (!inside(b, safe)) out.push({ code: "outside-safe-area", message: `"${b.id}" keluar dari area aman.` });
@@ -34,5 +35,8 @@ export function checkLayout(boxes: Box[], safe: Area): CheckIssue[] {
   for (let i = 0; i < boxes.length; i++)
     for (let j = i + 1; j < boxes.length; j++)
       if (overlaps(boxes[i], boxes[j])) out.push({ code: "overlap", message: `"${boxes[i].id}" bertabrakan dengan "${boxes[j].id}".` });
+  for (const b of boxes)
+    for (const o of obstacles)
+      if (overlaps(b, o)) out.push({ code: "overlap", message: `"${b.id}" menimpa area ${o.id}.` });
   return out;
 }

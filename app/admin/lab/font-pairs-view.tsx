@@ -6,7 +6,7 @@ import type { FontRef, FontSelectResult } from "@/lib/brand/font-select";
 import { loadCatalogFont } from "./font/load-font";
 import ToneView from "./tone-view";
 import MaterialsPanel from "./materials-panel";
-import type { Materials } from "@/lib/materials/generate";
+import type { Materials } from "@/lib/materials/types";
 import styles from "./lab.module.css";
 
 const LETTERFORM: Record<string, string> = { sans: "Sans serif", serif: "Serif", slab: "Slab serif", script: "Script", display: "Display", mixed: "Campuran", none: "Tanpa huruf" };

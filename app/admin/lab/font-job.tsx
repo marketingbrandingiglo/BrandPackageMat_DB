@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { FontSelectResult } from "@/lib/brand/font-select";
-import type { Materials } from "@/lib/materials/generate";
+import type { Materials } from "@/lib/materials/types";
 import FontPairsView from "./font-pairs-view";
 import styles from "./lab.module.css";
 

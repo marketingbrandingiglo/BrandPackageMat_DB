@@ -150,3 +150,8 @@ details.group summary { cursor: pointer; }
 .downloads { display: flex; gap: 8px; flex-wrap: wrap; margin: 0; }
 .downloads :global(.btn) { height: 36px; font-size: 14px; }
 @media (max-width: 640px) { .materialsForm .wide { grid-column: auto; } }
+.cats { display: flex; flex-wrap: wrap; gap: 8px; }
+.cats button { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--card-border); background: #fff; cursor: pointer; }
+.cats button[aria-pressed="true"] { background: var(--iglo-red); border-color: var(--iglo-red); color: #fff; }
+.previewRow { display: grid; gap: 10px; }
+.materialCard[data-kind="idPortrait"] .previewRow { grid-template-columns: 1fr 1fr; }

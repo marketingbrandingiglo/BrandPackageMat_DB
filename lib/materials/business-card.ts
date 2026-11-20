@@ -1,8 +1,8 @@
 import { SPECS } from "@/lib/brand/specs";
-import { escapeXml } from "@/lib/render/escape";
 import { checkLayout, type CheckIssue } from "./checks";
 import { formatPhone, kitColors, PLACEHOLDER, socialLine, type BrandKit } from "./kit";
 import { placeLogo } from "./logo";
+import { BLEED, SAFE, sheet, svgDoc } from "./svgdoc";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 
 /**
@@ -11,14 +11,10 @@ import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
  * Grup ber-id menjadi layer di Illustrator; panduan bleed/area aman ada di grup tersembunyi.
  */
 const C = SPECS.materials.businessCard;
-const BLEED = SPECS.print.bleedMm;
-const SAFE = SPECS.print.safeAreaMm;
-export const CARD_SIZE = { widthMm: C.widthMm + 2 * BLEED, heightMm: C.heightMm + 2 * BLEED };
-
-const W = CARD_SIZE.widthMm;
-const H = CARD_SIZE.heightMm;
-const IN = BLEED + SAFE; // tepi area aman
-const SAFE_AREA = { x: IN, y: IN, w: W - 2 * IN, h: H - 2 * IN };
+const S = sheet(C.widthMm, C.heightMm);
+export const CARD_SIZE = S.size;
+const { W, H, IN } = S;
+const SAFE_AREA = S.safe;
 
 export interface CardSide {
   svg: string;
@@ -30,20 +26,10 @@ export interface BusinessCard {
   back: CardSide;
 }
 
-function doc(title: string, body: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}mm" height="${H}mm" viewBox="0 0 ${W} ${H}">
-  <title>${escapeXml(title)}</title>
-${body}
-  <g id="panduan" display="none">
-    <rect id="potong" x="${BLEED}" y="${BLEED}" width="${r(W - 2 * BLEED)}" height="${r(H - 2 * BLEED)}" fill="none" stroke="#FF00FF" stroke-width="0.1"/>
-    <rect id="area-aman" x="${IN}" y="${IN}" width="${r(W - 2 * IN)}" height="${r(H - 2 * IN)}" fill="none" stroke="#00AEEF" stroke-width="0.1"/>
-  </g>
-</svg>`;
-}
+const doc = (title: string, body: string) => svgDoc(S, title, body);
 
 /** Baris kontak: telepon, email, alamat (maks. 2 baris), lalu sosial media (maks. 2). */
-function contactLines(kit: BrandKit, style: TextStyle, maxWidth: number) {
+export function contactLines(kit: BrandKit, style: TextStyle, maxWidth: number) {
   const c = kit.company;
   const lines: { id: string; value: string }[] = [];
   if (c.phone) lines.push({ id: "telepon", value: `${PLACEHOLDER[kit.lang].phone} ${formatPhone(c.phone)}` });

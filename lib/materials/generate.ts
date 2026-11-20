@@ -8,27 +8,17 @@ import sharp from "sharp";
 import { SPECS } from "@/lib/brand/specs";
 import { svgToPdf, svgToPng } from "@/lib/render/svg";
 import { businessCard, CARD_SIZE } from "./business-card";
-import { kitFonts, type BrandKit, type CompanyData, type Lang, type PackageKey } from "./kit";
+import type { CheckIssue } from "./checks";
+import { envelope, ENVELOPE_SIZE } from "./envelope";
+import { idCard, ID_SIZE } from "./id-card";
+import { kitFonts, type BrandKit } from "./kit";
+import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
 /**
- * Tahap 4: membuat materi dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
+ * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
  * folder job (Google Drive). Render dilakukan kode aplikasi (bukan Claude).
  */
-export interface MaterialPackage {
-  /** File untuk diunduh (SVG/PDF), nama di folder job. */
-  files: string[];
-  /** PNG pratinjau, nama di folder job. */
-  previews: string[];
-  /** Hasil pengecekan otomatis (teks keluar area aman, tabrakan, kontras, font). */
-  issues: string[];
-}
-
-export interface Materials {
-  lang: Lang;
-  company: CompanyData;
-  generatedAt: string;
-  businessCard?: Record<PackageKey, MaterialPackage>;
-}
+export type { MaterialKey, MaterialPackage, Materials } from "./types";
 
 type FontJob = Job<FontSelectResult> & { materials?: Materials };
 
@@ -50,13 +40,49 @@ async function put(job: FontJob, name: string, mime: string, data: Buffer) {
   job.files[name] = { id: f.id, name, mimeType: mime, size: f.size };
 }
 
-export async function makeBusinessCards(job: FontJob, company: CompanyData, lang: Lang): Promise<Materials> {
+interface Side {
+  name: string;
+  svg: string;
+  issues: CheckIssue[];
+}
+
+/** Simpan satu materi: SVG per sisi, PDF (semua sisi), pratinjau per sisi. */
+async function store(job: FontJob, kit: BrandKit, base: string, size: { widthMm: number; heightMm: number }, sides: Side[], title: string): Promise<MaterialPackage> {
+  const fonts = kitFonts(kit);
+  const { pdf, warnings } = await svgToPdf(sides.map((s) => s.svg), { ...size, fonts, title });
+  const files: string[] = [];
+  const previews: string[] = [];
+  for (const s of sides) {
+    const svgName = sides.length > 1 ? `${base}-${s.name}.svg` : `${base}.svg`;
+    await put(job, svgName, "image/svg+xml", Buffer.from(s.svg));
+    files.push(svgName);
+    const prevName = sides.length > 1 ? `pratinjau-${base}-${s.name}.png` : `pratinjau-${base}.png`;
+    const width = Math.round(size.widthMm * 12.2);
+    await put(job, prevName, "image/png", await trimmed(svgToPng(s.svg, fonts, width), size.widthMm, size.heightMm));
+    previews.push(prevName);
+  }
+  await put(job, `${base}.pdf`, "application/pdf", pdf);
+  files.push(`${base}.pdf`);
+  return {
+    files,
+    previews,
+    issues: [
+      ...sides.flatMap((s) => s.issues.map((i) => (sides.length > 1 ? `${s.name[0].toUpperCase()}${s.name.slice(1)}: ${i.message}` : i.message))),
+      ...warnings.filter((w) => w.source === "font").map((w) => `PDF: ${w.message}`),
+    ],
+  };
+}
+
+export async function makeMaterials(job: FontJob, company: CompanyData, lang: Lang): Promise<Materials> {
   const r = job.result;
   if (job.status !== "done" || !r) throw new Error("Job belum selesai.");
   const buf = await download(job.files.logo.id);
   const rep = await analyzeLogo(buf);
   const palette = buildPalette(rep.colors);
-  const out = {} as Record<PackageKey, MaterialPackage>;
+  const items: Materials["items"] = {};
+  const set = (key: MaterialKey, pkg: PackageKey, v: MaterialPackage) => {
+    items[key] = { ...(items[key] ?? ({} as Record<PackageKey, MaterialPackage>)), [pkg]: v };
+  };
 
   for (const pkg of ["A", "B"] as const) {
     const kit: BrandKit = {
@@ -73,28 +99,17 @@ export async function makeBusinessCards(job: FontJob, company: CompanyData, lang
         hasText: r.traits.hasText,
       },
     };
+    const name = company.name;
     const card = businessCard(kit);
-    const fonts = kitFonts(kit);
-    const { pdf, warnings } = await svgToPdf([card.front.svg, card.back.svg], { ...CARD_SIZE, fonts, title: `${company.name} - kartu nama ${pkg}` });
-    const base = `kartu-nama-${pkg}`;
-    await put(job, `${base}-depan.svg`, "image/svg+xml", Buffer.from(card.front.svg));
-    await put(job, `${base}-belakang.svg`, "image/svg+xml", Buffer.from(card.back.svg));
-    await put(job, `${base}.pdf`, "application/pdf", pdf);
-    for (const [side, svg] of [["depan", card.front.svg], ["belakang", card.back.svg]] as const) {
-      const png = await trimmed(svgToPng(svg, fonts, 1170), CARD_SIZE.widthMm, CARD_SIZE.heightMm);
-      await put(job, `pratinjau-${base}-${side}.png`, "image/png", png);
+    set("businessCard", pkg, await store(job, kit, `kartu-nama-${pkg}`, CARD_SIZE, [{ name: "depan", ...card.front }, { name: "belakang", ...card.back }], `${name} - kartu nama ${pkg}`));
+    for (const o of ["landscape", "portrait"] as const) {
+      const id = idCard(kit, o);
+      set(o === "landscape" ? "idLandscape" : "idPortrait", pkg, await store(job, kit, `id-card-${o}-${pkg}`, ID_SIZE[o], [{ name: "depan", ...id.front }, { name: "belakang", ...id.back }], `${name} - ID card ${o} ${pkg}`));
     }
-    out[pkg] = {
-      files: [`${base}-depan.svg`, `${base}-belakang.svg`, `${base}.pdf`],
-      previews: [`pratinjau-${base}-depan.png`, `pratinjau-${base}-belakang.png`],
-      issues: [
-        ...card.front.issues.map((i) => `Depan: ${i.message}`),
-        ...card.back.issues.map((i) => `Belakang: ${i.message}`),
-        ...warnings.filter((w) => w.source === "font").map((w) => `PDF: ${w.message}`),
-      ],
-    };
+    const env = envelope(kit);
+    set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }
-  const materials: Materials = { lang, company, generatedAt: new Date().toISOString(), businessCard: out };
+  const materials: Materials = { lang, company, generatedAt: new Date().toISOString(), items };
   job.materials = materials;
   await saveJob(job as Job);
   return materials;

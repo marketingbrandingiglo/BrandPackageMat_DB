@@ -4,6 +4,8 @@ import { ref } from "@/lib/brand/font-select";
 import { FONTS } from "@/lib/brand/fonts";
 import { buildPalette } from "@/lib/brand/palette";
 import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
+import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
+import { idCard, ID_SIZE } from "@/lib/materials/id-card";
 import { checkLayout } from "@/lib/materials/checks";
 import { formatPhone, kitFonts, socialLine, type BrandKit } from "@/lib/materials/kit";
 import { placeLogo } from "@/lib/materials/logo";
@@ -92,5 +94,47 @@ describe("kartu nama", () => {
       expect(c.front.issues).toEqual([]);
       expect(c.front.svg).not.toContain("alamat-1");
     }
+  });
+});
+
+describe("ID card dan amplop", () => {
+  for (const pkg of ["A", "B"] as const) {
+    it(`Paket ${pkg}: ID card portrait/landscape dan amplop lolos pengecekan, PDF benar`, async () => {
+      const k = await kit(pkg);
+      for (const o of ["landscape", "portrait"] as const) {
+        const c = idCard(k, o);
+        expect(c.front.issues, `${o} depan`).toEqual([]);
+        expect(c.back.issues, `${o} belakang`).toEqual([]);
+        expect(c.front.svg).toContain("lubang-tali");
+        expect(c.front.svg).toContain("No. ID 0000 0000");
+        expect(c.back.svg).toContain("Bila menemukan kartu ini");
+        const { pdf, warnings } = await svgToPdf([c.front.svg, c.back.svg], { ...ID_SIZE[o], fonts: kitFonts(k) });
+        expect(warnings.filter((w) => w.source === "font")).toEqual([]);
+        expect((pdf.toString("latin1").match(/\/Type \/Page\b/g) ?? []).length).toBe(2);
+      }
+      const e = envelope(k);
+      expect(e.issues).toEqual([]);
+      expect(e.svg).toContain('width="226mm"');
+      expect(e.svg).toContain("Kepada Yth.");
+      const { warnings } = await svgToPdf(e.svg, { ...ENVELOPE_SIZE, fonts: kitFonts(k) });
+      expect(warnings.filter((w) => w.source === "font")).toEqual([]);
+    });
+  }
+
+  it("ukuran CR80 dan DL dengan bleed", () => {
+    expect(ID_SIZE.landscape).toEqual({ widthMm: 91.6, heightMm: 60 });
+    expect(ID_SIZE.portrait).toEqual({ widthMm: 60, heightMm: 91.6 });
+    expect(ENVELOPE_SIZE).toEqual({ widthMm: 226, heightMm: 116 });
+  });
+
+  it("bahasa Inggris dan nama sangat panjang tetap lolos", async () => {
+    const k = { ...(await kit("B", { name: "PT Nama Perusahaan Yang Sangat Panjang Sekali Untuk Diuji Indonesia Raya" }, false)), lang: "en" as const };
+    for (const o of ["landscape", "portrait"] as const) {
+      const c = idCard(k, o);
+      expect([...c.front.issues, ...c.back.issues], o).toEqual([]);
+      expect(c.back.svg).toContain("If found");
+    }
+    expect(envelope(k).issues).toEqual([]);
+    expect(envelope(k).svg).toContain(">To<");
   });
 });
