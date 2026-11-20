@@ -107,14 +107,27 @@ async function accessToken(): Promise<string> {
 
 /* ---------------- REST ---------------- */
 
-async function call(path: string, init: RequestInit = {}, retry = true): Promise<Response> {
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Panggilan REST Drive. 401: perbarui token sekali. 429, 5xx, dan 403 batas kecepatan
+ * (rateLimitExceeded/userRateLimitExceeded): ulang maks. 4 kali dengan jeda bertambah,
+ * karena tugas materi paralel bisa mengunggah banyak file sekaligus.
+ */
+async function call(path: string, init: RequestInit = {}, retry = true, attempt = 0): Promise<Response> {
   const res = await fetch(`${API()}${path}`, { ...init, headers: { ...init.headers, authorization: `Bearer ${await accessToken()}` } });
   if (res.status === 401 && retry) {
     cached = null;
-    return call(path, init, false);
+    return call(path, init, false, attempt);
   }
   if (!res.ok) {
-    const j = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+    const j = (await res.json().catch(() => null)) as { error?: { message?: string; errors?: { reason?: string }[] } } | null;
+    const reason = j?.error?.errors?.[0]?.reason ?? "";
+    const transient = res.status === 429 || res.status >= 500 || (res.status === 403 && /rateLimit/i.test(reason));
+    if (transient && attempt < 4) {
+      await sleep(800 * 2 ** attempt + Math.random() * 400);
+      return call(path, init, retry, attempt + 1);
+    }
     throw new DriveError(res.status, `Google Drive ${res.status}: ${j?.error?.message ?? res.statusText}`);
   }
   return res;

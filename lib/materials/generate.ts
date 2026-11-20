@@ -256,6 +256,7 @@ export async function runMaterialTask(job: FontJob, key: MaterialKey, pkg: Packa
     const out = await build(job, key, kit, sink);
     rec = { run: m.run, pkg: out, refs: sink.refs, finishedAt: new Date().toISOString() };
   } catch (e) {
+    console.error(`[materi] ${job.id} ${key}:${pkg} gagal:`, e);
     rec = { run: m.run, refs: sink.refs, error: (e as Error).message.slice(0, 200), finishedAt: new Date().toISOString() };
   }
   await redis().hset(hashKey(job), { [field(key, pkg)]: rec });

@@ -27,3 +27,4 @@
 .compare[data-kind="guideline"] .previews, .compare[data-kind="presentation"] .previews { grid-template-columns: 1fr 1fr; }
 .compare[data-kind="stamp"] .previews img { max-width: 220px; box-shadow: none; }
 @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }
+.errors { margin: 0; padding-left: 18px; color: var(--error); font-size: 13px; display: grid; gap: 4px; overflow-wrap: anywhere; }

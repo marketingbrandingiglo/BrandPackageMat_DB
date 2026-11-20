@@ -37,6 +37,7 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
   const [error, setError] = useState<string>();
   const running = useRef(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [taskErrors, setTaskErrors] = useState<Record<string, string>>({});
 
   const workerDone = (j?: JobView) => j?.status === "done" && !(j.wantVisual && (!j.visual || j.visual.status === "queued" || j.visual.status === "working"));
 
@@ -77,6 +78,7 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
       if (!j) return;
       const state: Record<string, TaskState> = {};
       for (const x of TASKS) state[x.id] = j.tasks?.[x.id]?.state === "done" ? "done" : "pending";
+      setTaskErrors({});
       setTasks({ ...state });
       const queue = TASKS.filter((x) => state[x.id] !== "done");
       const worker = async () => {
@@ -84,7 +86,12 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
           const task = x;
           setTasks((p) => ({ ...p, [task.id]: "running" }));
           const res = await fetch(`/api/jobs/${jobId}/materials`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ key: task.key, pkg: task.pkg }) }).catch(() => null);
-          setTasks((p) => ({ ...p, [task.id]: res?.ok ? "done" : "error" }));
+          const ok = Boolean(res?.ok);
+          if (!ok) {
+            const msg = res ? ((await res.json().catch(() => ({}))) as { error?: string }).error ?? `HTTP ${res.status}` : "network";
+            setTaskErrors((p) => ({ ...p, [task.id]: msg }));
+          }
+          setTasks((p) => ({ ...p, [task.id]: ok ? "done" : "error" }));
         }
       };
       await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -147,7 +154,16 @@ export default function JobProgress({ jobId, lang }: { jobId: string; lang: Lang
               ))}
             </tbody>
           </table>
-          {failed && !isRunning && <button type="button" className="btn btn-secondary" onClick={runTasks}>{T.mat.retry}</button>}
+          {failed && (
+            <>
+              <ul className={styles.errors}>
+                {TASKS.filter((x) => tasks[x.id] === "error").map((x) => (
+                  <li key={x.id}>{T.mat.labels[x.key]} {x.pkg}: {taskErrors[x.id] ?? "-"}</li>
+                ))}
+              </ul>
+              <button type="button" className="btn btn-secondary" disabled={isRunning} onClick={runTasks}>{T.mat.retry}</button>
+            </>
+          )}
         </>
       )}
       {error && <p className="alert alert-error">{error}</p>}
