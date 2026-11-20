@@ -61,3 +61,14 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 - Diverifikasi dengan merender DOCX lewat LibreOffice (font brand terpasang); pengujian akhir di Microsoft Word oleh pemilik.
 - Output: `kop-surat-<A|B>.docx`, `kop-surat-<A|B>.svg`, `.pdf`, pratinjau.
 
+## 4e · Template PPT
+
+`lib/materials/presentation.ts`. 16:9 (13,333 × 7,5 inci). Pustaka `pptxgenjs` 4.0.1 + `jszip` 3.10.2 (keduanya dipatok).
+
+- **Theme asli** (XML `ppt/theme/theme1.xml` ditulis ulang): skema warna brand (dk1 teks gelap, lt1 putih, dk2 warna utama gelap, lt2 latar lembut, accent1 warna utama, accent2-3 aksen paket, accent4-6 netral, hyperlink) dan **font tema**: major = font heading, minor = font teks isi. Teks di master/layout memakai font tema, jadi mengganti font tema di PowerPoint mengubah seluruh template.
+- **Slide master** dengan layout bernama: **Judul, Bagian, Isi, Dua kolom, Penutup** (Inggris: Title, Section, Content, Two columns, Closing), plus layout kosong ("Kosong"/"Blank"). Logo ada di setiap layout (terlihat di View > Slide Master); placeholder judul/teks dengan teks petunjuk ("Klik untuk menambah judul").
+- Paket A: putih, pita warna utama, latar lembut untuk Bagian. Paket B: Judul dan Penutup berwarna utama dengan logo di pelat putih, Bagian berlatar gelap, garis aksen.
+- **5 slide contoh** (satu per layout): nama perusahaan + "Profil Perusahaan", "Tentang Kami", "Layanan Kami" (poin), "Visi dan Misi" (dua kolom), "Terima kasih" + kontak.
+- **Pratinjau**: layout didefinisikan sekali sebagai data; data yang sama dipakai untuk PPTX dan pratinjau SVG/PNG (server tidak punya PowerPoint/LibreOffice). Dicek lokal dengan merender PPTX lewat LibreOffice: hasilnya sama dengan pratinjau. Pengujian akhir di PowerPoint oleh pemilik.
+- Output: `template-ppt-<A|B>.pptx`, pratinjau 5 slide.
+

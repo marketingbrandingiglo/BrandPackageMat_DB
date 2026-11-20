@@ -8,6 +8,7 @@ import { envelope, ENVELOPE_SIZE } from "@/lib/materials/envelope";
 import { idCard, ID_SIZE } from "@/lib/materials/id-card";
 import { pngInk, stamp, svgInk } from "@/lib/materials/stamp";
 import { letterheadDocx, letterheadSvg, LETTERHEAD_SIZE } from "@/lib/materials/letterhead";
+import { presentationPptx, presentationPreviews } from "@/lib/materials/presentation";
 import { inflateRawSync } from "node:zlib";
 import { checkLayout } from "@/lib/materials/checks";
 import { formatPhone, kitFonts, socialLine, type BrandKit } from "@/lib/materials/kit";
@@ -252,5 +253,35 @@ describe("kop surat", () => {
     expect(zipEntry(docx, "word/document.xml")).toContain("Sincerely,");
     expect(zipEntry(docx, "word/header1.xml")).toContain("Tel +62");
     expect(letterheadSvg(k).svg).not.toContain('id="footer"');
+  });
+});
+
+describe("template PPT", () => {
+  for (const pkg of ["A", "B"] as const) {
+    it(`Paket ${pkg}: theme brand (warna dan font tema), layout bernama, 5 slide contoh`, async () => {
+      const k = await kit(pkg);
+      const pptx = await presentationPptx(k);
+      const theme = zipEntry(pptx, "ppt/theme/theme1.xml")!;
+      expect(theme).toContain(`<a:majorFont><a:latin typeface="${k.fonts.heading.family}"/>`);
+      expect(theme).toContain(`<a:minorFont><a:latin typeface="${k.fonts.body.family}"/>`);
+      expect(theme).toContain(`<a:accent1><a:srgbClr val="${k.palette.primary.hex.slice(1).toUpperCase()}"/></a:accent1>`);
+      expect(theme).not.toContain("Calibri");
+      const names = [1, 2, 3, 4, 5, 6].map((i) => /<p:cSld name="([^"]+)"/.exec(zipEntry(pptx, `ppt/slideLayouts/slideLayout${i}.xml`) ?? "")?.[1]);
+      expect(names).toEqual(["Kosong", "Judul", "Bagian", "Isi", "Dua kolom", "Penutup"]);
+      for (let i = 1; i <= 5; i++) expect(zipEntry(pptx, `ppt/slides/slide${i}.xml`)).toBeTruthy();
+      expect(zipEntry(pptx, "ppt/slides/slide1.xml")).toContain("PT Uji &lt;Sejahtera&gt; &amp; Co");
+      // Logo ada di layout (master).
+      expect(zipEntry(pptx, "ppt/slideLayouts/_rels/slideLayout2.xml.rels")).toMatch(/media\/image/);
+      const prev = presentationPreviews(k);
+      expect(prev).toHaveLength(5);
+      expect(prev[0]).toContain("PT Uji &lt;Sejahtera&gt; &amp; Co");
+    });
+  }
+
+  it("bahasa Inggris", async () => {
+    const k = { ...(await kit("A")), lang: "en" as const };
+    const pptx = await presentationPptx(k);
+    expect(/<p:cSld name="([^"]+)"/.exec(zipEntry(pptx, "ppt/slideLayouts/slideLayout2.xml")!)?.[1]).toBe("Title");
+    expect(zipEntry(pptx, "ppt/slides/slide5.xml")).toContain("Thank you");
   });
 });

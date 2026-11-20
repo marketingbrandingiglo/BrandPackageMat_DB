@@ -12,12 +12,13 @@ import type { CheckIssue } from "./checks";
 import { envelope, ENVELOPE_SIZE } from "./envelope";
 import { idCard, ID_SIZE } from "./id-card";
 import { letterheadDocx, letterheadSvg, LETTERHEAD_SIZE } from "./letterhead";
+import { presentationPptx, presentationPreviews } from "./presentation";
 import { stamp } from "./stamp";
 import { kitFonts, type BrandKit } from "./kit";
 import type { CompanyData, Lang, MaterialKey, MaterialPackage, Materials, PackageKey } from "./types";
 
 /**
- * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
+ * Tahap 4: membuat materi (4a kartu nama, 4b ID card dan amplop, 4c cap, 4d kop surat, 4e template PPT) dari job 3d-3e yang selesai + data perusahaan, lalu menyimpannya di
  * folder job (Google Drive). Render dilakukan kode aplikasi (bukan Claude).
  */
 export type { MaterialKey, MaterialPackage, Materials } from "./types";
@@ -118,6 +119,16 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
     await put(job, `kop-surat-${pkg}.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", await letterheadDocx(kit));
     kopPkg.files.unshift(`kop-surat-${pkg}.docx`);
     set("letterhead", pkg, kopPkg);
+    const slides = presentationPreviews(kit);
+    const fontsP = kitFonts(kit);
+    await put(job, `template-ppt-${pkg}.pptx`, "application/vnd.openxmlformats-officedocument.presentationml.presentation", await presentationPptx(kit));
+    const pptPrev: string[] = [];
+    for (const [i, svg] of slides.entries()) {
+      const n = `pratinjau-template-ppt-${pkg}-${i + 1}.png`;
+      await put(job, n, "image/png", svgToPng(svg, fontsP, 960));
+      pptPrev.push(n);
+    }
+    set("presentation", pkg, { files: [`template-ppt-${pkg}.pptx`], previews: pptPrev, issues: [] });
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }

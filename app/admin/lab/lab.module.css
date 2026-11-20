@@ -157,3 +157,4 @@ details.group summary { cursor: pointer; }
 .materialCard[data-kind="idPortrait"] .previewRow { grid-template-columns: 1fr 1fr; }
 .materialCard[data-kind="stamp"] .previewRow img { max-width: 260px; box-shadow: none; }
 .materialCard[data-kind="letterhead"] .previewRow img { max-width: 420px; }
+.materialCard[data-kind="presentation"] .previewRow { grid-template-columns: 1fr 1fr; }
