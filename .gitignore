@@ -45,3 +45,4 @@ next-env.d.ts
 
 # Dibuat otomatis oleh next dev (bukan bagian proyek)
 AGENTS.md
+.tmp-*
