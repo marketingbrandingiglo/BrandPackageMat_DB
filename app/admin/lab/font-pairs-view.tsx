@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { EXPRESSIVE_LABEL } from "@/lib/brand/fonts";
 import type { FontRef, FontSelectResult } from "@/lib/brand/font-select";
 import { loadCatalogFont } from "./font/load-font";
 import ToneView from "./tone-view";
 import MaterialsPanel from "./materials-panel";
+import VisualPanel from "./visual-panel";
+import type { VisualTask } from "@/lib/brand/visual-types";
 import type { Materials } from "@/lib/materials/types";
 import styles from "./lab.module.css";
 
@@ -45,8 +47,10 @@ function PairCard({ k, p, name }: { k: "A" | "B"; p: FontSelectResult["packages"
   );
 }
 
-export default function FontPairsView({ r, jobId, companyName, industry, took, materials }: { r: FontSelectResult; jobId: string; companyName: string; industry?: string; took?: number; materials?: Materials }) {
+export default function FontPairsView({ r, jobId, companyName, industry, took, materials, visual }: { r: FontSelectResult; jobId: string; companyName: string; industry?: string; took?: number; materials?: Materials; visual?: VisualTask }) {
   const t = r.traits;
+  const [vis, setVis] = useState<VisualTask | undefined>(visual);
+  const onVisual = useCallback((x?: VisualTask) => setVis(x), []);
   return (
     <div className={styles.palette}>
       <div>
@@ -71,7 +75,9 @@ export default function FontPairsView({ r, jobId, companyName, industry, took, m
         <p className="alert alert-warn">Tone of voice (3e) tidak ada di hasil ini: job dikerjakan sesi pekerja dengan kode versi lama. Kirim ulang setelah pekerja menjalankan git pull.</p>
       )}
 
-      <MaterialsPanel jobId={jobId} initial={materials} />
+      <VisualPanel jobId={jobId} initial={visual} onChange={onVisual} />
+
+      <MaterialsPanel jobId={jobId} initial={materials} visualReady={vis?.status === "done" && Boolean(vis.result?.A || vis.result?.B)} />
 
       <div className={styles.group}>
         <h4>Karakter logo menurut Claude</h4>

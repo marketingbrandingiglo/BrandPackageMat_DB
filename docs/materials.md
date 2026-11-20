@@ -97,3 +97,17 @@ Diuji di **Lab**: setelah job 3d-3e selesai, isi data perusahaan contoh (email, 
 
 - Pengecekan otomatis: teks di area aman, tidak bertabrakan, kontras cukup, isi tidak melewati batas bawah halaman.
 - Output: `guideline-<A|B>.pdf`, pratinjau 6 halaman.
+
+## Tahap 5 · Visual dekoratif di materi
+
+`lib/materials/visual.ts` (`placeVisual`): aset persegi 1200 × 1200 ditempatkan sebagai `<svg>` bersarang (`preserveAspectRatio="xMidYMid slice"`) di dalam `clipPath`, jadi tetap vektor di SVG/PDF dan bisa diedit di Illustrator. PPTX memakai PNG area yang sama (`visualAreaPng`).
+
+| Materi | Paket A | Paket B |
+|---|---|---|
+| Kartu nama belakang | pita bawah 17 mm menggantikan pita warna | latar penuh, logo tetap di pelat putih |
+| ID card belakang | pita bawah (landscape 7 mm, portrait 16 mm); isi berhenti 2 mm di atasnya | sama, di atas latar warna utama |
+| PPT Judul | panel kanan 5 inci, judul menyempit | panel kanan 4,6 inci menggantikan pita aksen |
+| PPT Penutup | pita bawah 1,4 inci | pita bawah 1,3 inci |
+| Guideline sampul | pita atas 34 mm | pita atas 32 mm |
+
+Di Lab, kotak "Pakai visual dekoratif" muncul bila visual job sudah selesai; materi dibuat ulang dengan atau tanpa visual.

@@ -31,7 +31,7 @@ function SignaturePreview({ htmlUrl, logoUrl }: { htmlUrl: string; logoUrl: stri
 }
 
 /** Lab Tahap 4: data perusahaan contoh -> materi Paket A dan B (SVG + PDF), pratinjau, unduh. */
-export default function MaterialsPanel({ jobId, initial }: { jobId: string; initial?: Materials }) {
+export default function MaterialsPanel({ jobId, initial, visualReady }: { jobId: string; initial?: Materials; visualReady?: boolean }) {
   const [state, action, pending] = useActionState<LabMaterialsResult, FormData>(makeMaterials, { materials: initial });
   const [lang, setLang] = useState<"id" | "en">(initial?.lang ?? "id");
   const [tab, setTab] = useState<MaterialKey>("businessCard");
@@ -51,6 +51,11 @@ export default function MaterialsPanel({ jobId, initial }: { jobId: string; init
         {SOCIALS.map(([k, label]) => (
           <label key={k}><span>{label} (opsional)</span><input className="input" name={k} defaultValue={c?.socials.find((s) => s.platform === k)?.handle ?? ""} placeholder="handle" /></label>
         ))}
+        {visualReady && (
+          <label className={`${styles.wide} ${styles.check}`}>
+            <input type="checkbox" name="useVisual" defaultChecked={m?.visual ? Boolean(m.visual.A || m.visual.B) : true} /> <span>Pakai visual dekoratif (Tahap 5)</span>
+          </label>
+        )}
         <div className={styles.materialsActions}>
           <div className={styles.langToggle} role="group" aria-label="Bahasa materi">
             {(["id", "en"] as const).map((x) => (

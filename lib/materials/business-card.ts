@@ -2,6 +2,7 @@ import { SPECS } from "@/lib/brand/specs";
 import { checkLayout, type CheckIssue } from "./checks";
 import { formatPhone, kitColors, PLACEHOLDER, socialLine, type BrandKit } from "./kit";
 import { placeLogo } from "./logo";
+import { placeVisual } from "./visual";
 import { BLEED, SAFE, sheet, svgDoc } from "./svgdoc";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 
@@ -84,7 +85,8 @@ function frontA(kit: BrandKit): CardSide {
 function backA(kit: BrandKit): CardSide {
   const k = kitColors(kit);
   const boxes: Box[] = [];
-  const stripH = BLEED + 3.5;
+  // Dengan visual dekoratif (Tahap 5): pita bawah diganti pita visual 17 mm.
+  const stripH = BLEED + (kit.visual ? 17 : 3.5);
   const logoBox = { x: IN, y: IN, w: SAFE_AREA.w, h: SAFE_AREA.h - stripH + BLEED - 2 };
   let companySvg = "";
   let box = { ...logoBox };
@@ -103,7 +105,7 @@ function backA(kit: BrandKit): CardSide {
     svg: doc(
       `${kit.company.name} - kartu nama belakang (Paket A)`,
       [
-        `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/><rect id="pita" x="0" y="${r(H - stripH)}" width="${W}" height="${r(stripH)}" fill="${k.primary}"/></g>`,
+        `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="#FFFFFF"/>${kit.visual ? placeVisual(kit.visual, { x: 0, y: H - stripH, w: W, h: stripH }, "pita") : `<rect id="pita" x="0" y="${r(H - stripH)}" width="${W}" height="${r(stripH)}" fill="${k.primary}"/>`}</g>`,
         `  <g id="logo">${logo.svg}</g>`,
         companySvg,
       ].filter(Boolean).join("\n"),
@@ -185,7 +187,9 @@ function backB(kit: BrandKit): CardSide {
     svg: doc(
       `${kit.company.name} - kartu nama belakang (Paket B)`,
       [
-        `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(W - 8)}" cy="8" r="16" fill="${k.accent}"/><circle id="lingkaran-kecil" cx="10" cy="${r(H - 9)}" r="6" fill="none" stroke="${k.onPrimary}" stroke-width="0.5" opacity="0.6"/></g>`,
+        kit.visual
+          ? `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="${k.primary}"/>${placeVisual(kit.visual, { x: 0, y: 0, w: W, h: H }, "latar")}</g>`
+          : `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(W - 8)}" cy="8" r="16" fill="${k.accent}"/><circle id="lingkaran-kecil" cx="10" cy="${r(H - 9)}" r="6" fill="none" stroke="${k.onPrimary}" stroke-width="0.5" opacity="0.6"/></g>`,
         `  <g id="logo"><rect id="pelat-logo" x="${r(plate.x)}" y="${r(plate.y)}" width="${plate.w}" height="${plate.h}" rx="2.5" fill="#FFFFFF"/>${logo.svg}${companySvg}</g>`,
       ].join("\n"),
     ),

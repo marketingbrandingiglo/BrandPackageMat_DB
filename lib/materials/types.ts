@@ -45,6 +45,8 @@ export interface Materials {
   company: CompanyData;
   generatedAt: string;
   items: Partial<Record<MaterialKey, Record<PackageKey, MaterialPackage>>>;
+  /** Tahap 5: paket yang memakai visual dekoratif. */
+  visual?: Record<PackageKey, boolean>;
 }
 
 /** Nama file logo yang dirujuk relatif oleh signature.html (Tahap 4f). */

@@ -6,6 +6,7 @@ import { escapeXml } from "@/lib/render/escape";
 import { checkLayout, type CheckIssue } from "./checks";
 import { kitColors, type BrandKit } from "./kit";
 import { placeLogo } from "./logo";
+import { placeVisual } from "./visual";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 import type { Lang } from "./types";
 
@@ -220,6 +221,8 @@ export function guideline(kit: BrandKit, input: GuidelineInput = {}): { pages: s
     const bg = isB ? k.primary : "#FFFFFF";
     const fg = isB ? k.onPrimary : k.dark;
     const p = new Page(bg);
+    // Visual dekoratif (Tahap 5): pita atas, di luar area logo dan teks.
+    if (kit.visual) p.add(placeVisual(kit.visual, isB ? { x: 0, y: 0, w: W, h: 32 } : { x: 10, y: 0, w: W - 10, h: 34 }, "sampul"));
     if (isB) {
       // Logo di pelat putih (warna logo asli tetap terbaca di atas warna utama).
       p.rect(M, 40, CW, 90, "#FFFFFF", ` rx="4"`);

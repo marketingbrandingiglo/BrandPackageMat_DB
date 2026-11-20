@@ -9,6 +9,10 @@
  *   npm run worker -- pick <env> <id>       # validasi picks.json, simpan pasangan font
  *   npm run worker -- tone <env> <id>       # validasi tone.json (3e), job selesai
  *   npm run worker -- fail <env> <id> "<alasan untuk user>"
+ *   npm run worker -- visual-begin <env> <id>   # Tahap 5: data rancangan visual dekoratif
+ *   npm run worker -- visual-check <env> <id>   # validasi + pratinjau, tanpa menyimpan
+ *   npm run worker -- visual-save <env> <id>    # simpan visual-A/B.svg (maks. 3 penolakan per paket)
+ *   npm run worker -- visual-fail <env> <id> "<alasan>"
  *
  * File kerja ada di luar repo: <tmp>/bpa-worker/<env>-<id>/ (logo.png, traits.json, sheet-N.png, picks.json, tone.json).
  */
@@ -24,6 +28,10 @@ import { FORMALITY_LABEL, industryById } from "../lib/brand/industries";
 import { checkTone, ToneSchema } from "../lib/brand/tone";
 import { failJob, finishJob, getJob, queued, saveJob, startJob, type Job, type JobEnv } from "../lib/jobs/jobs";
 import { redis } from "../lib/redis";
+import { allowedColors, validateVisual, visualPreview, VISUAL_MAX_ATTEMPTS, type VisualPkg } from "../lib/brand/visual";
+import { dequeueVisual, queuedVisual } from "../lib/jobs/jobs";
+import { cacheVisual, completeIfReady, jobPalette, PKGS, storeVisual } from "../lib/jobs/visual";
+import { z } from "zod";
 
 const [cmd, envArg, id, ...rest] = process.argv.slice(2);
 const ENVS: JobEnv[] = ["dev", "prod"];
@@ -121,6 +129,14 @@ async function main() {
           }
         }
       }
+      for (const env of ENVS) {
+        for (const jid of await queuedVisual(env)) {
+          const j = await getJob(env, jid);
+          if (!j?.visual) continue;
+          n++;
+          console.log(`${env} ${jid}  visual  ${j.visual.status}${j.visual.step ? ` (${j.visual.step})` : ""}  oleh ${j.userEmail}`);
+        }
+      }
       if (!n) console.log("Tidak ada job.");
       break;
     }
@@ -211,8 +227,108 @@ async function main() {
       console.log(`Job ${job.env}/${job.id} ditandai gagal.`);
       break;
     }
+    case "visual-begin": {
+      ensureLatestCode();
+      const job = await loadJob();
+      const t = job.visual;
+      if (!t || !job.result) die("job ini tidak punya permintaan visual");
+      if (t.status === "done") die("visual job ini sudah selesai");
+      t.status = "working";
+      t.step = "Merancang visual dekoratif";
+      t.startedAt ??= new Date().toISOString();
+      await saveJob(job);
+      const dir = workDir(job.env, job.id);
+      const png = await download(job.files.preview.id);
+      const bg = job.input.darkBackground ? "#212122" : "#ffffff";
+      writeFileSync(path.join(dir, "logo.png"), await sharp(png).flatten({ background: bg }).extend({ top: 40, bottom: 40, left: 40, right: 40, background: bg }).png().toBuffer());
+      const { palette } = await jobPalette(job);
+      const r = job.result;
+      console.log(userData(job));
+      console.log(`\nKesan logo: ${r.traits.impression.id} (bentuk ${r.traits.geometry}, ketebalan ${r.traits.weight}, formalitas ${r.traits.formality}/5, energi ${r.traits.energy}/5)`);
+      for (const p of PKGS) {
+        const done = t.result && p in t.result;
+        console.log(`\n== Paket ${p}${done ? " (SUDAH tersimpan, lewati)" : ` (sisa percobaan ${VISUAL_MAX_ATTEMPTS - t.attempts[p]})`} ==`);
+        console.log(`Font: ${r.packages[p].heading.family} + ${r.packages[p].body.family}`);
+        if (r.tone) console.log(`Tone: ${r.tone[p].summary.id}`);
+        console.log(`Warna yang BOLEH dipakai (HEX persis):\n${allowedColors(palette, p).map((c) => `  ${c.hex}  ${c.name}`).join("\n")}`);
+        if (!done) console.log(`Tulis: ${path.join(dir, `visual-${p}.svg`)}`);
+      }
+      console.log(`\nLogo: ${path.join(dir, "logo.png")}`);
+      console.log(`Konsep singkat: ${path.join(dir, "visual.json")}  {"A": {"id": "...", "en": "..."}, "B": {...}}`);
+      console.log(`Lalu: npm run worker -- visual-check ${job.env} ${job.id}  (lihat pratinjau), setelah itu visual-save.`);
+      break;
+    }
+    case "visual-check":
+    case "visual-save": {
+      const job = await loadJob();
+      const t = job.visual;
+      if (!t || !job.result) die("job ini tidak punya permintaan visual");
+      if (t.status === "done") die("visual job ini sudah selesai");
+      const dir = workDir(job.env, job.id);
+      const { palette } = await jobPalette(job);
+      const Concept = z.record(z.enum(["A", "B"]), z.object({ id: z.string().trim().min(1).max(200), en: z.string().trim().min(1).max(200) }));
+      const concepts = Concept.safeParse(readJson(path.join(dir, "visual.json")));
+      if (!concepts.success) die(`visual.json tidak sesuai format:\n${issues(concepts.error)}`);
+      const save = cmd === "visual-save";
+      const failed: string[] = [];
+      t.result ??= {};
+      for (const p of PKGS as VisualPkg[]) {
+        if (p in t.result) continue;
+        const file = path.join(dir, `visual-${p}.svg`);
+        const concept = concepts.data[p];
+        const res = existsSync(file) ? validateVisual(readFileSync(file, "utf8"), allowedColors(palette, p)) : { ok: false as const, errors: ["file belum ada"] };
+        if (!concept && res.ok) {
+          failed.push(`Paket ${p}: konsep di visual.json belum ada.`);
+          continue;
+        }
+        if (!res.ok) {
+          if (save) t.attempts[p]++;
+          const left = VISUAL_MAX_ATTEMPTS - t.attempts[p];
+          if (save && left <= 0) {
+            t.result[p] = null;
+            (t.notes ??= []).push(`Paket ${p}: visual ditolak validator ${VISUAL_MAX_ATTEMPTS} kali; materi Paket ${p} dibuat tanpa visual.`);
+            console.log(`Paket ${p}: batas percobaan habis, paket ini tanpa visual.`);
+          } else failed.push(`Paket ${p} (sisa percobaan ${left}):\n  - ${res.errors.join("\n  - ")}`);
+          continue;
+        }
+        // Pratinjau: kanvas penuh + potongan rasio lebar dan tinggi (aset dipotong sesuai area materi).
+        const full = visualPreview(res.svg, 600);
+        const wide = await sharp(full).extract({ left: 0, top: 200, width: 600, height: 200 }).png().toBuffer();
+        const tall = await sharp(full).extract({ left: 210, top: 0, width: 180, height: 600 }).png().toBuffer();
+        const sheet = await sharp({ create: { width: 1060, height: 640, channels: 4, background: "#9a9a9a" } })
+          .composite([{ input: full, left: 20, top: 20 }, { input: wide, left: 640, top: 20 }, { input: tall, left: 640, top: 240 }])
+          .png()
+          .toBuffer();
+        writeFileSync(path.join(dir, `check-${p}.png`), sheet);
+        console.log(`Paket ${p}: lolos validasi (${res.colors.length} warna, ${Math.round(res.ink * 100)}% kanvas terisi). Pratinjau: ${path.join(dir, `check-${p}.png`)}`);
+        if (save) {
+          t.result[p] = await storeVisual(job, p, res.svg, concept!);
+          await cacheVisual(job, p, res.svg, concept!);
+        }
+      }
+      if (save) {
+        if (completeIfReady(t)) await dequeueVisual(job);
+        await saveJob(job);
+      }
+      if (failed.length) die(`${save ? "Belum tersimpan" : "Belum lolos"}:\n${failed.join("\n")}`);
+      console.log(save ? ((t.status as string) === "done" ? "Visual selesai." : "Tersimpan sebagian.") : `Lihat pratinjau dengan Read; bila sudah baik: npm run worker -- visual-save ${job.env} ${job.id}`);
+      break;
+    }
+    case "visual-fail": {
+      const job = await loadJob();
+      const reason = rest.join(" ").trim();
+      if (!job.visual) die("job ini tidak punya permintaan visual");
+      if (!reason) die("isi alasan singkat untuk user");
+      job.visual.status = "failed";
+      job.visual.error = reason.slice(0, 300);
+      job.visual.finishedAt = new Date().toISOString();
+      await dequeueVisual(job);
+      await saveJob(job);
+      console.log(`Visual ${job.env}/${job.id} ditandai gagal.`);
+      break;
+    }
     default:
-      die("perintah: status | pending | begin | traits | pick | tone | fail");
+      die("perintah: status | pending | begin | traits | pick | tone | fail | visual-begin | visual-check | visual-save | visual-fail");
   }
 }
 

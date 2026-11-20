@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { appEnv } from "@/lib/env";
 import { APP_KEY_PREFIX, redis } from "@/lib/redis";
+import type { VisualTask } from "@/lib/brand/visual-types";
 
 /**
  * Job untuk sesi pekerja Claude (SPEC bagian 8). Disimpan di Upstash per environment,
@@ -49,6 +50,8 @@ export interface Job<R = unknown> {
   belled: boolean;
   result?: R;
   error?: string;
+  /** Tahap 5: visual dekoratif (opsional, diminta terpisah setelah job selesai). */
+  visual?: VisualTask;
 }
 
 export const currentEnv = (): JobEnv => (appEnv() === "production" ? "prod" : "dev");
@@ -120,4 +123,35 @@ export async function listJobs(env: JobEnv, userId?: string, limit = 50): Promis
   const gone = ids.filter((_, i) => !jobs[i]);
   if (gone.length) await redis().zrem(z, ...gone);
   return jobs.filter((j): j is Job => !!j);
+}
+
+/* ---------- Tahap 5: antrean visual dekoratif ---------- */
+
+export async function enqueueVisual(job: Job): Promise<void> {
+  await saveJob(job);
+  const q = k(job.env, "visual", "queue");
+  await redis().lrem(q, 0, job.id);
+  await redis().rpush(q, job.id);
+}
+
+export async function queuedVisual(env: JobEnv): Promise<string[]> {
+  return redis().lrange(k(env, "visual", "queue"), 0, -1);
+}
+
+export async function dequeueVisual(job: Job): Promise<void> {
+  await redis().lrem(k(job.env, "visual", "queue"), 0, job.id);
+}
+
+export interface CachedVisual {
+  svg: string;
+  concept: { id: string; en: string };
+}
+
+/** Cache aset per kunci (logo + palet paket + versi), TTL 90 hari. */
+export async function getCachedVisual(env: JobEnv, key: string): Promise<CachedVisual | null> {
+  return redis().get<CachedVisual>(k(env, "visual", "cache", key));
+}
+
+export async function putCachedVisual(env: JobEnv, key: string, v: CachedVisual): Promise<void> {
+  await redis().set(k(env, "visual", "cache", key), v, { ex: JOB_TTL_SECONDS });
 }

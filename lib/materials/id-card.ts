@@ -3,6 +3,7 @@ import { contactLines } from "./business-card";
 import { checkLayout, type CheckIssue } from "./checks";
 import { kitColors, PLACEHOLDER, type BrandKit } from "./kit";
 import { placeLogo } from "./logo";
+import { placeVisual } from "./visual";
 import { BLEED, sheet, svgDoc, type Sheet } from "./svgdoc";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 
@@ -124,14 +125,19 @@ function back(kit: BrandKit, o: Orientation): IdSide {
   const k = kitColors(kit);
   const s = o === "portrait" ? P : L;
   const z = slot(s);
-  const area = { x: s.IN, y: z.y + z.h + 3, w: s.safe.w, h: s.H - s.IN - (z.y + z.h + 3) };
+  // Visual dekoratif (Tahap 5): pita bawah, isi berhenti 2 mm di atasnya.
+  const band = kit.visual ? BLEED + (o === "portrait" ? 16 : 7) : 0;
+  const bottom = band ? Math.min(s.H - s.IN, s.H - band - 2) : s.H - s.IN;
+  const area = { x: s.IN, y: z.y + z.h + 3, w: s.safe.w, h: bottom - (z.y + z.h + 3) };
   const dark = kit.pkg === "B";
   const bg = dark ? k.primary : "#FFFFFF";
   const fg = dark ? k.onPrimary : k.dark;
   const parts: string[] = [];
   const boxes: Box[] = [];
   parts.push(
-    dark
+    kit.visual
+      ? `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="${dark ? k.primary : "#FFFFFF"}"/>${placeVisual(kit.visual, { x: 0, y: s.H - band, w: s.W, h: band }, "pita")}</g>`
+      : dark
       ? `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(s.W - 2)}" cy="${r(s.H - 2)}" r="${o === "portrait" ? 13 : 9}" fill="${k.accent}"/></g>`
       : `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="#FFFFFF"/><rect id="pita" x="0" y="${r(s.H - BLEED - 3)}" width="${s.W}" height="${r(BLEED + 3)}" fill="${k.primary}"/></g>`,
   );

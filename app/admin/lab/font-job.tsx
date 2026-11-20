@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { FontSelectResult } from "@/lib/brand/font-select";
 import type { Materials } from "@/lib/materials/types";
+import type { VisualTask } from "@/lib/brand/visual-types";
 import FontPairsView from "./font-pairs-view";
 import styles from "./lab.module.css";
 
@@ -19,6 +20,7 @@ interface JobView {
   industry?: string;
   result?: FontSelectResult;
   materials?: Materials;
+  visual?: VisualTask;
 }
 
 const STATUS_LABEL = { queued: "Menunggu pekerja Claude", working: "Sedang dikerjakan", done: "Selesai", failed: "Gagal" } as const;
@@ -55,7 +57,7 @@ export default function FontJob({ jobId, belled }: { jobId: string; belled: bool
     };
   }, [jobId]);
 
-  if (job?.status === "done" && job.result) return <FontPairsView r={job.result} jobId={job.id} companyName={job.companyName} industry={job.industry} took={job.finishedAt ? Date.parse(job.finishedAt) - Date.parse(job.createdAt) : undefined} materials={job.materials} />;
+  if (job?.status === "done" && job.result) return <FontPairsView r={job.result} jobId={job.id} companyName={job.companyName} industry={job.industry} took={job.finishedAt ? Date.parse(job.finishedAt) - Date.parse(job.createdAt) : undefined} materials={job.materials} visual={job.visual} />;
 
   const waited = job ? now - Date.parse(job.createdAt) : 0;
   return (

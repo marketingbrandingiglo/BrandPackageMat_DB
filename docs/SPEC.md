@@ -309,7 +309,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 5. ~~Gambar di email signature~~: diputuskan 2026-11-20 (bagian 18).
 6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
 7. Ambang peringatan resolusi logo.
-8. Aset visual AI dipakai di materi mana (usulan: sampul PPT, sisi belakang ID card, sisi belakang kartu nama).
+8. ~~Aset visual AI dipakai di materi mana~~: diputuskan 2026-11-20 (bagian 18).
 9. Penamaan ZIP hasil checklist, dan apakah versi di lokal diberi label "(lokal)".
 10. ~~Detail API OpenAI dan Magnific~~ — tidak berlaku lagi (visual AI memakai Claude, 2026-11-10).
 11. Penggantian kurs: IDR memakai kurs saat event (default di bagian 11); ubah bila pemilik memilih kurs berjalan.
@@ -335,3 +335,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Kop surat (2026-11-20): header = logo, nama perusahaan, alamat dan telepon utama; footer = email dan sosial media. DOCX berisi kerangka surat dengan placeholder; PDF berupa kertas kop kosong (header + footer) untuk dicetak.
 - Email signature (2026-11-20): pilihan a. ZIP berisi `signature.html` + `logo-email.png` (logo dirujuk relatif, bukan URL aplikasi dan bukan base64). Halaman HTML memuat panduan singkat; signature ditempel dari browser (Outlook desktop dan Apple Mail ikut membawa logo; Gmail dan Outlook web: logo disisipkan lewat Sisipkan gambar). Sosial media tautan teks. Font brand disebut pertama lalu cadangan web-safe (Arial, Georgia, atau Courier New). Paket A: logo kiri + garis warna utama; Paket B: logo atas + pita aksen.
 - Guideline (2026-11-20): PDF A4 6 halaman per paket (sampul, logo + area bebas + ukuran minimum, warna HEX/RGB/CMYK + kontras, tipografi + tautan unduh + lisensi, tone of voice, contoh kalimat + isi paket dan catatan). Teks memakai font paket itu sendiri. Logo PNG diberi saran mengganti dengan versi vektor.
+- Visual dekoratif / Tahap 5 (2026-11-20): dipakai di sampul PPT (slide Judul dan Penutup), belakang kartu nama, belakang ID card, dan sampul guideline, selalu di area sendiri (tidak menimpa logo/teks). Opsional lewat tombol terpisah setelah job font selesai (bel `🛎️ visual`); di Tahap 6 menjadi kotak centang di form. Paket A halus dan selaras bentuk logo, Paket B lebih berani dan kontras; warna hanya dari palet paket. Validator: SVG sederhana tanpa teks/gambar/script/filter, maks. 150 KB; maks. 3 penolakan per paket lalu paket itu tanpa visual. Cache per hash logo + palet paket + versi (90 hari). Materi tanpa visual tetap bisa dibuat.

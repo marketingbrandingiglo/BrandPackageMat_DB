@@ -18,7 +18,7 @@ Satu sesi melayani dev (`bpa:dev:`) dan production (`bpa:prod:`).
 ```bash
 git pull origin dev          # kode terbaru (sekali per bangun cukup)
 npm ci                       # hanya bila package-lock berubah
-npm run worker -- pending
+npm run worker -- pending       # job font (3d-3e) dan visual (Tahap 5)
 ```
 
 **Selalu `git pull origin dev` dan baca ulang runbook ini setiap kali dibangunkan**: langkah dan aturan bisa berubah. `begin` menolak berjalan bila kode pekerja tertinggal dari `origin/dev`.
@@ -110,6 +110,27 @@ Tone of voice adalah **hipotesis** dari kesan logo dan nada dasar bidang usaha (
 - **Paket A**: nada dasar bidang usaha yang selaras dengan kesan logo (aman). **Paket B**: nuansa berbeda (mis. lebih hangat, lebih berani, atau lebih formal), tetap pantas untuk bidang usahanya; selaras dengan karakter font Paket B.
 - `personality` tepat 3; `do` dan `dont` 3-4 butir; `taglines` tepat 2. Ringkasan dan tagline B tidak boleh sama dengan A (`tone` menolak).
 - Nama perusahaan boleh dipakai di contoh. Bidang usaha "Lainnya": pakai teks bidang usaha dari user sebagai data.
+
+## Visual dekoratif (Tahap 5, bel `🛎️ visual <env>/<id>`)
+
+Job font yang sudah selesai bisa meminta **satu aset dekoratif SVG per paket** (SPEC bagian 7). `pending` menampilkannya sebagai `visual`. Aset ditempatkan aplikasi di area sendiri (pita bawah kartu nama dan ID card, panel sampul PPT, pita sampul guideline) dan **dipotong** sesuai rasio area, jadi rancang sebagai komposisi yang tetap bagus bila dipotong lebar maupun tinggi.
+
+1. `npm run worker -- visual-begin <env> <id>` → data user, kesan logo, font dan tone tiap paket, **daftar HEX yang boleh dipakai** per paket, path `logo.png`. Buka logo dengan Read.
+2. Tulis `visual-A.svg`, `visual-B.svg`, dan `visual.json` (`{"A": {"id": "konsep singkat", "en": "..."}, "B": {...}}`) di folder kerja.
+3. `npm run worker -- visual-check <env> <id>` → validasi + pratinjau `check-A.png`/`check-B.png` (kanvas penuh, potongan lebar, potongan tinggi). **Buka pratinjau dengan Read** dan perbaiki bila kurang rapi. Tidak menghitung percobaan.
+4. `npm run worker -- visual-save <env> <id>` → simpan ke Drive dan cache. Setiap penolakan validator dihitung; setelah **3 penolakan** paket itu dibuat tanpa visual (job tetap selesai). Paket yang sudah tersimpan dilewati saat mengulang.
+5. Bila tidak bisa dikerjakan: `npm run worker -- visual-fail <env> <id> "<alasan>"`.
+
+Aturan SVG (dicek validator):
+- `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200">`, maks. 150 KB, maks. 800 elemen, minimal 8% kanvas terisi.
+- Elemen hanya `g, defs, path, rect, circle, ellipse, line, polyline, polygon, linearGradient, radialGradient, stop, clipPath, title, desc`. **Tanpa** teks, gambar, `use`, `pattern`, `mask`, `filter`, `style`, `class`, script, atau tautan.
+- Warna (`fill`, `stroke`, `stop-color`) **hanya HEX dari daftar paket itu**, ditulis persis; variasi kepekatan lewat `opacity`/`fill-opacity`/`stroke-opacity`.
+- Tanpa teks, logo, huruf, wajah, atau orang. Pola atau ilustrasi abstrak (bentuk geometris, garis, gelombang, potongan bentuk dari logo).
+
+Arah desain (keputusan pemilik 2026-11-20):
+- **Paket A**: halus dan selaras dengan bentuk logo (mis. mengulang lengkung, sudut, atau ritme bentuk logo), warna utama + aksen paket A, banyak ruang tenang.
+- **Paket B**: lebih berani dan kontras (mis. bidang diagonal, bentuk besar, warna aksen B yang menonjol), tetap pantas untuk bidang usahanya.
+- Elemen tersebar ke seluruh kanvas (bukan satu objek kecil di tengah) supaya potongan mana pun tetap berisi. Isi seluruh kanvas dengan latar (mis. `rect` penuh warna latar lembut atau warna utama) agar tidak transparan di tepi.
 
 ## Setup sesi pekerja (sekali, oleh pemilik)
 

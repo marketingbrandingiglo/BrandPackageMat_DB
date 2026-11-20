@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 5: visual dekoratif SVG per paket dari sesi pekerja Claude (perintah `visual-begin/check/save/fail`, bel `🛎️ visual`), validator (palet paket, tanpa teks/gambar/script/filter, maks. 150 KB, maks. 3 penolakan), cache 90 hari, panel di Lab; dipakai di belakang kartu nama dan ID card, sampul dan penutup PPT, sampul guideline.
 - Tahap 4g: guideline PDF Paket A dan B (6 halaman: sampul, logo, warna, tipografi, tone of voice, contoh kalimat dan catatan), pratinjau di Lab.
 - Tahap 4f: email signature HTML Paket A dan B (tabel + gaya inline, lebar maks. 600 px, font cadangan web-safe), logo PNG 2x sebagai file terpisah, unduhan ZIP dibuat saat diunduh, pratinjau di Lab.
 - Tahap 4e: template PPT 16:9 Paket A dan B: theme asli (warna dan font tema brand), slide master dengan layout Judul/Bagian/Isi/Dua kolom/Penutup berlogo, 5 slide contoh, pratinjau. Pustaka `pptxgenjs` 4.0.1 dan `jszip` 3.10.2.

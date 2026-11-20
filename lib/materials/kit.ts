@@ -30,6 +30,8 @@ export interface BrandKit {
   logo: KitLogo;
   palette: Palette;
   fonts: { heading: FontRef; body: FontRef };
+  /** Tahap 5: aset dekoratif SVG paket ini (opsional). */
+  visual?: string;
 }
 
 const LIB = path.join(process.cwd(), "fonts/lib");

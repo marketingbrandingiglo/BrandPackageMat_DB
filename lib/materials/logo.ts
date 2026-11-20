@@ -13,7 +13,7 @@ export interface Placed {
   h: number;
 }
 
-function inner(svg: string): { viewBox: string; body: string } {
+export function inner(svg: string, prefix = "lg-"): { viewBox: string; body: string } {
   const open = /<svg\b[^>]*>/i.exec(svg);
   const close = svg.lastIndexOf("</svg>");
   if (!open || close < 0) throw new Error("SVG logo tidak valid");
@@ -27,9 +27,9 @@ function inner(svg: string): { viewBox: string; body: string } {
   let body = svg.slice(open.index + tag.length, close);
   // Awali id supaya tidak bentrok dengan id template (gradien, clipPath, dll.).
   body = body
-    .replace(/\bid="([^"]+)"/g, 'id="lg-$1"')
-    .replace(/url\(#([^)]+)\)/g, "url(#lg-$1)")
-    .replace(/(xlink:href|href)="#([^"]+)"/g, '$1="#lg-$2"');
+    .replace(/\bid="([^"]+)"/g, `id="${prefix}$1"`)
+    .replace(/url\(#([^)]+)\)/g, `url(#${prefix}$1)`)
+    .replace(/(xlink:href|href)="#([^"]+)"/g, `$1="#${prefix}$2"`);
   return { viewBox, body };
 }
 

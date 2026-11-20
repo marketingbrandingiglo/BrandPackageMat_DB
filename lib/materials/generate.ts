@@ -81,7 +81,7 @@ async function store(job: FontJob, kit: BrandKit, base: string, size: { widthMm:
   };
 }
 
-export async function makeMaterials(job: FontJob, company: CompanyData, lang: Lang): Promise<Materials> {
+export async function makeMaterials(job: FontJob, company: CompanyData, lang: Lang, useVisual = false): Promise<Materials> {
   const r = job.result;
   if (job.status !== "done" || !r) throw new Error("Job belum selesai.");
   const buf = await download(job.files.logo.id);
@@ -92,8 +92,19 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
     items[key] = { ...(items[key] ?? ({} as Record<PackageKey, MaterialPackage>)), [pkg]: v };
   };
 
+  // Tahap 5: aset dekoratif per paket (bila diminta dan tersedia).
+  const visuals: Partial<Record<PackageKey, string>> = {};
+  if (useVisual && job.visual?.status === "done") {
+    for (const pkg of ["A", "B"] as const) {
+      const a = job.visual.result?.[pkg];
+      const f = a && job.files[a.file];
+      if (f) visuals[pkg] = (await download(f.id)).toString("utf8");
+    }
+  }
+
   for (const pkg of ["A", "B"] as const) {
     const kit: BrandKit = {
+      visual: visuals[pkg],
       pkg,
       lang,
       company,
@@ -153,7 +164,7 @@ export async function makeMaterials(job: FontJob, company: CompanyData, lang: La
     const env = envelope(kit);
     set("envelope", pkg, await store(job, kit, `amplop-${pkg}`, ENVELOPE_SIZE, [{ name: "depan", ...env }], `${name} - amplop ${pkg}`));
   }
-  const materials: Materials = { lang, company, generatedAt: new Date().toISOString(), items };
+  const materials: Materials = { lang, company, generatedAt: new Date().toISOString(), items, visual: { A: Boolean(visuals.A), B: Boolean(visuals.B) } };
   job.materials = materials;
   await saveJob(job as Job);
   return materials;

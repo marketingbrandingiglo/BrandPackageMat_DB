@@ -5,6 +5,7 @@ import { escapeXml } from "@/lib/render/escape";
 import { formatPhone, kitColors, type BrandKit, type KitColors } from "./kit";
 import { placeLogo } from "./logo";
 import { r, wrap, type TextStyle } from "./text";
+import { placeVisual, visualAreaPng } from "./visual";
 
 /**
  * Template PowerPoint 16:9 (SPEC bagian 5): theme asli (warna tema, font tema major/minor),
@@ -18,6 +19,7 @@ export const SLIDE = { w: 13.333, h: 7.5 }; // inci
 type Font = "heading" | "body";
 type El =
   | { t: "rect"; x: number; y: number; w: number; h: number; fill: string; radius?: number }
+  | { t: "visual"; x: number; y: number; w: number; h: number }
   | { t: "logo"; x: number; y: number; w: number; h: number; align: "start" | "center" | "end"; plate?: boolean }
   | {
       t: "ph";
@@ -91,6 +93,7 @@ function layouts(kit: BrandKit, k: KitColors): Layout[] {
   const isB = kit.pkg === "B";
   const W = SLIDE.w;
   const H = SLIDE.h;
+  const vis = Boolean(kit.visual);
   const titlePh = (color: string, y = 0.5): El => ({ t: "ph", name: "judul", kind: "title", x: 0.8, y, w: 9.9, h: 0.9, size: 28, color, font: "heading", bold: true, valign: "bottom", prompt: T.promptTitle });
   const smallLogo: El = { t: "logo", x: W - 2.3, y: isB ? H - 1.0 : 0.55, w: 1.5, h: 0.6, align: "end" };
   const contentDecor: El[] = isB
@@ -105,10 +108,10 @@ function layouts(kit: BrandKit, k: KitColors): Layout[] {
         name: T.names.title,
         bg: k.primary,
         els: [
-          { t: "rect", x: W - 1.6, y: 0, w: 1.6, h: H, fill: k.accent },
+          vis ? { t: "visual", x: W - 4.6, y: 0, w: 4.6, h: H } : { t: "rect", x: W - 1.6, y: 0, w: 1.6, h: H, fill: k.accent },
           { t: "logo", x: 0.8, y: 0.6, w: 3.0, h: 1.2, align: "start", plate: true },
-          { t: "ph", name: "judul", kind: "title", x: 0.8, y: 2.7, w: 10.2, h: 1.6, size: 44, color: k.onPrimary, font: "heading", bold: true, valign: "bottom", prompt: T.promptTitle },
-          { t: "ph", name: "subjudul", kind: "body", x: 0.8, y: 4.45, w: 10.2, h: 0.9, size: 20, color: k.onPrimary, font: "body", valign: "top", prompt: T.promptSub },
+          { t: "ph", name: "judul", kind: "title", x: 0.8, y: 2.7, w: vis ? 7.5 : 10.2, h: 1.6, size: 44, color: k.onPrimary, font: "heading", bold: true, valign: "bottom", prompt: T.promptTitle },
+          { t: "ph", name: "subjudul", kind: "body", x: 0.8, y: 4.45, w: vis ? 7.5 : 10.2, h: 0.9, size: 20, color: k.onPrimary, font: "body", valign: "top", prompt: T.promptSub },
         ],
       }
     : {
@@ -116,10 +119,11 @@ function layouts(kit: BrandKit, k: KitColors): Layout[] {
         bg: "#FFFFFF",
         els: [
           { t: "rect", x: 0, y: H - 0.3, w: W, h: 0.3, fill: k.primary },
+          ...(vis ? [{ t: "visual", x: W - 5.0, y: 0, w: 5.0, h: H - 0.3 } as El] : []),
           { t: "logo", x: 0.8, y: 0.6, w: 2.6, h: 1.0, align: "start" },
-          { t: "ph", name: "judul", kind: "title", x: 0.8, y: 2.5, w: 11.7, h: 1.6, size: 40, color: k.dark, font: "heading", bold: true, valign: "bottom", prompt: T.promptTitle },
+          { t: "ph", name: "judul", kind: "title", x: 0.8, y: 2.5, w: vis ? 7.1 : 11.7, h: 1.6, size: 40, color: k.dark, font: "heading", bold: true, valign: "bottom", prompt: T.promptTitle },
           { t: "rect", x: 0.8, y: 4.25, w: 1.2, h: 0.07, fill: k.primary },
-          { t: "ph", name: "subjudul", kind: "body", x: 0.8, y: 4.45, w: 11.7, h: 0.9, size: 20, color: k.primaryText, font: "body", valign: "top", prompt: T.promptSub },
+          { t: "ph", name: "subjudul", kind: "body", x: 0.8, y: 4.45, w: vis ? 7.1 : 11.7, h: 0.9, size: 20, color: k.primaryText, font: "body", valign: "top", prompt: T.promptSub },
         ],
       };
 
@@ -168,7 +172,7 @@ function layouts(kit: BrandKit, k: KitColors): Layout[] {
         name: T.names.closing,
         bg: k.primary,
         els: [
-          { t: "rect", x: 0, y: H - 0.4, w: W, h: 0.4, fill: k.accent },
+          vis ? { t: "visual", x: 0, y: H - 1.3, w: W, h: 1.3 } : { t: "rect", x: 0, y: H - 0.4, w: W, h: 0.4, fill: k.accent },
           { t: "logo", x: W / 2 - 1.6, y: 1.0, w: 3.2, h: 1.3, align: "center", plate: true },
           { t: "ph", name: "judul", kind: "title", x: 1, y: 2.85, w: W - 2, h: 1.2, size: 40, color: k.onPrimary, font: "heading", bold: true, align: "center", valign: "middle", prompt: T.promptTitle },
           { t: "ph", name: "kontak", kind: "body", x: 1.5, y: 4.2, w: W - 3, h: 1.6, size: 16, color: k.onPrimary, font: "body", align: "center", valign: "top", prompt: T.promptBody },
@@ -178,7 +182,7 @@ function layouts(kit: BrandKit, k: KitColors): Layout[] {
         name: T.names.closing,
         bg: "#FFFFFF",
         els: [
-          { t: "rect", x: 0, y: H - 0.3, w: W, h: 0.3, fill: k.primary },
+          vis ? { t: "visual", x: 0, y: H - 1.4, w: W, h: 1.4 } : { t: "rect", x: 0, y: H - 0.3, w: W, h: 0.3, fill: k.primary },
           { t: "logo", x: W / 2 - 1.5, y: 1.0, w: 3.0, h: 1.2, align: "center" },
           { t: "ph", name: "judul", kind: "title", x: 1, y: 2.85, w: W - 2, h: 1.2, size: 40, color: k.primaryText, font: "heading", bold: true, align: "center", valign: "middle", prompt: T.promptTitle },
           { t: "ph", name: "kontak", kind: "body", x: 1.5, y: 4.2, w: W - 3, h: 1.6, size: 16, color: k.dark, font: "body", align: "center", valign: "top", prompt: T.promptBody },
@@ -238,7 +242,9 @@ export async function presentationPptx(kit: BrandKit): Promise<Buffer> {
     const objects: pptxgen.SlideMasterProps["objects"] = [];
     for (const e of lay.els) {
       if (e.t === "rect") objects.push({ rect: { x: e.x, y: e.y, w: e.w, h: e.h, fill: { color: hex(e.fill) } } });
-      else if (e.t === "logo") {
+      else if (e.t === "visual") {
+        if (kit.visual) objects.push({ image: { x: e.x, y: e.y, w: e.w, h: e.h, data: `data:image/png;base64,${visualAreaPng(kit.visual, e.w, e.h, Math.round(e.w * 200)).toString("base64")}` } });
+      } else if (e.t === "logo") {
         const pad = e.plate ? 0.18 : 0;
         if (e.plate) objects.push({ text: { text: "", options: { x: e.x, y: e.y, w: e.w, h: e.h, shape: p.ShapeType.roundRect, rectRadius: 0.12, fill: { color: "FFFFFF" }, line: { color: "FFFFFF", width: 0 } } } });
         const b = fitBox(kit.logo.aspect, { x: e.x + pad, y: e.y + pad, w: e.w - 2 * pad, h: e.h - 2 * pad }, e.plate ? "center" : e.align);
@@ -318,7 +324,9 @@ export function presentationPreviews(kit: BrandKit): string[] {
     const parts: string[] = [`<rect width="${SLIDE.w}" height="${SLIDE.h}" fill="${lay.bg}"/>`];
     for (const e of lay.els) {
       if (e.t === "rect") parts.push(`<rect x="${r(e.x)}" y="${r(e.y)}" width="${r(e.w)}" height="${r(e.h)}" fill="${e.fill}"/>`);
-      else if (e.t === "logo") {
+      else if (e.t === "visual") {
+        if (kit.visual) parts.push(placeVisual(kit.visual, e, "slide"));
+      } else if (e.t === "logo") {
         const pad = e.plate ? 0.18 : 0;
         if (e.plate) parts.push(`<rect x="${r(e.x)}" y="${r(e.y)}" width="${r(e.w)}" height="${r(e.h)}" rx="0.12" fill="#FFFFFF"/>`);
         parts.push(placeLogo(kit.logo, { x: e.x + pad, y: e.y + pad, w: e.w - 2 * pad, h: e.h - 2 * pad }, e.plate ? "center" : e.align).svg);

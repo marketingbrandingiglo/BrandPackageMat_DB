@@ -9,7 +9,7 @@ export function bellConfigured(): boolean {
   return Boolean(process.env.GITHUB_TOKEN && process.env.CONTROL_PR);
 }
 
-export async function ring(env: "dev" | "prod", jobId: string): Promise<boolean> {
+export async function ring(env: "dev" | "prod", jobId: string, kind: "job" | "visual" = "job"): Promise<boolean> {
   if (!bellConfigured()) return false;
   const repo = process.env.GITHUB_REPO || "marketingbrandingiglo/BrandPackageMat_DB";
   const res = await fetch(`https://api.github.com/repos/${repo}/issues/${process.env.CONTROL_PR}/comments`, {
@@ -20,7 +20,7 @@ export async function ring(env: "dev" | "prod", jobId: string): Promise<boolean>
       "x-github-api-version": "2022-11-28",
       "content-type": "application/json",
     },
-    body: JSON.stringify({ body: `🛎️ job ${env}/${jobId}` }),
+    body: JSON.stringify({ body: `🛎️ ${kind} ${env}/${jobId}` }),
   });
   if (!res.ok) console.error(`Bel gagal: GitHub ${res.status}`);
   return res.ok;
