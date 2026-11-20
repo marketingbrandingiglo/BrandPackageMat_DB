@@ -46,13 +46,16 @@ interface Content {
   address: string;
   phone: string;
   footer: string;
+  /** Alamat/telepon tambahan, baris kedua footer. */
+  extra: string;
 }
 
 function content(kit: BrandKit): Content {
   const c = kit.company;
   const phone = c.phone ? `${PLACEHOLDER[kit.lang].phone} ${formatPhone(c.phone)}` : "";
   const footer = [c.email, ...c.socials.slice(0, 3).map(socialLine)].filter(Boolean).join("   ·   ");
-  return { company: c.name, address: c.address, phone, footer };
+  const extra = [...(c.extraAddresses ?? []).slice(0, 2), ...(c.extraPhones ?? []).slice(0, 2).map(formatPhone)].filter(Boolean).join("   ·   ");
+  return { company: c.name, address: c.address, phone, footer, extra };
 }
 
 /* ---------------- PDF / SVG (kertas kop) ---------------- */
@@ -103,12 +106,15 @@ export function letterheadSvg(kit: BrandKit): { svg: string; issues: CheckIssue[
   // Footer.
   const fy = PAGE.H - MARGIN.footer;
   const fs: TextStyle = { font: kit.fonts.body, size: 2.8, color: k.mid, anchor: isB ? "start" : "middle" };
-  if (ct.footer) {
-    const t = text("footer", ct.footer, isB ? L : W / 2, fy, fit(ct.footer, fs, R - L, 2.2), "#FFFFFF");
-    boxes.push(t.box);
-    parts.push(
-      `  <g id="footer"><rect x="${L}" y="${r(fy - 6)}" width="${r(R - L)}" height="${isB ? 0.9 : 0.25}" fill="${isB ? k.primary : k.light}"/>${t.svg}</g>`,
-    );
+  const flines = [ct.extra, ct.footer].filter(Boolean);
+  if (flines.length) {
+    const ts = flines.map((v, i) => {
+      const t = text(`footer-${i + 1}`, v, isB ? L : W / 2, fy - (flines.length - 1 - i) * 4, fit(v, fs, R - L, 2.2), "#FFFFFF");
+      boxes.push(t.box);
+      return t.svg;
+    });
+    const ry = fy - 6 - (flines.length - 1) * 4;
+    parts.push(`  <g id="footer"><rect x="${L}" y="${r(ry)}" width="${r(R - L)}" height="${isB ? 0.9 : 0.25}" fill="${isB ? k.primary : k.light}"/>${ts.join("")}</g>`);
   }
   const svg = svgDoc(PAGE, `${kit.company.name} - kop surat (Paket ${kit.pkg})`, parts.join("\n"));
   return { svg, issues: checkLayout(boxes, { x: L - 0.01, y: 8, w: R - L + 0.02, h: PAGE.H - 16 }) };
@@ -205,15 +211,17 @@ export async function letterheadDocx(kit: BrandKit): Promise<Buffer> {
       ]
     : [new Paragraph({ spacing: { before: 100, after: 0, line: 40, lineRule: LineRuleType.EXACT }, border: { bottom: { style: BorderStyle.SINGLE, size: 10, color: hex(k.primary), space: 1 } }, children: [] })];
 
-  const footerChildren = ct.footer
-    ? [
-        new Paragraph({
-          alignment: isB ? AlignmentType.LEFT : AlignmentType.CENTER,
-          spacing: TIGHT,
-          border: { top: isB ? { style: BorderStyle.SINGLE, size: 18, color: hex(k.primary), space: 6 } : { style: BorderStyle.SINGLE, size: 4, color: hex(k.light), space: 6 } },
-          children: [new TextRun({ text: ct.footer, font: bodyFont, size: 16, color: hex(k.mid) })],
-        }),
-      ]
+  const flines = [ct.extra, ct.footer].filter(Boolean);
+  const footerChildren = flines.length
+    ? flines.map(
+        (v, i) =>
+          new Paragraph({
+            alignment: isB ? AlignmentType.LEFT : AlignmentType.CENTER,
+            spacing: TIGHT,
+            ...(i === 0 ? { border: { top: isB ? { style: BorderStyle.SINGLE, size: 18, color: hex(k.primary), space: 6 } : { style: BorderStyle.SINGLE, size: 4, color: hex(k.light), space: 6 } } } : {}),
+            children: [new TextRun({ text: v, font: bodyFont, size: 16, color: hex(k.mid) })],
+          }),
+      )
     : [new Paragraph({ children: [] })];
 
   // Tanpa `after`: jarak mengikuti gaya Normal (8 pt setelah paragraf).

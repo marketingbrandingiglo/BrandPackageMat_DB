@@ -13,7 +13,35 @@ export interface LogoDropzoneProps {
   maxBytes: number;
   onChange?: (file: File | null) => void;
   disabled?: boolean;
+  lang?: "id" | "en";
 }
+
+const TXT = {
+  id: {
+    notType: (n: string) => `"${n}" bukan SVG atau PNG.`,
+    tooBig: (a: string, b: string) => `Ukuran file ${a} melebihi ${b}.`,
+    empty: "File kosong.",
+    pastedPng: "Gambar ditempel sebagai PNG. Bila tersedia, SVG asli memberi hasil terbaik.",
+    onlyOne: (n: string) => `Hanya satu logo yang dipakai: "${n}".`,
+    drop: "Lepaskan untuk mengunggah",
+    replace: "Ganti",
+    remove: "Hapus",
+    title: "Seret logo ke sini atau klik untuk memilih",
+    sub: (m: string) => `SVG atau PNG, maks ${m} · bisa juga tempel dengan Cmd/Ctrl + V`,
+  },
+  en: {
+    notType: (n: string) => `"${n}" is not an SVG or PNG.`,
+    tooBig: (a: string, b: string) => `File size ${a} exceeds ${b}.`,
+    empty: "The file is empty.",
+    pastedPng: "The image was pasted as a PNG. The original SVG gives the best result if available.",
+    onlyOne: (n: string) => `Only one logo is used: "${n}".`,
+    drop: "Drop to upload",
+    replace: "Replace",
+    remove: "Remove",
+    title: "Drag the logo here or click to choose",
+    sub: (m: string) => `SVG or PNG, max ${m} · you can also paste with Cmd/Ctrl + V`,
+  },
+};
 
 const ACCEPT = ".svg,.png,image/svg+xml,image/png";
 
@@ -34,7 +62,8 @@ function fmtBytes(n: number) {
 /** Teks yang tampak seperti SVG (mis. "Copy as SVG" dari Figma/Illustrator). */
 const looksLikeSvg = (t: string) => /^\s*(<\?xml[^>]*>\s*)?(<!--[\s\S]*?-->\s*)*<svg[\s>]/i.test(t);
 
-export default function LogoDropzone({ name, maxBytes, onChange, disabled }: LogoDropzoneProps) {
+export default function LogoDropzone({ name, maxBytes, onChange, disabled, lang = "id" }: LogoDropzoneProps) {
+  const T = TXT[lang];
   const inputRef = useRef<HTMLInputElement>(null);
   const depth = useRef(0);
   const [file, setFile] = useState<File | null>(null);
@@ -50,13 +79,13 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
     (f: File | null, note?: string) => {
       setMessage(note ?? null);
       if (f && !kindOf(f)) {
-        setMessage(`"${f.name}" bukan SVG atau PNG.`);
+        setMessage(T.notType(f.name));
         f = null;
       } else if (f && f.size > maxBytes) {
-        setMessage(`Ukuran file ${fmtBytes(f.size)} melebihi ${fmtBytes(maxBytes)}.`);
+        setMessage(T.tooBig(fmtBytes(f.size), fmtBytes(maxBytes)));
         f = null;
       } else if (f && f.size === 0) {
-        setMessage("File kosong.");
+        setMessage(T.empty);
         f = null;
       }
       const input = inputRef.current;
@@ -69,7 +98,7 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
       setPreview(f ? URL.createObjectURL(f) : null);
       onChange?.(f);
     },
-    [maxBytes, onChange],
+    [maxBytes, onChange, T],
   );
 
   // React mereset form setelah server action selesai, termasuk <input type="file">.
@@ -103,7 +132,7 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
         e.preventDefault();
         const ext = img.type === "image/png" ? "png" : "svg";
         const named = img.name && img.name !== "image.png" ? img : new File([img], `tempel-${stamp}.${ext}`, { type: img.type });
-        accept(named, ext === "png" ? "Gambar ditempel sebagai PNG. Bila tersedia, SVG asli memberi hasil terbaik." : undefined);
+        accept(named, ext === "png" ? T.pastedPng : undefined);
         return;
       }
       if (cd.files.length) {
@@ -119,7 +148,7 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
     };
     document.addEventListener("paste", onPaste);
     return () => document.removeEventListener("paste", onPaste);
-  }, [accept, disabled]);
+  }, [accept, disabled, T]);
 
   const hasFiles = (e: React.DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
 
@@ -151,7 +180,7 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
         setDragging(false);
         const files = Array.from(e.dataTransfer.files);
         if (!files.length) return;
-        accept(files[0], files.length > 1 ? `Hanya satu logo yang dipakai: "${files[0].name}".` : undefined);
+        accept(files[0], files.length > 1 ? T.onlyOne(files[0].name) : undefined);
       }}
     >
       <input
@@ -166,7 +195,7 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
       />
 
       {dragging ? (
-        <div className={styles.dropHint}>Lepaskan untuk mengunggah</div>
+        <div className={styles.dropHint}>{T.drop}</div>
       ) : file ? (
         <div className={styles.filled}>
           <div className={styles.thumb}>
@@ -180,8 +209,8 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
             </span>
           </div>
           <div className={styles.actions}>
-            <label htmlFor={`${name}-input`} className="btn btn-secondary">Ganti</label>
-            <button type="button" className="btn btn-ghost" onClick={() => accept(null)} disabled={disabled}>Hapus</button>
+            <label htmlFor={`${name}-input`} className="btn btn-secondary">{T.replace}</label>
+            <button type="button" className="btn btn-ghost" onClick={() => accept(null)} disabled={disabled}>{T.remove}</button>
           </div>
         </div>
       ) : (
@@ -190,8 +219,8 @@ export default function LogoDropzone({ name, maxBytes, onChange, disabled }: Log
             <path d="M12 16V4M7 9l5-5 5 5" />
             <path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
           </svg>
-          <span className={styles.title}>Seret logo ke sini atau klik untuk memilih</span>
-          <span className={styles.sub}>SVG atau PNG, maks {fmtBytes(maxBytes)} · bisa juga tempel dengan Cmd/Ctrl + V</span>
+          <span className={styles.title}>{T.title}</span>
+          <span className={styles.sub}>{T.sub(fmtBytes(maxBytes))}</span>
         </label>
       )}
 

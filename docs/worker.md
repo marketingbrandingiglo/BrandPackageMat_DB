@@ -28,7 +28,7 @@ Kerjakan job satu per satu, urut dari yang terlama. Untuk job `font-select` (3d)
 1. `npm run worker -- begin <env> <id>` → mencetak data user, pemetaan bidang usaha (nada dasar dan karakter font dari aplikasi), dan path `logo.png`. **Buka logo itu dengan Read** dan amati.
 2. Tulis `traits.json` di folder kerja yang disebut (bentuk di bawah). `npm run worker -- traits <env> <id>` → validasi, shortlist 20-36 kandidat (termasuk kandidat kontras untuk Paket B), lembar spesimen `sheet-N.png`. Bila ada pesan `GAGAL`, perbaiki JSON lalu ulangi.
 3. **Buka semua lembar spesimen dengan Read**, bandingkan dengan logo, tulis `picks.json`. `npm run worker -- pick <env> <id>` → pasangan font disimpan.
-4. Tulis `tone.json` (tone of voice Paket A dan B, Indonesia + Inggris). `npm run worker -- tone <env> <id>` → job selesai.
+4. Tulis `tone.json` (tone of voice Paket A dan B, Indonesia + Inggris). `npm run worker -- tone <env> <id>` → job selesai. Bila user mencentang visual dekoratif di form, `tone` langsung membuat tugas visual: **lanjutkan dengan `visual-begin`** (bagian Visual dekoratif) di bangun yang sama.
 5. Bila job tidak bisa dikerjakan (logo rusak, Drive putus, dll.): `npm run worker -- fail <env> <id> "<alasan singkat untuk user>"`.
 
 Job yang tertinggal di status `working` (sesi sebelumnya terputus) juga muncul di `pending`: lanjutkan dari `begin`.

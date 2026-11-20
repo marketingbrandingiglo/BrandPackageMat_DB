@@ -1,0 +1,5 @@
+.progress { display: grid; gap: 12px; max-width: 760px; padding: 24px; background: #fff; border: 1px solid var(--card-border); border-radius: var(--radius-card); }
+.progress .alert { margin: 0; }
+.status { display: flex; align-items: center; gap: 10px; margin: 0; }
+.spinner { width: 18px; height: 18px; border: 2px solid var(--iglo-red-tint); border-top-color: var(--iglo-red); border-radius: 50%; animation: spin 0.9s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }

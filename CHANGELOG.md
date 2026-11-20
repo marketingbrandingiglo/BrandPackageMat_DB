@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 6a: form brand package 3 langkah di beranda (logo + cek logo, nama, bidang usaha; email, alamat dan telepon bertanda utama, sosial media; ringkasan + visual dekoratif opsional), tombol bahasa ID/EN di header (antarmuka dan bahasa materi), halaman status `/hasil/<id>`. Alamat/telepon tambahan di footer kop surat. Pekerja langsung membuat visual setelah tone bila diminta.
 - Tahap 5: visual dekoratif SVG per paket dari sesi pekerja Claude (perintah `visual-begin/check/save/fail`, bel `🛎️ visual`), validator (palet paket, tanpa teks/gambar/script/filter, maks. 150 KB, maks. 3 penolakan), cache 90 hari, panel di Lab; dipakai di belakang kartu nama dan ID card, sampul dan penutup PPT, sampul guideline.
 - Tahap 4g: guideline PDF Paket A dan B (6 halaman: sampul, logo, warna, tipografi, tone of voice, contoh kalimat dan catatan), pratinjau di Lab.
 - Tahap 4f: email signature HTML Paket A dan B (tabel + gaya inline, lebar maks. 600 px, font cadangan web-safe), logo PNG 2x sebagai file terpisah, unduhan ZIP dibuat saat diunduh, pratinjau di Lab.

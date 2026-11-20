@@ -30,8 +30,8 @@ import { failJob, finishJob, getJob, queued, saveJob, startJob, type Job, type J
 import { redis } from "../lib/redis";
 import { allowedColors, validateVisual, visualPreview } from "../lib/brand/visual";
 import { VISUAL_MAX_ATTEMPTS, type VisualPkg } from "../lib/brand/visual-types";
-import { dequeueVisual, queuedVisual } from "../lib/jobs/jobs";
-import { cacheVisual, completeIfReady, jobPalette, PKGS, storeVisual } from "../lib/jobs/visual";
+import { dequeueVisual, enqueueVisual, queuedVisual } from "../lib/jobs/jobs";
+import { cacheVisual, completeIfReady, jobPalette, newVisualTask, PKGS, storeVisual } from "../lib/jobs/visual";
 import { z } from "zod";
 
 const [cmd, envArg, id, ...rest] = process.argv.slice(2);
@@ -229,6 +229,14 @@ async function main() {
       if (broken.length) die(`tone.json belum memenuhi aturan:\n- ${broken.join("\n- ")}`);
       await finishJob(job, { ...job.result, tone: parsed.data });
       console.log(`Selesai. Tone A: ${parsed.data.A.summary.id} | Tone B: ${parsed.data.B.summary.id}`);
+      // Tahap 6: user mencentang visual dekoratif di form -> lanjut visual di bangun yang sama.
+      if (job.input.wantVisual && !job.visual) {
+        const needWorker = await newVisualTask(job, false);
+        if (needWorker) {
+          await enqueueVisual(job);
+          console.log(`\nUser meminta visual dekoratif. Lanjutkan sekarang: npm run worker -- visual-begin ${job.env} ${job.id}`);
+        } else console.log("\nVisual dekoratif diambil dari cache; tidak ada yang perlu dikerjakan.");
+      }
       break;
     }
     case "fail": {

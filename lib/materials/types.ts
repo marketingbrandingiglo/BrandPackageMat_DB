@@ -15,6 +15,9 @@ export interface CompanyData {
   phone: string;
   address: string;
   socials: Social[];
+  /** Alamat dan telepon tambahan (maks. 2 masing-masing), hanya di footer kop surat (keputusan 2026-11-20). */
+  extraAddresses?: string[];
+  extraPhones?: string[];
 }
 
 export interface MaterialPackage {

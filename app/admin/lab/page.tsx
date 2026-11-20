@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppHeader from "@/app/_components/app-header";
+import { getLang } from "@/lib/i18n/server";
 import industries from "@/data/industries.json";
 import { bellConfigured } from "@/lib/jobs/bell";
 import { driveStatus } from "@/lib/drive/drive";
@@ -18,7 +19,7 @@ export default async function LabPage() {
   const bellNote = bellConfigured() ? "" : " Bel belum diatur (GITHUB_TOKEN/CONTROL_PR kosong): setelah mengirim, minta Claude memproses job secara manual.";
   return (
     <>
-      <AppHeader user={user} />
+      <AppHeader user={user} lang={await getLang()} />
       <main className={styles.main}>
         <p className="eyebrow">Lab mesin brand · Tahap 3</p>
         <h1 className={styles.h1}>Lab</h1>

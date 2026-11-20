@@ -2,10 +2,11 @@
 
 import { requireSuperAdmin } from "@/lib/auth/server";
 import { INDUSTRIES } from "@/lib/brand/industries";
-import { createFolder, DriveError, DriveNotConnected, envFolder, upload } from "@/lib/drive/drive";
+import { DriveError, DriveNotConnected } from "@/lib/drive/drive";
 import { ring } from "@/lib/jobs/bell";
-import { currentEnv, enqueue, enqueueVisual, getJob, newJobId, saveJob, type Job } from "@/lib/jobs/jobs";
+import { currentEnv, enqueueVisual, getJob, saveJob, type Job } from "@/lib/jobs/jobs";
 import { newVisualTask } from "@/lib/jobs/visual";
+import { createBrandJob } from "@/lib/jobs/create";
 import type { FontSelectResult } from "@/lib/brand/font-select";
 import { makeMaterials as buildMaterials, type Materials } from "@/lib/materials/generate";
 import type { CompanyData, Lang } from "@/lib/materials/kit";
@@ -89,42 +90,12 @@ export async function requestFonts(_prev: LabFontRequest, form: FormData): Promi
   const industryId = String(form.get("industry") ?? "");
   const known = INDUSTRIES.find((x) => x.id === industryId);
   const other = String(form.get("industryOther") ?? "").trim().replace(/\s+/g, " ").slice(0, 60);
-  const industry = known?.freeText ? (other ? `Lainnya: ${other}` : undefined) : known?.id_label;
   if (!(file instanceof File) || file.size === 0) return { error: "Pilih file logo terlebih dulu." };
   if (!companyName) return { error: "Isi nama perusahaan untuk contoh spesimen." };
   if (known?.freeText && !other) return { error: "Bidang usaha \"Lainnya\": isi keterangan bidang usahanya." };
   try {
-    const buf = Buffer.from(await file.arrayBuffer());
-    const r = await analyzeLogo(buf);
-    const env = currentEnv();
-    const id = newJobId();
-    const folderId = await createFolder(id, await envFolder(env));
-    const ext = r.kind === "svg" ? "svg" : "png";
-    const logo = await upload(folderId, `logo-asli.${ext}`, r.kind === "svg" ? "image/svg+xml" : "image/png", r.kind === "svg" && r.sanitized ? Buffer.from(r.sanitized.svg) : buf);
-    const preview = await upload(folderId, "logo-pratinjau.png", "image/png", r.previews.original);
-    const now = new Date().toISOString();
-    const job: Job = {
-      id,
-      env,
-      type: "font-select",
-      userId: user.id,
-      userEmail: user.email,
-      status: "queued",
-      step: "Menunggu pekerja Claude",
-      createdAt: now,
-      updatedAt: now,
-      input: { companyName, industry, industryId: known?.id, darkBackground: r.transparentBackground && r.onLight.strategy !== "original" },
-      folderId,
-      files: {
-        logo: { id: logo.id, name: logo.name, mimeType: logo.mimeType, size: logo.size },
-        preview: { id: preview.id, name: preview.name, mimeType: preview.mimeType, size: preview.size },
-      },
-      belled: false,
-    };
-    await enqueue(job);
-    job.belled = await ring(env, id).catch(() => false);
-    if (job.belled) await saveJob(job);
-    return { jobId: id, belled: job.belled };
+    const { id, belled } = await createBrandJob({ user, logo: Buffer.from(await file.arrayBuffer()), companyName, industryId, industryOther: other });
+    return { jobId: id, belled };
   } catch (e) {
     if (e instanceof LogoRejected || e instanceof DriveNotConnected) return { error: e.message };
     if (e instanceof DriveError) return { error: `Gagal menyimpan ke Google Drive: ${e.message}` };

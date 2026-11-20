@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { appEnv } from "@/lib/env";
 import { APP_KEY_PREFIX, redis } from "@/lib/redis";
 import type { VisualTask } from "@/lib/brand/visual-types";
+import type { CompanyData } from "@/lib/materials/types";
 
 /**
  * Job untuk sesi pekerja Claude (SPEC bagian 8). Disimpan di Upstash per environment,
@@ -28,6 +29,12 @@ export interface FontSelectInput {
   industryId?: string;
   /** True bila logo perlu latar gelap agar terbaca. */
   darkBackground: boolean;
+  /** Tahap 6 (form user): data kontak, bahasa materi, dan permintaan visual dekoratif. */
+  company?: CompanyData;
+  lang?: "id" | "en";
+  wantVisual?: boolean;
+  /** Label bidang usaha dalam bahasa Inggris (untuk tampilan EN). */
+  industryEn?: string;
 }
 
 export interface Job<R = unknown> {

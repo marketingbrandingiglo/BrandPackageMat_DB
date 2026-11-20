@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AppHeader from "@/app/_components/app-header";
+import { getLang } from "@/lib/i18n/server";
 import { requireSuperAdmin } from "@/lib/auth/server";
 import { FONT_CATALOG } from "@/lib/brand/fonts";
 import FontBrowser, { type FontCard } from "./font-browser";
@@ -22,7 +23,7 @@ export default async function FontReviewPage() {
   }));
   return (
     <>
-      <AppHeader user={user} />
+      <AppHeader user={user} lang={await getLang()} />
       <main className={styles.main}>
         <p className="eyebrow">Lab mesin brand · 3c</p>
         <h1 className={styles.h1}>Daftar font terkurasi</h1>

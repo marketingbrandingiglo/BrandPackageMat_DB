@@ -2,9 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { logout } from "@/app/login/actions";
 import type { PublicUser } from "@/lib/auth/users";
+import { DICT, type Lang } from "@/lib/i18n/dict";
+import LangToggle from "./lang-toggle";
 import styles from "./app-header.module.css";
 
-export default function AppHeader({ user }: { user: PublicUser }) {
+export default function AppHeader({ user, lang = "id" }: { user: PublicUser; lang?: Lang }) {
+  const t = DICT[lang].header;
   return (
     <header className={styles.header}>
       <Link href="/" className={styles.brand}>
@@ -14,6 +17,7 @@ export default function AppHeader({ user }: { user: PublicUser }) {
         </span>
       </Link>
       <nav className={styles.nav}>
+        <LangToggle lang={lang} label={t.lang} />
         {user.role === "superadmin" && (
           <>
             <Link href="/admin/lab" className={styles.link}>Lab</Link>
@@ -22,7 +26,7 @@ export default function AppHeader({ user }: { user: PublicUser }) {
         )}
         <span className={styles.email}>{user.email}</span>
         <form action={logout}>
-          <button type="submit" className={`btn btn-secondary ${styles.logout}`}>Keluar</button>
+          <button type="submit" className={`btn btn-secondary ${styles.logout}`}>{t.logout}</button>
         </form>
       </nav>
     </header>

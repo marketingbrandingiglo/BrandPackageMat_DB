@@ -1,4 +1,5 @@
 import AppHeader from "@/app/_components/app-header";
+import { getLang } from "@/lib/i18n/server";
 import { requireSuperAdmin, users } from "@/lib/auth/server";
 import { toPublic } from "@/lib/auth/users";
 import { driveStatus } from "@/lib/drive/drive";
@@ -31,7 +32,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const list = (await users().list()).map(toPublic);
   return (
     <>
-      <AppHeader user={me} />
+      <AppHeader user={me} lang={await getLang()} />
       <main className={styles.main}>
         <p className="eyebrow">Super admin</p>
         <h1 className={styles.h1}>Admin</h1>
