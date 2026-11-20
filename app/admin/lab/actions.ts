@@ -84,7 +84,7 @@ export interface LabFontRequest {
  * (beberapa menit) dan dipantau UI lewat /api/jobs/<id>.
  */
 export async function requestFonts(_prev: LabFontRequest, form: FormData): Promise<LabFontRequest> {
-  const { user } = await requireSuperAdmin();
+  const { user, session } = await requireSuperAdmin();
   const file = form.get("logo");
   const companyName = String(form.get("companyName") ?? "").trim().slice(0, 80);
   const industryId = String(form.get("industry") ?? "");
@@ -94,7 +94,7 @@ export async function requestFonts(_prev: LabFontRequest, form: FormData): Promi
   if (!companyName) return { error: "Isi nama perusahaan untuk contoh spesimen." };
   if (known?.freeText && !other) return { error: "Bidang usaha \"Lainnya\": isi keterangan bidang usahanya." };
   try {
-    const { id, belled } = await createBrandJob({ user, logo: Buffer.from(await file.arrayBuffer()), companyName, industryId, industryOther: other });
+    const { id, belled } = await createBrandJob({ user, sessionId: session.id, logo: Buffer.from(await file.arrayBuffer()), companyName, industryId, industryOther: other });
     return { jobId: id, belled };
   } catch (e) {
     if (e instanceof LogoRejected || e instanceof DriveNotConnected) return { error: e.message };

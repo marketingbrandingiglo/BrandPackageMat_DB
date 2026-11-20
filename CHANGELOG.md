@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tahap 7: penghitung pemakaian (total, per user, per sesi, per bulan) dan rekap di halaman Admin; data job di Upstash kedaluwarsa tepat 90 hari sejak dibuat (sebelumnya terhitung ulang tiap kali job disimpan); cron harian juga merapikan indeks sesi.
 - Tahap 6d: unduh paket terpilih (semua, per materi, checklist) sebagai ZIP yang dialirkan saat diunduh dengan struktur folder SPEC dan BACA-SAYA/README; halaman Riwayat; tautan Buat baru dan Riwayat di header; header rapi di layar sempit.
 - Tahap 6c: tab Ringkasan (font, warna, tone per paket), pratinjau email signature, ubah data kontak sebelum memilih (materi dibuat ulang), pilih Paket A/B dengan konfirmasi, file paket lain langsung dihapus dari Drive.
 - Tahap 6b: materi dibuat otomatis di halaman hasil setelah pekerja selesai: 18 tugas (materi × paket) paralel dengan progres per materi, hasil per tugas di Upstash, ulang tugas yang gagal; hasil Paket A dan B berdampingan per materi; catatan bila visual dekoratif tidak tersedia.

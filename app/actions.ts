@@ -42,14 +42,14 @@ export interface SubmitResult {
 }
 
 export async function submitBrand(form: FormData): Promise<SubmitResult> {
-  const { user } = await requireUser();
+  const { user, session } = await requireUser();
   const lang = await getLang();
   const file = form.get("logo");
   if (!(file instanceof File) || file.size === 0) return { error: DICT[lang].err.logo, field: "logo" };
   const p = await parseBrandForm(form, lang);
   if ("error" in p) return p;
   try {
-    const { id } = await createBrandJob({ user, logo: Buffer.from(await file.arrayBuffer()), companyName: p.companyName, industryId: p.industryId, industryOther: p.industryOther, company: p.company, lang, wantVisual: p.wantVisual });
+    const { id } = await createBrandJob({ user, sessionId: session.id, logo: Buffer.from(await file.arrayBuffer()), companyName: p.companyName, industryId: p.industryId, industryOther: p.industryOther, company: p.company, lang, wantVisual: p.wantVisual });
     return { jobId: id };
   } catch (e) {
     if (e instanceof LogoRejected) return { error: e.message, field: "logo" };

@@ -13,6 +13,8 @@ import { currentEnv, enqueue, newJobId, saveJob, type Job } from "./jobs";
  */
 export interface NewJobInput {
   user: PublicUser;
+  /** Sesi login (pemakaian per sesi). */
+  sessionId?: string;
   logo: Buffer;
   companyName: string;
   industryId: string;
@@ -46,6 +48,7 @@ export async function createBrandJob(i: NewJobInput): Promise<{ id: string; bell
     type: "font-select",
     userId: i.user.id,
     userEmail: i.user.email,
+    sessionId: i.sessionId,
     status: "queued",
     step: "Menunggu pekerja Claude",
     createdAt: now,

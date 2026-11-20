@@ -4,7 +4,8 @@ import type { FontSelectResult } from "@/lib/brand/font-select";
 import { analyzeLogo } from "@/lib/brand/logo";
 import { buildPalette } from "@/lib/brand/palette";
 import { download, remove, upload } from "@/lib/drive/drive";
-import { k, saveJob, type Job, type JobFile } from "@/lib/jobs/jobs";
+import { jobExpiry, k, saveJob, usageRef, type Job, type JobFile } from "@/lib/jobs/jobs";
+import { track } from "@/lib/usage";
 import { redis } from "@/lib/redis";
 import sharp from "sharp";
 import { SPECS } from "@/lib/brand/specs";
@@ -262,6 +263,7 @@ export async function beginMaterials(job: FontJob, company: CompanyData, lang: L
     run: randomBytes(4).toString("hex"),
   };
   await saveJob(job as Job);
+  await track(usageRef(job as Job), "materials");
   return job.materials;
 }
 
@@ -285,6 +287,7 @@ export async function runMaterialTask(job: FontJob, key: MaterialKey, pkg: Packa
     rec = { run: m.run, refs: sink.refs, error: (e as Error).message.slice(0, 200), finishedAt: new Date().toISOString() };
   }
   await redis().hset(hashKey(job), { [field(key, pkg)]: rec });
+  await redis().expireat(hashKey(job), jobExpiry(job));
   // File lama (putaran sebelumnya) yang tidak dipakai lagi.
   for (const [n, f] of Object.entries(prev?.refs ?? {})) if (rec.refs[n]?.id !== f.id) await remove(f.id).catch(() => {});
   return rec.error ? { ok: false, error: rec.error } : { ok: true };
@@ -327,6 +330,7 @@ export async function choosePackage(job: FontJob, pkg: PackageKey): Promise<void
   const other: PackageKey = pkg === "A" ? "B" : "A";
   job.chosen = { pkg, at: new Date().toISOString() };
   await saveJob(job as Job);
+  await track(usageRef(job as Job), "chosen");
   const recs = await readTasks(job);
   const del: string[] = [];
   for (const key of MATERIAL_KEYS) {

@@ -41,3 +41,11 @@
   .section { padding: 18px; }
   .h1 { font-size: 26px; }
 }
+.h3 { font-size: 16px; margin: 20px 0 8px; }
+.usageWrap { overflow-x: auto; border: 1px solid var(--card-border); border-radius: 12px; background: #fff; }
+.usage { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+.usage th, .usage td { padding: 9px 12px; border-bottom: 1px solid var(--card-border); text-align: right; white-space: nowrap; }
+.usage th:first-child, .usage td:first-child { text-align: left; white-space: normal; }
+.usage th { color: var(--muted); font-weight: 600; }
+.usage tr:last-child td { border-bottom: 0; }
+.usage tr[data-total] td { font-weight: 700; background: var(--n10); }

@@ -3,6 +3,7 @@ import { appEnv } from "@/lib/env";
 import { APP_KEY_PREFIX, redis } from "@/lib/redis";
 import type { VisualTask } from "@/lib/brand/visual-types";
 import type { CompanyData, Materials } from "@/lib/materials/types";
+import { track, type UsageRef } from "@/lib/usage";
 
 /**
  * Job untuk sesi pekerja Claude (SPEC bagian 8). Disimpan di Upstash per environment,
@@ -43,6 +44,8 @@ export interface Job<R = unknown> {
   type: "font-select";
   userId: string;
   userEmail: string;
+  /** Sesi login saat job dibuat (pemakaian per sesi, Tahap 7). */
+  sessionId?: string;
   status: JobStatus;
   /** Langkah terakhir yang dikerjakan pekerja, untuk ditampilkan di UI. */
   step?: string;
@@ -74,10 +77,15 @@ export function newJobId(): string {
   return `${ymd}-${randomBytes(4).toString("hex")}`;
 }
 
+/** Kedaluwarsa job: tepat 90 hari sejak dibuat, sama dengan folder Drive-nya (SPEC bagian 10). */
+export const jobExpiry = (job: Pick<Job, "createdAt">) => Math.floor(Date.parse(job.createdAt) / 1000) + JOB_TTL_SECONDS;
+
 export async function saveJob(job: Job): Promise<void> {
   job.updatedAt = new Date().toISOString();
-  await redis().set(k(job.env, "job", job.id), job, { ex: JOB_TTL_SECONDS });
+  await redis().set(k(job.env, "job", job.id), job, { exat: Math.max(jobExpiry(job), Math.floor(Date.now() / 1000) + 60) });
 }
+
+export const usageRef = (job: Job): UsageRef => ({ env: job.env, userId: job.userId, sessionId: job.sessionId });
 
 export async function getJob<R = unknown>(env: JobEnv, id: string): Promise<Job<R> | null> {
   if (!/^[0-9]{8}-[0-9a-f]{8}$/.test(id)) return null;
@@ -87,6 +95,7 @@ export async function getJob<R = unknown>(env: JobEnv, id: string): Promise<Job<
 /** Simpan job baru, masukkan ke antrean dan indeks riwayat. */
 export async function enqueue(job: Job): Promise<void> {
   await saveJob(job);
+  await track(usageRef(job), "jobs");
   const score = Date.parse(job.createdAt);
   const p = redis().pipeline();
   p.rpush(k(job.env, "jobs", "queue"), job.id);
@@ -114,6 +123,8 @@ export async function finishJob<R>(job: Job<R>, result: R): Promise<void> {
   job.step = "Selesai";
   job.finishedAt = new Date().toISOString();
   await saveJob(job as Job);
+  await track(usageRef(job as Job), "done");
+  await track(usageRef(job as Job), "workerMs", Date.parse(job.finishedAt) - Date.parse(job.createdAt));
 }
 
 export async function failJob(job: Job, reason: string): Promise<void> {
@@ -122,6 +133,7 @@ export async function failJob(job: Job, reason: string): Promise<void> {
   job.error = reason.slice(0, 300);
   job.finishedAt = new Date().toISOString();
   await saveJob(job);
+  await track(usageRef(job), "failed");
 }
 
 /** Riwayat: job milik user (terbaru dulu), atau semua bila userId tidak diisi (super admin). */

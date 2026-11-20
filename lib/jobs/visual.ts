@@ -3,7 +3,8 @@ import { analyzeLogo } from "@/lib/brand/logo";
 import { buildPalette, type Palette } from "@/lib/brand/palette";
 import { visualKey, visualPreview, type VisualAsset, type VisualPkg, type VisualTask } from "@/lib/brand/visual";
 import { download, remove, upload } from "@/lib/drive/drive";
-import { getCachedVisual, putCachedVisual, saveJob, type Job } from "./jobs";
+import { getCachedVisual, putCachedVisual, saveJob, usageRef, type Job } from "./jobs";
+import { track } from "@/lib/usage";
 
 /**
  * Tahap 5: alur visual dekoratif, dipakai server aplikasi (permintaan, cache) dan skrip pekerja
@@ -52,6 +53,7 @@ export async function newVisualTask(job: Job, fresh: boolean): Promise<boolean> 
   const keys = { A: visualKey(logo, palette, "A"), B: visualKey(logo, palette, "B") };
   const task: VisualTask = { status: "queued", step: "Menunggu pekerja Claude", requestedAt: new Date().toISOString(), keys, attempts: { A: 0, B: 0 } };
   job.visual = task;
+  await track(usageRef(job), "visual");
   if (!fresh) {
     const hits = await Promise.all(PKGS.map((p) => getCachedVisual(job.env, keys[p])));
     if (hits.every(Boolean)) {

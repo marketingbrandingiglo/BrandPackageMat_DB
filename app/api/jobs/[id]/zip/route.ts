@@ -3,7 +3,8 @@ import JSZip from "jszip";
 import { getCurrentUser } from "@/lib/auth/server";
 import type { FontSelectResult } from "@/lib/brand/font-select";
 import { download } from "@/lib/drive/drive";
-import { currentEnv, getJob, JOB_TTL_SECONDS } from "@/lib/jobs/jobs";
+import { currentEnv, getJob, JOB_TTL_SECONDS, usageRef } from "@/lib/jobs/jobs";
+import { track } from "@/lib/usage";
 import { findJobFile, loadMaterials } from "@/lib/materials/generate";
 import { GROUP_KEYS, GROUPS, groupFolder, safeName, zipName, type GroupKey } from "@/lib/materials/groups";
 import { readme, readmeName } from "@/lib/materials/readme";
@@ -53,6 +54,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     `${root}/${readmeName(lang)}`,
     readme({ lang, company, pkg, fonts: { heading: job.result.packages[pkg].heading, body: job.result.packages[pkg].body }, groups: groups as GroupKey[], availableUntil: until, pngLogo: job.files.logo.mimeType === "image/png" }),
   );
+  await track(usageRef(job), "downloads");
   const stream = zip.generateNodeStream({ type: "nodebuffer", streamFiles: true, compression: "DEFLATE", compressionOptions: { level: 6 } });
   return new Response(Readable.toWeb(stream as Readable) as ReadableStream, {
     headers: {

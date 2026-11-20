@@ -5,6 +5,7 @@ import { toPublic } from "@/lib/auth/users";
 import { driveStatus } from "@/lib/drive/drive";
 import { bellConfigured } from "@/lib/jobs/bell";
 import { currentEnv, queued } from "@/lib/jobs/jobs";
+import { usageReport, type Usage } from "@/lib/usage";
 import { CreateUserForm, UserRow } from "./forms";
 import styles from "./admin.module.css";
 
@@ -30,6 +31,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const { dihapus, drive: driveMsg } = await searchParams;
   const [drive, queue] = await Promise.all([driveStatus(), queued(currentEnv()).catch(() => [])]);
   const list = (await users().list()).map(toPublic);
+  const usage = await usageReport(list.map((u) => u.id)).catch(() => null);
+  const emailOf = (id: string) => list.find((u) => u.id === id)?.email ?? "(user dihapus)";
   return (
     <>
       <AppHeader user={me} lang={await getLang()} />
@@ -84,9 +87,53 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <section className={styles.section}>
           <p className="eyebrow">Pemantauan</p>
           <h2>Pemakaian</h2>
-          <div className="alert alert-info">Rekap jumlah generate per user dan per sesi dibuat di Tahap 7.</div>
+          <p className={styles.muted}>
+            Engine Claude memakai sesi pekerja berlangganan, jadi tidak ada biaya per token. Yang dihitung: job dibuat, selesai, gagal, rata-rata waktu pekerja (kirim form sampai font dan tone selesai), visual dekoratif, putaran materi, paket dipilih, dan unduhan ZIP. Environment: {currentEnv()}.
+          </p>
+          {!usage ? (
+            <p className="alert alert-warn">Data pemakaian belum bisa dibaca.</p>
+          ) : (
+            <>
+              <h3 className={styles.h3}>Per user</h3>
+              <UsageTable rows={[...list.map((u) => ({ label: u.email, u: usage.users[u.id] })), { label: "Total semua pengguna", u: usage.total, total: true }]} />
+              <h3 className={styles.h3}>Per bulan (WIB)</h3>
+              <UsageTable rows={usage.months.map((m) => ({ label: m.month, u: m.usage }))} />
+              <h3 className={styles.h3}>Sesi login terbaru</h3>
+              {usage.sessions.length ? (
+                <UsageTable rows={usage.sessions.map((x) => ({ label: `${emailOf(x.userId)} · ${fmt(x.firstAt)}`, u: x.usage }))} />
+              ) : (
+                <p className={styles.muted}>Belum ada sesi dengan aktivitas.</p>
+              )}
+            </>
+          )}
         </section>
       </main>
     </>
+  );
+}
+
+function dur(u: Usage) {
+  if (!u.done) return "—";
+  const s = Math.round(u.workerMs / u.done / 1000);
+  return s >= 60 ? `${Math.floor(s / 60)} mnt ${s % 60} dtk` : `${s} dtk`;
+}
+
+/** Tabel pemakaian (Tahap 7). */
+function UsageTable({ rows }: { rows: { label: string; u: Usage; total?: boolean }[] }) {
+  return (
+    <div className={styles.usageWrap}>
+      <table className={styles.usage}>
+        <thead>
+          <tr><th /><th>Job</th><th>Selesai</th><th>Gagal</th><th>Rata-rata pekerja</th><th>Visual</th><th>Putaran materi</th><th>Paket dipilih</th><th>Unduhan</th></tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.label} data-total={r.total || undefined}>
+              <td>{r.label}</td><td>{r.u.jobs}</td><td>{r.u.done}</td><td>{r.u.failed}</td><td>{dur(r.u)}</td><td>{r.u.visual}</td><td>{r.u.materials}</td><td>{r.u.chosen}</td><td>{r.u.downloads}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
