@@ -16,7 +16,7 @@ SVG di Illustrator, PDF lewat File > Open, DOCX di Word, PPTX di PowerPoint, ema
 
 ## C. Persiapan production (dikerjakan pemilik)
 
-1. **Reset token Upstash** (keputusan pemilik: saat rilis 1.0). Upstash > database > Reset token. Lalu perbarui nilainya di tiga tempat: `.env.local` di Mac, env var Vercel (integrasi Upstash biasanya memperbarui sendiri; cek), dan environment sesi pekerja "BPA Pekerja".
+1. ~~**Reset token Upstash**~~: **dilewati** atas keputusan pemilik (2026-11-22). Database Upstash (`codia-fix-users`, cabang `main`) dipakai bersama aplikasi Codia dengan prefiks kunci berbeda dan satu token yang sama, sehingga reset akan memutus Codia juga; token tidak pernah tersebar dan pemakainya hanya pemilik. Bila nanti perlu reset: Upstash > database > Settings > Reset Credentials, lalu perbarui `KV_REST_API_TOKEN` di semua aplikasi yang memakai database itu (BPA: `.env.local`, Vercel, environment sesi pekerja; Codia: env lokal dan Vercel-nya).
 2. **Env var Vercel (Production)**, Settings > Environment Variables:
    - `KV_REST_API_URL`, `KV_REST_API_TOKEN` (dari integrasi Upstash).
    - `SESSION_SECRET`: nilai **baru**, berbeda dari lokal (cara buat ada di `.env.example`).
