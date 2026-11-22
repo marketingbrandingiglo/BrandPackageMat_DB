@@ -27,7 +27,7 @@ SVG di Illustrator, PDF lewat File > Open, DOCX di Word, PPTX di PowerPoint, ema
    - Jangan isi `APP_ENV` dan variabel `GOOGLE_*_URL`/`GOOGLE_DRIVE_API` di Vercel.
 3. **Google Cloud** > Google Auth Platform > Clients > client aplikasi > Authorized redirect URIs: tambahkan `https://<domain production>/api/drive/callback` (mis. `https://automatebrandpackage.vercel.app/api/drive/callback`).
 4. **Password super admin production**: di Mac, `npm run admin:set-password -- prod` (password diketik di terminal, tidak ditulis ke file).
-5. **Vercel project**: region `sin1` (dari `vercel.json`), Node.js 26.x, Cron aktif, preview untuk branch selain `main` dimatikan (`ignoreCommand` di `vercel.json`).
+5. **Vercel project** (paket Hobby): Settings > Environments > Production > Branch Tracking = **`main`** (sebelumnya `claude/tahap-0-fondasi-pjdg6o`); region `sin1` (dari `vercel.json`), Node.js 26.x, Cron aktif (Hobby: sekali sehari, ±59 menit), preview untuk branch selain `main` dimatikan (`ignoreCommand` di `vercel.json`). Env var Upstash sudah ada sejak 10 Nov; pastikan `KV_REST_API_URL` sama dengan `.env.local`.
 
 ## D. Push ke `main` (dikerjakan Claude Code atas perintah pemilik)
 
