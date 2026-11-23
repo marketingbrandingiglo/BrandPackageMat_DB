@@ -1,6 +1,9 @@
 # Changelog
 
 ## Belum dirilis
+
+## 1.0 · 2026-11-23
+Rilis pertama ke production (push pertama ke `main`).
 - Halaman login menampilkan "(lokal)" di samping versi saat berjalan di lokal/dev.
 - Tahap 8 (persiapan rilis 1.0): rate limit endpoint generate (10 brand package baru dan 10 kali buat ulang materi per jam per user), tes unit penghapusan 90 hari, pemakaian, dan aturan versi; daftar periksa rilis `docs/release.md`.
 - Tahap 7: penghitung pemakaian (total, per user, per sesi, per bulan) dan rekap di halaman Admin; data job di Upstash kedaluwarsa tepat 90 hari sejak dibuat (sebelumnya terhitung ulang tiap kali job disimpan); cron harian juga merapikan indeks sesi.
