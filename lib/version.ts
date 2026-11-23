@@ -1,4 +1,5 @@
 import pkg from "../package.json";
+import { appEnv } from "./env";
 
 /**
  * Versi aplikasi berformat MAJOR.MINOR (tanpa patch), mis. "1.0".
@@ -18,3 +19,11 @@ export function bumpVersion(current: string, kind: "minor" | "major" = "minor"):
 }
 
 export const APP_VERSION = formatVersion(pkg.version);
+
+/**
+ * Label versi untuk halaman login (keputusan pemilik 2026-11-23): "1.0 (lokal)" saat aplikasi
+ * berjalan di lokal/dev, supaya tidak tertukar dengan production.
+ */
+export function versionLabel(env = appEnv()): string {
+  return env === "production" ? APP_VERSION : `${APP_VERSION} (lokal)`;
+}

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Halaman login menampilkan "(lokal)" di samping versi saat berjalan di lokal/dev.
 - Tahap 8 (persiapan rilis 1.0): rate limit endpoint generate (10 brand package baru dan 10 kali buat ulang materi per jam per user), tes unit penghapusan 90 hari, pemakaian, dan aturan versi; daftar periksa rilis `docs/release.md`.
 - Tahap 7: penghitung pemakaian (total, per user, per sesi, per bulan) dan rekap di halaman Admin; data job di Upstash kedaluwarsa tepat 90 hari sejak dibuat (sebelumnya terhitung ulang tiap kali job disimpan); cron harian juga merapikan indeks sesi.
 - Tahap 6d: unduh paket terpilih (semua, per materi, checklist) sebagai ZIP yang dialirkan saat diunduh dengan struktur folder SPEC dan BACA-SAYA/README; halaman Riwayat; tautan Buat baru dan Riwayat di header; header rapi di layar sempit.

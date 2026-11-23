@@ -310,7 +310,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
 7. Ambang peringatan resolusi logo.
 8. ~~Aset visual AI dipakai di materi mana~~: diputuskan 2026-11-20 (bagian 18).
-9. ~~Penamaan ZIP hasil checklist~~: diputuskan 2026-11-20 (bagian 18). Label "(lokal)" pada versi: belum diputuskan.
+9. ~~Penamaan ZIP hasil checklist~~: diputuskan 2026-11-20 (bagian 18). Label "(lokal)": diputuskan 2026-11-23 (bagian 18).
 10. ~~Detail API OpenAI dan Magnific~~ — tidak berlaku lagi (visual AI memakai Claude, 2026-11-10).
 11. Penggantian kurs: IDR memakai kurs saat event (default di bagian 11); ubah bila pemilik memilih kurs berjalan.
 
@@ -343,3 +343,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Tahap 8 (2026-11-20): rate limit generate per user (10 job baru dan 10 kali buat ulang materi per jam; Lab super admin tidak dibatasi). Temuan `npm audit` pada `image-size` (lewat `pptxgenjs`) dinilai tidak terjangkau dan diterima sebagai risiko. Daftar periksa rilis: `docs/release.md`.
 - Token Upstash (2026-11-22): reset sebelum rilis 1.0 **dilewati** (keputusan pemilik). Database dipakai bersama aplikasi Codia (satu token, prefiks kunci berbeda); token tidak tersebar dan pemakainya hanya pemilik. Cara reset tercatat di `docs/release.md`.
 - Vercel (2026-11-22): project tetap di paket **Hobby** (keputusan pemilik), bukan Pro. Diverifikasi di dokumentasi Vercel: durasi fungsi maks. 300 detik (sama dengan `maxDuration` aplikasi), cron maks. sekali sehari dengan presisi per jam (±59 menit). Branch Production Vercel diarahkan ke `main` sebelum rilis.
+- Label versi (2026-11-23): halaman login menampilkan "Version 1.0 (lokal)" saat aplikasi berjalan di lokal/dev; production tanpa label.

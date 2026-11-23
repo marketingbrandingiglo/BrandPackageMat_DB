@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/server";
-import { APP_VERSION } from "@/lib/version";
+import { versionLabel } from "@/lib/version";
 import LoginForm from "./login-form";
 import styles from "./login.module.css";
 
@@ -14,7 +14,7 @@ export default async function LoginPage() {
         <h1 className={styles.title}>Automation Brand Package</h1>
         <LoginForm />
         <p className={styles.help}>Lupa password atau akun terkunci? Hubungi admin.</p>
-        <p className={styles.version}>Version {APP_VERSION}</p>
+        <p className={styles.version}>Version {versionLabel()}</p>
       </div>
     </main>
   );
