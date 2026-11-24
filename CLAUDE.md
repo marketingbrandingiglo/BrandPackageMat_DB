@@ -2,6 +2,8 @@
 
 Proyek: Brand Package Automation. **Sumber kebenaran: [`docs/SPEC.md`](docs/SPEC.md)** — baca seluruhnya sebelum menulis kode.
 
+**Mulai sesi baru? Baca dulu [`docs/HANDOVER.md`](docs/HANDOVER.md)**: status terakhir (versi 1.0 di production), infrastruktur, keputusan, dan hal yang masih terbuka.
+
 Aturan singkat (detail di SPEC):
 - Bahasa dokumen Indonesia; istilah teknis tetap Inggris.
 - Kerjakan per tahap (SPEC bagian 16), laporkan singkat, tunggu pemilik menguji. Jangan lanjut ke tahap berikutnya tanpa perintah.
