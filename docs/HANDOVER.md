@@ -115,7 +115,7 @@ Rincian lengkap: SPEC bagian 18 dan CHANGELOG. Ringkasnya:
 
 ## 7. Hal yang masih terbuka dan usulan berikutnya
 
-1. **1.1 (disetujui 2026-11-25, dikerjakan di `dev`)**: `git.deploymentEnabled` di `vercel.json` supaya push ke `dev` dan branch kerja **tidak membuat deployment** (build yang dibatalkan `ignoreCommand` tetap memakai kuota). Diuji dengan satu push ke `dev`; status cron di Admin; audit ditinjau ulang. Lihat SPEC bagian 18.
+1. **1.1 (disetujui 2026-11-25, dikerjakan di `dev`)**: `git.deploymentEnabled` di `vercel.json` supaya push ke `dev` dan branch kerja **tidak membuat deployment** (build yang dibatalkan `ignoreCommand` tetap memakai kuota). **Terverifikasi 2026-11-25**: push ke `dev` (commit `32483e3`) tidak membuat deployment sama sekali (tanpa status Vercel di commit GitHub; push sebelumnya berstatus "Canceled by Ignored Build Step"), jadi berlaku langsung dari `vercel.json` di branch yang di-push. Status cron di Admin; audit ditinjau ulang. Lihat SPEC bagian 18.
 2. **Cron pembersihan**: mulai 1.1 statusnya tampil di halaman Admin (7 run terakhir, peringatan bila gagal atau terlambat > 26 jam). Sebelum 1.1 dirilis, cek di Vercel (Logs, filter `/api/cron/cleanup`).
 3. **`npm audit`**: 2 temuan high di `image-size` (lewat `pptxgenjs`), dinilai tidak terjangkau; tinjau saat `pptxgenjs` merilis perbaikan.
 4. **SPEC 17 yang masih terbuka**: spesifikasi cetak (ukuran amplop, bleed, safe area) belum diverifikasi ke vendor; ambang peringatan resolusi logo (sekarang < 800 px peringatan, < 400 px keras) belum dikonfirmasi; butir harga token dan kurs tidak relevan selama memakai sesi pekerja.
