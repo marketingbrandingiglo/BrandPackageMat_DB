@@ -1,6 +1,8 @@
 # Changelog
 
 ## Belum dirilis
+- Vercel: push ke branch selain `main` tidak lagi membuat deployment (`git.deploymentEnabled` di `vercel.json`), sehingga tidak memakai kuota harian Hobby; `ignoreCommand` tetap sebagai pengaman kedua.
+- Dokumen: SPEC bagian 8 dikoreksi ke Vercel Hobby; temuan `npm audit` `image-size` ditinjau ulang (risiko tetap diterima).
 
 ## 1.0 · 2026-11-23
 Rilis pertama ke production (push pertama ke `main`).

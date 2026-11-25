@@ -8,7 +8,7 @@ Daftar periksa sebelum dan sesudah push pertama ke `main`. Push ke `main` **hany
 - `npm test` 113 tes lolos; `npm run typecheck` dan `npm run lint` bersih.
 - File font (`fonts/lib`) ikut terbawa ke fungsi yang merender materi; ukuran fungsi terbesar ±105 MB (batas Vercel 250 MB).
 - Semua rute API butuh login, kecuali `/api/cron/cleanup` (dilindungi `CRON_SECRET`). Rute Drive dan Lab khusus super admin. Rate limit: login, 10 brand package baru per jam per user, 10 kali buat ulang materi per jam per user.
-- `npm audit`: 2 temuan "high" pada `image-size` (dipakai `pptxgenjs` 4.0.1). **Tidak terjangkau**: `pptxgenjs` hanya mengukur gambar yang diberikan lewat path tanpa ukuran, sedangkan aplikasi selalu memberi data gambar + ukuran, dan logo user sudah divalidasi sebagai PNG/SVG. Diterima sebagai risiko; ditinjau lagi saat `pptxgenjs` merilis versi yang memperbaikinya.
+- `npm audit`: 2 temuan "high" pada `image-size` (dipakai `pptxgenjs` 4.0.1). **Tidak terjangkau**: `pptxgenjs` hanya mengukur gambar yang diberikan lewat path tanpa ukuran, sedangkan aplikasi selalu memberi data gambar + ukuran, dan logo user sudah divalidasi sebagai PNG/SVG. Diterima sebagai risiko; ditinjau lagi saat `pptxgenjs` merilis versi yang memperbaikinya. Ditinjau ulang 2026-11-25: `pptxgenjs` 4.0.1 masih versi terbaru, risiko tetap diterima.
 
 ## B. Pengujian pemilik (sudah dilakukan selama Tahap 4-7)
 
@@ -27,7 +27,7 @@ SVG di Illustrator, PDF lewat File > Open, DOCX di Word, PPTX di PowerPoint, ema
    - Jangan isi `APP_ENV` dan variabel `GOOGLE_*_URL`/`GOOGLE_DRIVE_API` di Vercel.
 3. **Google Cloud** > Google Auth Platform > Clients > client aplikasi > Authorized redirect URIs: tambahkan `https://<domain production>/api/drive/callback` (mis. `https://automatebrandpackage.vercel.app/api/drive/callback`).
 4. **Password super admin production**: di Mac, `npm run admin:set-password -- prod` (password diketik di terminal, tidak ditulis ke file).
-5. **Vercel project** (paket Hobby): Settings > Environments > Production > Branch Tracking = **`main`** (sebelumnya `claude/tahap-0-fondasi-pjdg6o`); region `sin1` (dari `vercel.json`), Node.js 26.x, Cron aktif (Hobby: sekali sehari, ±59 menit), preview untuk branch selain `main` dimatikan (`ignoreCommand` di `vercel.json`). Env var Upstash sudah ada sejak 10 Nov; pastikan `KV_REST_API_URL` sama dengan `.env.local`.
+5. **Vercel project** (paket Hobby): Settings > Environments > Production > Branch Tracking = **`main`** (sebelumnya `claude/tahap-0-fondasi-pjdg6o`); region `sin1` (dari `vercel.json`), Node.js 26.x, Cron aktif (Hobby: sekali sehari, ±59 menit), deployment untuk branch selain `main` dimatikan (`git.deploymentEnabled` di `vercel.json` sejak 1.1; `ignoreCommand` sebagai pengaman kedua). Env var Upstash sudah ada sejak 10 Nov; pastikan `KV_REST_API_URL` sama dengan `.env.local`.
 
 ## D. Push ke `main` (dikerjakan Claude Code atas perintah pemilik)
 

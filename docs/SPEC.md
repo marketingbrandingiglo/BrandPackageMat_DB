@@ -169,7 +169,7 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 
 ## 8. Arsitektur
 
-- **Stack**: Next.js (App Router) + TypeScript, deploy di **Vercel Pro** (satu tim). Satu codebase untuk tampilan dan backend.
+- **Stack**: Next.js (App Router) + TypeScript, deploy di **Vercel Hobby** (keputusan 2026-11-22, bagian 18). Satu codebase untuk tampilan dan backend.
 - **Upstash Redis**: user, sesi, antrean dan status job, riwayat, penghitung pemakaian, rate limit, cache kurs, token Google Drive (terenkripsi). Dev dan production dipisah dengan prefiks kunci (bagian 18).
 - **Google Drive pemilik** (akun Gmail pribadi, paket 400 GB): logo yang diunggah dan file materi hasil generate, di satu folder aplikasi, dipisah per environment dan per job. Akses lewat Google Drive API dengan scope `drive.file` (aplikasi hanya melihat file yang ia buat sendiri); pemilik menghubungkan Drive sekali dari halaman Admin, token disimpan terenkripsi. File dikirim ke user lewat route yang butuh login, tidak pernah lewat tautan berbagi Drive. *(Diubah 2026-11-19: sebelumnya Vercel Blob, kapasitas akun tim sudah penuh.)*
 - **Vercel Cron**: pembersihan file kedaluwarsa (bagian 10).
@@ -261,7 +261,7 @@ Redis (kunci berawalan sesuai environment): `user:{id}`, `session:{id}` (TTL 12 
 ## 14. Alur development dan rilis
 
 - Pengembangan di **lokal** pemilik. Repo GitHub; hanya pemilik yang mengerjakan repo ini.
-- Branch: **`main`** = production, **`dev`** = branch kerja. `dev` di-push ke GitHub sebagai cadangan **tanpa memicu Vercel**: preview deployment untuk branch selain `main` dimatikan (lewat `vercel.json` atau Ignored Build Step; caranya diverifikasi saat setup).
+- Branch: **`main`** = production, **`dev`** = branch kerja. `dev` di-push ke GitHub sebagai cadangan **tanpa memicu Vercel**: deployment untuk branch selain `main` dimatikan lewat `git.deploymentEnabled` di `vercel.json` (`"**": false, "main": true`); `ignoreCommand` tetap ada sebagai pengaman kedua (bagian 18, 2026-11-25).
 - **Vercel hanya diperbarui saat pemilik memerintahkan push ke `main`.**
 - Tanpa pull request untuk kode. Satu-satunya PR adalah **PR saluran kontrol** (bel sesi pekerja, bagian 8), yang tidak pernah di-merge atau ditutup. Prosedur push ke `main` atas perintah pemilik:
   1. `fetch` dari GitHub; bila `main` di remote punya perubahan baru, **pull dulu**.
@@ -344,3 +344,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Token Upstash (2026-11-22): reset sebelum rilis 1.0 **dilewati** (keputusan pemilik). Database dipakai bersama aplikasi Codia (satu token, prefiks kunci berbeda); token tidak tersebar dan pemakainya hanya pemilik. Cara reset tercatat di `docs/release.md`.
 - Vercel (2026-11-22): project tetap di paket **Hobby** (keputusan pemilik), bukan Pro. Diverifikasi di dokumentasi Vercel: durasi fungsi maks. 300 detik (sama dengan `maxDuration` aplikasi), cron maks. sekali sehari dengan presisi per jam (±59 menit). Branch Production Vercel diarahkan ke `main` sebelum rilis.
 - Label versi (2026-11-23): halaman login menampilkan "Version 1.0 (lokal)" saat aplikasi berjalan di lokal/dev; production tanpa label.
+- Versi 1.1 (2026-11-25): (a) `vercel.json` memakai `git.deploymentEnabled` (`"**": false, "main": true`) karena build yang dibatalkan `ignoreCommand` tetap dihitung kuota deployment Vercel (Hobby: 100 per hari per akun, diverifikasi di dokumentasi Vercel); `ignoreCommand` dipertahankan sebagai pengaman kedua. (b) Halaman Admin menampilkan status cron pembersihan: 7 run terakhir disimpan di kunci bersama `bpa:shared:cron:cleanup` (cron production membersihkan folder dev dan prod), peringatan "terlambat" bila run terakhir lebih dari 26 jam lalu. (c) Temuan `npm audit` `image-size` ditinjau ulang: `pptxgenjs` 4.0.1 masih terbaru, risiko tetap diterima. Kerja harian: commit dan push hanya ke `dev`; `main` hanya atas perintah pemilik.
