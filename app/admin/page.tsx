@@ -3,9 +3,11 @@ import { getLang } from "@/lib/i18n/server";
 import { requireSuperAdmin, users } from "@/lib/auth/server";
 import { toPublic } from "@/lib/auth/users";
 import { driveStatus } from "@/lib/drive/drive";
+import { cleanupRuns } from "@/lib/cron";
 import { bellConfigured } from "@/lib/jobs/bell";
 import { currentEnv, queued } from "@/lib/jobs/jobs";
 import { avgWorkerSeconds, usageReport, type Usage } from "@/lib/usage";
+import { CronStatus } from "./cron-status";
 import { CreateUserForm, UserRow } from "./forms";
 import styles from "./admin.module.css";
 
@@ -29,7 +31,7 @@ function gb(n?: number) {
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ dihapus?: string; drive?: string }> }) {
   const { user: me } = await requireSuperAdmin();
   const { dihapus, drive: driveMsg } = await searchParams;
-  const [drive, queue] = await Promise.all([driveStatus(), queued(currentEnv()).catch(() => [])]);
+  const [drive, queue, runs] = await Promise.all([driveStatus(), queued(currentEnv()).catch(() => []), cleanupRuns().catch(() => null)]);
   const list = (await users().list()).map(toPublic);
   const usage = await usageReport(list.map((u) => u.id)).catch(() => null);
   const emailOf = (id: string) => list.find((u) => u.id === id)?.email ?? "(user dihapus)";
@@ -60,6 +62,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <p className={styles.muted}>
             Bel pekerja: {bellConfigured() ? "aktif (PR saluran kontrol)" : "belum diatur (GITHUB_TOKEN/CONTROL_PR kosong)"} · Antrean saat ini: {queue.length} job.
           </p>
+          <CronStatus runs={runs} />
         </section>
 
         <section className={styles.section}>

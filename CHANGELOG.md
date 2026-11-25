@@ -2,6 +2,7 @@
 
 ## Belum dirilis
 - Vercel: push ke branch selain `main` tidak lagi membuat deployment (`git.deploymentEnabled` di `vercel.json`), sehingga tidak memakai kuota harian Hobby; `ignoreCommand` tetap sebagai pengaman kedua.
+- Admin: status cron pembersihan harian (normal, gagal, terlambat bila run terakhir lebih dari 26 jam lalu, atau belum tercatat) dan tabel 7 run terakhir (waktu WIB, folder dihapus dev/prod, sesi dirapikan, durasi, galat). Riwayat disimpan di kunci bersama `bpa:shared:cron:cleanup`, jadi tampil di Admin lokal maupun production. Cron mengembalikan status 500 bila gagal.
 - Dokumen: SPEC bagian 8 dikoreksi ke Vercel Hobby; temuan `npm audit` `image-size` ditinjau ulang (risiko tetap diterima).
 
 ## 1.0 · 2026-11-23
