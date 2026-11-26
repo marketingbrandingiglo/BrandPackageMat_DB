@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Petunjuk membuka PDF di Illustrator (BACA-SAYA/README dan catatan font di halaman hasil): untuk mengedit pakai SVG; PDF dibuka lewat File > Open dan, untuk PDF lebih dari satu halaman, pilih Range per halaman (opsi All membuat Illustrator mengubah tulisan menjadi outline).
 
 ## 1.1 · 2026-11-25
 - Vercel: push ke branch selain `main` tidak lagi membuat deployment (`git.deploymentEnabled` di `vercel.json`), sehingga tidak memakai kuota harian Hobby; `ignoreCommand` tetap sebagai pengaman kedua.

@@ -27,9 +27,11 @@ describe("unduhan", () => {
     expect(t).toContain("CMYK");
     expect(t).toContain("versi vektor");
     expect(t).toContain("18 Februari 2027");
+    expect(t).toContain("pilih Range");
     const en = readme({ lang: "en", company: "PT Uji", pkg: "B", fonts: { heading: f("Lato"), body: f("Lato") }, groups: [...GROUPS], availableUntil: "18 February 2027", pngLogo: false });
     expect(readmeName("en")).toBe("README.txt");
     expect(en.match(/fonts\.google\.com/g)).toHaveLength(1);
     expect(en).not.toContain("vector version");
+    expect(en).toContain("choose Range");
   });
 });

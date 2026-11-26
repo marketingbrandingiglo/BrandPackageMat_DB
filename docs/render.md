@@ -36,3 +36,4 @@ Kode: `lib/render/svg.ts`. Uji lokal: `npm run render:test` (hasil di `out/rende
 
 - SVG terbuka dan teks bisa diedit.
 - PDF: teks bisa diedit per baris utuh (setelah penggabungan teks).
+- PDF banyak halaman (2026-11-26): dibuka dengan opsi **All**, Illustrator mengubah tulisan menjadi outline; dengan **Range** per halaman teks tetap bisa diedit. Ini perilaku Illustrator (teks di PDF tetap teks hidup); petunjuk ada di BACA-SAYA.

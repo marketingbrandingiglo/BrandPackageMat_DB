@@ -114,6 +114,7 @@ Rincian lengkap: SPEC bagian 18 dan CHANGELOG. Ringkasnya:
 | Branch Tracking `main` ditolak | branch `main` belum ada | `main` dibuat saat rilis 1.0 |
 | Deploy ditolak "api-deployments-free-per-day" | Hobby maks. 100 deployment/hari per akun, banyak project + push `dev`/branch kerja | tunggu 24 jam; diperbaiki di 1.1 (`git.deploymentEnabled`) |
 | PDF tidak bisa diedit di Illustrator | dibuka lewat File > Place | buka lewat File > Open (dicatat di BACA-SAYA) |
+| Tulisan PDF menjadi outline di Illustrator | PDF banyak halaman (kartu nama, ID card) dibuka dengan opsi All: Illustrator mengimpor tiap halaman sebagai artwork (dicek 2026-11-26: teks di PDF tetap teks hidup; dengan Range per halaman bisa diedit) | petunjuk di BACA-SAYA dan halaman hasil: edit pakai SVG, PDF dibuka dengan Range per halaman (keputusan pemilik: hanya petunjuk, file tidak diubah) |
 
 ## 7. Hal yang masih terbuka dan usulan berikutnya
 
