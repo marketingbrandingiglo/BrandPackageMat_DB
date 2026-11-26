@@ -1,6 +1,6 @@
-# Handover: Brand Package Automation versi 1.0
+# Handover: Brand Package Automation versi 1.1
 
-Ringkasan lengkap kondisi aplikasi setelah rilis 1.0, untuk melanjutkan pembahasan di sesi Claude Code yang baru tanpa riwayat chat. Dokumen ini **melengkapi**, bukan menggantikan, dokumen lain; untuk detail selalu rujuk:
+Ringkasan lengkap kondisi aplikasi setelah rilis 1.1, untuk melanjutkan pembahasan di sesi Claude Code yang baru tanpa riwayat chat. Dokumen ini **melengkapi**, bukan menggantikan, dokumen lain; untuk detail selalu rujuk:
 
 | Dokumen | Isi |
 |---|---|
@@ -12,14 +12,15 @@ Ringkasan lengkap kondisi aplikasi setelah rilis 1.0, untuk melanjutkan pembahas
 | [`auth.md`](auth.md), [`render.md`](render.md) | Login/admin (Tahap 2), uji render (Tahap 1) |
 | [`../CHANGELOG.md`](../CHANGELOG.md) | Perubahan per tahap dan per rilis |
 
-Ditulis 2026-11-24.
+Ditulis 2026-11-24, diperbarui 2026-11-26 setelah rilis 1.1.
 
 ## 1. Status saat ini
 
-- **Versi 1.0 berjalan normal di production**: `https://automatebrandpackage.vercel.app`. Dirilis 2026-11-23, deploy berhasil 2026-11-24 (setelah kuota deployment harian Vercel pulih).
-- Branch `main` = commit `c1f2700` ("Rilis 1.0"), sama dengan `dev` saat rilis.
+- **Versi 1.1 berjalan normal di production**: `https://automatebrandpackage.vercel.app`. Dirilis dan deploy berhasil 2026-11-25. Versi 1.0 dirilis 2026-11-23 (deploy 2026-11-24).
+- Branch `main` = commit `31ed3b2` ("Rilis 1.1"), sama dengan `dev` saat rilis.
+- Isi 1.1: push ke branch selain `main` tidak lagi membuat deployment Vercel (`git.deploymentEnabled`, terverifikasi); status cron pembersihan + riwayat 7 run di Admin (run pertama di production 2026-11-26 03.01 WIB berhasil, dicek pemilik); `npm audit` ditinjau ulang.
 - Diuji pemilik: SVG di Illustrator (editable), PDF lewat File > Open, DOCX di Word, PPTX di PowerPoint, email signature di klien email, visual dekoratif di Illustrator, alur form sampai unduhan, Riwayat, Pemakaian, lalu di production: login super admin, Google Drive terhubung, bel pekerja aktif, alur brand package berjalan normal.
-- Tes otomatis: 114 tes (`npm test`), typecheck, lint, dan `npm run build` lolos.
+- Tes otomatis: 120 tes (`npm test`), typecheck, lint, dan `npm run build` lolos.
 - **Cara kerja ke depan (keputusan pemilik 2026-11-24)**: develop dan uji di **lokal**; deploy ke Vercel (push ke `main`) hanya bila di lokal sudah sesuai dan pemilik memerintahkan.
 
 ## 2. Gambaran aplikasi
@@ -33,9 +34,9 @@ Web app internal (prototype, dipakai pemilik dan tim) yang membuat **brand packa
 4. Tombol bahasa **ID/EN** di header: antarmuka + bahasa materi. Data perusahaan tidak diterjemahkan.
 
 ### Super admin
-- **Admin `/admin`**: status Google Drive (hubungkan/ulang), status bel pekerja + antrean, kelola user, **Pemakaian** (per user + total, per bulan WIB, 30 sesi login terbaru; tanpa biaya token).
+- **Admin `/admin`**: status Google Drive (hubungkan/ulang), status bel pekerja + antrean, **pembersihan otomatis** (status: normal, gagal, terlambat > 26 jam, belum tercatat; tabel 7 run terakhir dari kunci bersama `bpa:shared:cron:cleanup`, jadi tampil juga di lokal), kelola user, **Pemakaian** (per user + total, per bulan WIB, 30 sesi login terbaru; tanpa biaya token).
 - **Lab `/admin/lab`**: alat uji tiap tahap (cek logo/palet, kirim job font, visual dekoratif, materi dengan data contoh). Tidak dibatasi rate limit.
-- Halaman login menampilkan "Version 1.0", ditambah "(lokal)" saat berjalan di lokal/dev.
+- Halaman login menampilkan versi (sekarang "Version 1.1"), ditambah "(lokal)" saat berjalan di lokal/dev.
 
 ### Materi per paket
 | Materi | Format | Catatan |
@@ -87,6 +88,7 @@ Rincian lengkap: SPEC bagian 18 dan CHANGELOG. Ringkasnya:
 - **Tahap 6**: 6a form + bahasa, 6b materi otomatis per tugas (hasil per tugas di hash Upstash `job:<id>:mat`), 6c bandingkan/ubah kontak/pilih, 6d unduh + Riwayat.
 - **Tahap 7**: penghitung pemakaian (`lib/usage.ts`), rekap Admin, kedaluwarsa job absolut 90 hari.
 - **Tahap 8 / rilis**: rate limit generate (10 job baru dan 10 buat ulang materi per jam per user), tes unit (90 hari, pemakaian, versi), `release.md`. Keputusan pemilik: **reset token Upstash dilewati** (database dipakai bersama aplikasi lain; token tidak tersebar), **tetap Vercel Hobby**, label "(lokal)" pada versi.
+- **Versi 1.1 (2026-11-25)**: `git.deploymentEnabled` di `vercel.json` (`"**": false, "main": true`; `ignoreCommand` tetap sebagai pengaman kedua), status cron di Admin (`lib/cron.ts`, `app/admin/cron-status.tsx`; cron membalas 500 bila gagal), SPEC bagian 8 dikoreksi ke Hobby, audit ditinjau ulang.
 
 ## 5. Aturan kerja (dari CLAUDE.md dan SPEC)
 
@@ -95,7 +97,7 @@ Rincian lengkap: SPEC bagian 18 dan CHANGELOG. Ringkasnya:
 - Hal yang belum diputuskan: ajukan usulan dengan pilihan (a/b/c), jangan putuskan sendiri.
 - **Rahasia tidak pernah** masuk repo, log, atau chat; jangan minta pemilik menempel nilai rahasia.
 - **Push ke `main` hanya atas perintah pemilik.** Prosedur: fetch; pull `main` bila ada perubahan; gabungkan `dev` ke `main`; `npm run version:bump -- [minor|major]` (minor default; major untuk perubahan alur) dan commit; push `main`; laporkan versi dan alasannya. Setelah push, cek deployment Production di Vercel.
-- Kerja harian: commit di `dev`, push ke `dev`. **Hemat push**: setiap push ke branch apa pun membuat deployment Vercel yang dibatalkan dan kemungkinan memakai kuota 100 deployment/hari (lihat bagian 7).
+- Kerja harian: commit di `dev`, push ke `dev` (keputusan pemilik 2026-11-25: push hanya ke `dev`; `main` hanya atas perintah). Sejak 1.1 push ke `dev` **tidak** membuat deployment Vercel, jadi tidak memakai kuota; hanya push ke `main` yang memakai 1 deployment. Branch lama (`claude/*`, `bpa/control-channel`) masih memakai `vercel.json` lama; dibiarkan (keputusan pemilik), jangan push ke sana.
 - Commit diakhiri trailer `Co-Authored-By` dan `Claude-Session` (lihat commit sebelumnya); tanpa ID model di artefak repo.
 - Sesi pekerja perlu `git pull origin dev` dan membaca ulang `worker.md` setiap kali runbook berubah; pemilik meneruskan pesan itu ke chat pekerja.
 
@@ -110,14 +112,16 @@ Rincian lengkap: SPEC bagian 18 dan CHANGELOG. Ringkasnya:
 | `git pull` ditolak di Mac | `package-lock.json` berubah lokal | `git restore package-lock.json`, pull, `npm install` |
 | Vercel production memakai database Upstash lain | integrasi Upstash Vercel | sambungan dilepas, env var diisi manual |
 | Branch Tracking `main` ditolak | branch `main` belum ada | `main` dibuat saat rilis 1.0 |
-| Deploy ditolak "api-deployments-free-per-day" | Hobby maks. 100 deployment/hari per akun, banyak project + push `dev`/branch kerja | tunggu 24 jam; usulan perbaikan di 1.1 |
+| Deploy ditolak "api-deployments-free-per-day" | Hobby maks. 100 deployment/hari per akun, banyak project + push `dev`/branch kerja | tunggu 24 jam; diperbaiki di 1.1 (`git.deploymentEnabled`) |
 | PDF tidak bisa diedit di Illustrator | dibuka lewat File > Place | buka lewat File > Open (dicatat di BACA-SAYA) |
 
 ## 7. Hal yang masih terbuka dan usulan berikutnya
 
-1. **1.1 (disetujui 2026-11-25, dikerjakan di `dev`)**: `git.deploymentEnabled` di `vercel.json` supaya push ke `dev` dan branch kerja **tidak membuat deployment** (build yang dibatalkan `ignoreCommand` tetap memakai kuota). **Terverifikasi 2026-11-25**: push ke `dev` (commit `32483e3`) tidak membuat deployment sama sekali (tanpa status Vercel di commit GitHub; push sebelumnya berstatus "Canceled by Ignored Build Step"), jadi berlaku langsung dari `vercel.json` di branch yang di-push. Status cron di Admin; audit ditinjau ulang. Lihat SPEC bagian 18.
-2. **Cron pembersihan**: mulai 1.1 statusnya tampil di halaman Admin (7 run terakhir, peringatan bila gagal atau terlambat > 26 jam). Sebelum 1.1 dirilis, cek di Vercel (Logs, filter `/api/cron/cleanup`).
-3. **`npm audit`**: 2 temuan high di `image-size` (lewat `pptxgenjs`), dinilai tidak terjangkau; tinjau saat `pptxgenjs` merilis perbaikan.
+Selesai di 1.1: kuota deployment (`git.deploymentEnabled`), pemantauan cron pembersihan (berjalan normal di production), tinjauan `npm audit`.
+
+1. **Cron pembersihan**: pantau lewat Admin. Kuning = run terakhir lebih dari 26 jam lalu (cek Vercel > Settings > Cron Jobs dan Logs); merah = gagal (pesan galat tampil, mis. Drive terputus).
+2. **Branch lama di remote** (`claude/hopeful-cannon-nq25qs`, `claude/tahap-0-fondasi-pjdg6o`): dibiarkan atas keputusan pemilik; masih memakai `vercel.json` lama, jadi push ke sana memakai kuota.
+3. **`npm audit`**: 2 temuan high di `image-size` (lewat `pptxgenjs` 4.0.1), dinilai tidak terjangkau, diterima sebagai risiko (ditinjau ulang 2026-11-25); tinjau lagi saat `pptxgenjs` merilis versi baru.
 4. **SPEC 17 yang masih terbuka**: spesifikasi cetak (ukuran amplop, bleed, safe area) belum diverifikasi ke vendor; ambang peringatan resolusi logo (sekarang < 800 px peringatan, < 400 px keras) belum dikonfirmasi; butir harga token dan kurs tidak relevan selama memakai sesi pekerja.
 5. **Fitur opsional SPEC yang belum dibuat**: perbaikan logo oleh AI (upscale, hapus latar, vektorisasi; hanya dengan persetujuan user); bundel file font di ZIP; pilihan/koreksi warna utama oleh user.
 6. **Ditunda pemilik**: reset token Upstash (cara: `release.md` bagian C.1; ingat database dipakai aplikasi lain); pindah ke Vercel Pro bila pemakaian bertambah atau dipakai lebih luas; bila aplikasi dibuka untuk publik, arsitektur (engine Claude, penyimpanan) ditinjau ulang (SPEC bagian 2).
@@ -125,5 +129,5 @@ Rincian lengkap: SPEC bagian 18 dan CHANGELOG. Ringkasnya:
 ## 8. Cara melanjutkan di chat baru
 
 1. Buka sesi Claude Code baru di repo ini, branch `dev`.
-2. Kirim: *"Baca CLAUDE.md, docs/HANDOVER.md, dan docs/SPEC.md. Kita lanjut membahas versi 1.1, mulai dari usulan di HANDOVER bagian 7. Jangan dieksekusi dulu."*
+2. Kirim: *"Baca CLAUDE.md, docs/HANDOVER.md, dan docs/SPEC.md. Kita lanjut membahas versi 1.2, mulai dari HANDOVER bagian 7. Jangan dieksekusi dulu."*
 3. Untuk menjalankan lokal: `npm install`, isi `.env.local` (template `.env.example`), `npm run dev`, buka `http://localhost:3000`. Sesi pekerja tetap environment "BPA Pekerja" (PR #1).
