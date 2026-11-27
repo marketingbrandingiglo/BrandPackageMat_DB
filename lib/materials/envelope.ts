@@ -7,7 +7,7 @@ import { BLEED, sheet, svgDoc } from "./svgdoc";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 
 /**
- * Amplop DL 220 x 110 mm + bleed 3 mm (SPEC bagian 5; ukuran diverifikasi ke percetakan).
+ * Amplop DL 220 x 110 mm, tanpa bleed (SPEC bagian 5; bleed dihapus 2026-11-27; ukuran diverifikasi ke percetakan).
  * Satu sisi (depan): logo dan alamat pengirim di kiri atas, area alamat penerima di kanan.
  */
 const E = SPECS.materials.envelope;
@@ -28,10 +28,14 @@ export function envelope(kit: BrandKit): Envelope {
   const M = BLEED + 12;
   const isB = kit.pkg === "B";
   const x0 = isB ? M + 6 : M;
+  // Segitiga sudut kanan atas: memotong tepi atas 38,4 mm dari kanan dan tepi kanan 25,04 mm dari atas
+  // (relatif garis potong), diperpanjang ke tepi bleed bila ada.
+  const tx = W - BLEED - 38.4 - BLEED * (46 / 30);
+  const ty = 25.04 + BLEED + BLEED * (30 / 46);
 
   parts.push(
     isB
-      ? `  <g id="latar"><rect width="${W}" height="${H}" fill="#FFFFFF"/><rect id="panel" x="0" y="0" width="${BLEED + 8}" height="${H}" fill="${k.primary}"/><rect id="garis-aksen" x="${BLEED + 8}" y="0" width="1.5" height="${H}" fill="${k.accent}"/><path id="sudut-aksen" d="M${r(W - 46)} 0 L${W} 0 L${W} 30 Z" fill="${k.primary}"/></g>`
+      ? `  <g id="latar"><rect width="${W}" height="${H}" fill="#FFFFFF"/><rect id="panel" x="0" y="0" width="${BLEED + 8}" height="${H}" fill="${k.primary}"/><rect id="garis-aksen" x="${BLEED + 8}" y="0" width="1.5" height="${H}" fill="${k.accent}"/><path id="sudut-aksen" d="M${r(tx)} 0 L${W} 0 L${W} ${r(ty)} Z" fill="${k.primary}"/></g>`
       : `  <g id="latar"><rect width="${W}" height="${H}" fill="#FFFFFF"/><rect id="pita" x="0" y="${r(H - BLEED - 5)}" width="${W}" height="${r(BLEED + 5)}" fill="${k.primary}"/></g>`,
   );
 

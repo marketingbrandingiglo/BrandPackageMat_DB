@@ -8,7 +8,7 @@ import { BLEED, sheet, svgDoc, type Sheet } from "./svgdoc";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 
 /**
- * ID card CR80 (SPEC bagian 5): landscape 85,6 x 54 mm dan portrait 54 x 85,6 mm, + bleed 3 mm.
+ * ID card CR80 (SPEC bagian 5): landscape 85,6 x 54 mm dan portrait 54 x 85,6 mm, tanpa bleed (dihapus 2026-11-27).
  * Depan: logo, foto (placeholder), nama, jabatan, nomor ID. Belakang: logo, kontak perusahaan,
  * catatan "bila menemukan kartu ini". Area lubang tali (tengah atas) dibiarkan kosong.
  */
@@ -138,7 +138,7 @@ function back(kit: BrandKit, o: Orientation): IdSide {
     kit.visual
       ? `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="${dark ? k.primary : "#FFFFFF"}"/>${placeVisual(kit.visual, { x: 0, y: s.H - band, w: s.W, h: band }, "pita")}</g>`
       : dark
-      ? `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(s.W - 2)}" cy="${r(s.H - 2)}" r="${o === "portrait" ? 13 : 9}" fill="${k.accent}"/></g>`
+      ? `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(s.W - BLEED + 1)}" cy="${r(s.H - BLEED + 1)}" r="${o === "portrait" ? 13 : 9}" fill="${k.accent}"/></g>`
       : `  <g id="latar"><rect width="${s.W}" height="${s.H}" fill="#FFFFFF"/><rect id="pita" x="0" y="${r(s.H - BLEED - 3)}" width="${s.W}" height="${r(BLEED + 3)}" fill="${k.primary}"/></g>`,
   );
   // Logo (di atas pelat putih bila latar berwarna).

@@ -5,7 +5,7 @@ import { ref } from "@/lib/brand/font-select";
 import { FONTS } from "@/lib/brand/fonts";
 import { buildPalette } from "@/lib/brand/palette";
 import { allowedColors, validateVisual, visualKey } from "@/lib/brand/visual";
-import { businessCard } from "@/lib/materials/business-card";
+import { businessCard, CARD_SIZE } from "@/lib/materials/business-card";
 import { guideline } from "@/lib/materials/guideline";
 import { idCard } from "@/lib/materials/id-card";
 import { kitFonts, type BrandKit } from "@/lib/materials/kit";
@@ -90,7 +90,7 @@ describe("visual di materi", () => {
       expect(prev[2]).not.toContain("visual-slide");
       const pptx = await presentationPptx(k);
       expect(pptx.length).toBeGreaterThan(20000);
-      const { warnings } = await svgToPdf(card.back.svg, { widthMm: 96, heightMm: 61, fonts: kitFonts(k) });
+      const { warnings } = await svgToPdf(card.back.svg, { ...CARD_SIZE, fonts: kitFonts(k) });
       expect(warnings.filter((w) => w.source === "font")).toEqual([]);
     });
   }

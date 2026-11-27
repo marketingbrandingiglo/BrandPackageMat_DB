@@ -42,9 +42,9 @@ Web app internal (prototype, dipakai pemilik dan tim) yang membuat **brand packa
 | Materi | Format | Catatan |
 |---|---|---|
 | Guideline | PDF A4 6 halaman | sampul, logo (area bebas, ukuran minimum), warna HEX/RGB/CMYK + kontras, tipografi + tautan unduh, tone of voice, contoh kalimat + catatan |
-| Kartu nama | SVG depan/belakang + PDF | 90 × 55 mm, bleed 3 mm, safe 4 mm |
-| ID card | portrait + landscape, SVG + PDF | CR80, area lubang tali dicek |
-| Amplop | SVG + PDF | DL 110 × 220 mm |
+| Kartu nama | SVG depan/belakang + PDF | 90 × 55 mm, tanpa bleed (sejak 2026-11-27), area aman 4 mm |
+| ID card | portrait + landscape, SVG + PDF | CR80 85,6 × 54 mm, tanpa bleed, area lubang tali dicek |
+| Amplop | SVG + PDF | DL 220 × 110 mm, tanpa bleed |
 | Cap | SVG + PDF | satu warna, logo saja; A: logo 40 mm, B: logo dalam lingkaran Ø 40 mm |
 | Kop surat | DOCX + PDF/SVG | header/footer asli Word |
 | Template PPT | PPTX | theme asli (warna + font tema), 5 layout + slide contoh |
@@ -123,7 +123,7 @@ Selesai di 1.1: kuota deployment (`git.deploymentEnabled`), pemantauan cron pemb
 1. **Cron pembersihan**: pantau lewat Admin. Kuning = run terakhir lebih dari 26 jam lalu (cek Vercel > Settings > Cron Jobs dan Logs); merah = gagal (pesan galat tampil, mis. Drive terputus).
 2. **Branch lama di remote** (`claude/hopeful-cannon-nq25qs`, `claude/tahap-0-fondasi-pjdg6o`): dibiarkan atas keputusan pemilik; masih memakai `vercel.json` lama, jadi push ke sana memakai kuota.
 3. **`npm audit`**: 2 temuan high di `image-size` (lewat `pptxgenjs` 4.0.1), dinilai tidak terjangkau, diterima sebagai risiko (ditinjau ulang 2026-11-25); tinjau lagi saat `pptxgenjs` merilis versi baru.
-4. **SPEC 17 yang masih terbuka**: spesifikasi cetak (ukuran amplop, bleed, safe area) belum diverifikasi ke vendor; ambang peringatan resolusi logo (sekarang < 800 px peringatan, < 400 px keras) belum dikonfirmasi; butir harga token dan kurs tidak relevan selama memakai sesi pekerja.
+4. **SPEC 17 yang masih terbuka**: spesifikasi cetak (ukuran amplop, safe area; bleed sudah dihapus atas keputusan pemilik 2026-11-27) belum diverifikasi ke vendor; ambang peringatan resolusi logo (sekarang < 800 px peringatan, < 400 px keras) belum dikonfirmasi; butir harga token dan kurs tidak relevan selama memakai sesi pekerja.
 5. **Fitur opsional SPEC yang belum dibuat**: perbaikan logo oleh AI (upscale, hapus latar, vektorisasi; hanya dengan persetujuan user); bundel file font di ZIP; pilihan/koreksi warna utama oleh user.
 6. **Ditunda pemilik**: reset token Upstash (cara: `release.md` bagian C.1; ingat database dipakai aplikasi lain); pindah ke Vercel Pro bila pemakaian bertambah atau dipakai lebih luas; bila aplikasi dibuka untuk publik, arsitektur (engine Claude, penyimpanan) ditinjau ulang (SPEC bagian 2).
 

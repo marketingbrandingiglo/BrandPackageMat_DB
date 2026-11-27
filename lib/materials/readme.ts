@@ -68,13 +68,13 @@ export function readme(i: ReadmeInput): string {
   L.push(
     ...(id
       ? [
-          "- File cetak memakai bleed 3 mm dan area aman 4 mm. Ukuran adalah ukuran umum; konfirmasi ke percetakan.",
+          "- File cetak seukuran jadi (tanpa bleed), dengan area aman 4 mm dari tepi: kartu nama 90 x 55 mm, ID card 85,6 x 54 mm, amplop 220 x 110 mm. Ukuran adalah ukuran umum; konfirmasi ke percetakan. Bila percetakan meminta bleed, warna yang menempel di tepi perlu diperpanjang 3 mm di Illustrator.",
           "- File SVG hanya RGB. Kode CMYK di guideline adalah hasil konversi dan hanya acuan: minta proof cetak sebelum mencetak banyak.",
           "- Untuk mengedit di Illustrator, pakai file SVG (satu file per sisi). PDF terutama untuk dikirim ke percetakan.",
           "- Bila membuka PDF di Illustrator: gunakan File > Open (bukan File > Place). Untuk PDF lebih dari satu halaman (kartu nama, ID card), pilih Range dan buka per halaman (1, lalu 2), bukan All: dengan All, Illustrator mengubah tulisan menjadi outline sehingga tidak bisa diedit.",
         ]
       : [
-          "- Print files use a 3 mm bleed and a 4 mm safe area. Sizes are common sizes; confirm with your printer.",
+          "- Print files are at finished size (no bleed), with a 4 mm safe area from the edge: business card 90 x 55 mm, ID card 85.6 x 54 mm, envelope 220 x 110 mm. Sizes are common sizes; confirm with your printer. If your printer requires bleed, extend edge-touching colors by 3 mm in Illustrator.",
           "- SVG files are RGB only. CMYK values in the guidelines are calculated references: ask for a print proof before a large run.",
           "- To edit in Illustrator, use the SVG files (one file per side). The PDFs are mainly for sending to the printer.",
           "- When opening a PDF in Illustrator, use File > Open (not File > Place). For multi-page PDFs (business card, ID card), choose Range and open one page at a time (1, then 2), not All: with All, Illustrator turns the text into outlines that cannot be edited.",

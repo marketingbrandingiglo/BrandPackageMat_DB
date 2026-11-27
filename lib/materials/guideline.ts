@@ -120,7 +120,7 @@ const T = {
   ],
   notes: [
     { id: "File SVG, DOCX, dan PPTX memakai teks hidup: pasang font di halaman Tipografi agar tampil benar.", en: "SVG, DOCX, and PPTX files use live text: install the fonts on the Typography page so they display correctly." },
-    { id: "File cetak memakai bleed 3 mm dan area aman 4 mm. Ukuran adalah ukuran umum; cek ke percetakan.", en: "Print files use a 3 mm bleed and a 4 mm safe area. Sizes are common sizes; check with your printer." },
+    { id: "File cetak seukuran jadi (tanpa bleed) dengan area aman 4 mm dari tepi. Ukuran adalah ukuran umum; cek ke percetakan.", en: "Print files are at finished size (no bleed) with a 4 mm safe area from the edge. Sizes are common sizes; check with your printer." },
     { id: "SVG hanya RGB. Kode CMYK di halaman Warna adalah acuan untuk percetakan.", en: "SVGs are RGB only. The CMYK values on the Colors page are a reference for the printer." },
     { id: "Cap adalah desain, bukan stempel yang sah secara hukum.", en: "The stamp is a design, not a legally valid seal." },
   ],

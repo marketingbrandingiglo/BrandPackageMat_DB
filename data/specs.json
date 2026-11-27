@@ -1,6 +1,6 @@
 {
-  "$comment": "Katalog spesifikasi (SPEC bagian 5). Ukuran umum, BUKAN hasil verifikasi vendor; pemilik memverifikasi ke percetakan. Satuan mm kecuali disebut lain.",
-  "print": { "bleedMm": 3, "safeAreaMm": 4 },
+  "$comment": "Katalog spesifikasi (SPEC bagian 5). Ukuran umum, BUKAN hasil verifikasi vendor; pemilik memverifikasi ke percetakan. Tanpa bleed sejak 2026-11-27 (keputusan pemilik): ukuran file = ukuran jadi, area aman 4 mm dari tepi. Satuan mm kecuali disebut lain.",
+  "print": { "bleedMm": 0, "safeAreaMm": 4 },
   "materials": {
     "businessCard": { "label": { "id": "Kartu nama", "en": "Business card" }, "widthMm": 90, "heightMm": 55, "sides": ["front", "back"] },
     "idCardLandscape": { "label": { "id": "ID card landscape", "en": "ID card landscape" }, "widthMm": 85.6, "heightMm": 54, "sides": ["front", "back"], "standard": "CR80" },

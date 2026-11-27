@@ -4,7 +4,7 @@ Diuji lewat halaman **`/admin/lab`** (khusus super admin, hasil tidak disimpan).
 
 ## 3a · Katalog spesifikasi dan pengecekan logo
 
-- `data/specs.json`: ukuran materi (SPEC bagian 5), bleed/safe area, dan aturan logo (tipe, maks 4 MB, ambang resolusi 800/400 px, kontras minimum 3:1, warna latar gelap/terang uji).
+- `data/specs.json`: ukuran materi (SPEC bagian 5), bleed (0 sejak 2026-11-27)/safe area, dan aturan logo (tipe, maks 4 MB, ambang resolusi 800/400 px, kontras minimum 3:1, warna latar gelap/terang uji).
 - `data/industries.json`: 20 bidang usaha (label Indonesia/Inggris). Pemetaan ke font/tone ditambah di 3e.
 - `lib/brand/svg-sanitize.ts`: sanitasi SVG. Dibuang: `script`, `foreignObject`, animasi, elemen tak dikenal, atribut `on*`, `javascript:`, tautan/`<use>`/`<image>` eksternal, `@import` dan `url()` eksternal di CSS. DTD dengan entity ditolak.
 - `lib/brand/logo.ts`:

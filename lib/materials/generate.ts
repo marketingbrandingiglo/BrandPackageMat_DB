@@ -64,7 +64,7 @@ export async function findJobFile(job: Job, name: string): Promise<JobFile | und
   return undefined;
 }
 
-/** Pratinjau sebesar ukuran jadi (tanpa bleed), seperti hasil cetak setelah dipotong. */
+/** Pratinjau sebesar ukuran jadi (bleed dipotong bila ada; sejak 2026-11-27 bleed = 0), seperti hasil cetak setelah dipotong. */
 async function trimmed(png: Buffer, widthMm: number, heightMm: number): Promise<Buffer> {
   const meta = await sharp(png).metadata();
   const pxPerMm = (meta.width ?? 0) / widthMm;
@@ -106,7 +106,7 @@ async function store(sink: Sink, kit: BrandKit, base: string, size: { widthMm: n
     const prevName = sides.length > 1 ? `pratinjau-${base}-${s.name}.png` : `pratinjau-${base}.png`;
     const width = Math.round(size.widthMm * 12.2);
     const png = svgToPng(s.previewSvg ?? s.svg, fonts, width);
-    await sink.put(prevName, "image/png", bleed ? await trimmed(png, size.widthMm, size.heightMm) : png);
+    await sink.put(prevName, "image/png", bleed && SPECS.print.bleedMm > 0 ? await trimmed(png, size.widthMm, size.heightMm) : png);
     previews.push(prevName);
   }
   await sink.put(`${base}.pdf`, "application/pdf", pdf);

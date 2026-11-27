@@ -82,7 +82,7 @@ describe("kartu nama", () => {
       const c = businessCard(k);
       expect(c.front.issues).toEqual([]);
       expect(c.back.issues).toEqual([]);
-      expect(c.front.svg).toContain('width="96mm"');
+      expect(c.front.svg).toContain('width="90mm"');
       expect(c.front.svg).toContain("Nama Lengkap");
       expect(c.front.svg).toContain("+62 812-3456-7890");
       expect(c.back.svg).not.toContain("<Sejahtera>");
@@ -121,17 +121,21 @@ describe("ID card dan amplop", () => {
       }
       const e = envelope(k);
       expect(e.issues).toEqual([]);
-      expect(e.svg).toContain('width="226mm"');
+      expect(e.svg).toContain('width="220mm"');
       expect(e.svg).toContain("Kepada Yth.");
       const { warnings } = await svgToPdf(e.svg, { ...ENVELOPE_SIZE, fonts: kitFonts(k) });
       expect(warnings.filter((w) => w.source === "font")).toEqual([]);
     });
   }
 
-  it("ukuran CR80 dan DL dengan bleed", () => {
-    expect(ID_SIZE.landscape).toEqual({ widthMm: 91.6, heightMm: 60 });
-    expect(ID_SIZE.portrait).toEqual({ widthMm: 60, heightMm: 91.6 });
-    expect(ENVELOPE_SIZE).toEqual({ widthMm: 226, heightMm: 116 });
+  it("ukuran file = ukuran jadi (tanpa bleed), area aman 4 mm", async () => {
+    expect(CARD_SIZE).toEqual({ widthMm: 90, heightMm: 55 });
+    expect(ID_SIZE.landscape).toEqual({ widthMm: 85.6, heightMm: 54 });
+    expect(ID_SIZE.portrait).toEqual({ widthMm: 54, heightMm: 85.6 });
+    expect(ENVELOPE_SIZE).toEqual({ widthMm: 220, heightMm: 110 });
+    const svg = businessCard(await kit("A")).front.svg;
+    expect(svg).not.toContain('id="potong"');
+    expect(svg).toContain('<rect id="area-aman" x="4" y="4" width="82" height="47"');
   });
 
   it("bahasa Inggris dan nama sangat panjang tetap lolos", async () => {

@@ -1,6 +1,7 @@
 # Changelog
 
 ## Belum dirilis
+- Tanpa bleed: kartu nama, ID card, dan amplop kini seukuran jadi (90 × 55, 85,6 × 54 / 54 × 85,6, 220 × 110 mm; sebelumnya + bleed 3 mm per sisi). Area aman 4 mm dari tepi tetap; tata letak setelah dipotong tidak berubah. Catatan di guideline dan BACA-SAYA/README diperbarui.
 - Petunjuk membuka PDF di Illustrator (BACA-SAYA/README dan catatan font di halaman hasil): untuk mengedit pakai SVG; PDF dibuka lewat File > Open dan, untuk PDF lebih dari satu halaman, pilih Range per halaman (opsi All membuat Illustrator mengubah tulisan menjadi outline).
 
 ## 1.1 · 2026-11-25

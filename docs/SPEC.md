@@ -124,7 +124,7 @@ Disimpan di satu file data (mis. `data/specs.json`) agar mudah diubah. Nilai di 
 | Cap | Bulat, Ø 40 mm |
 | Template PPT | 16:9 |
 | Email signature | Lebar maksimal ±600 px |
-| Cetak | Bleed 3 mm, safe area ±4 mm |
+| Cetak | **Tanpa bleed** (ukuran file = ukuran jadi; diubah 2026-11-27 dari bleed 3 mm), safe area ±4 mm dari tepi |
 
 ### Aturan konten per materi
 
@@ -307,7 +307,7 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 3. ~~Pemetaan bidang usaha ke karakter font dan tone~~: diputuskan 2026-11-19 (`data/industries.json`, bagian 18).
 4. ~~Isi tengah cap~~: diputuskan 2026-11-20 (bagian 18).
 5. ~~Gambar di email signature~~: diputuskan 2026-11-20 (bagian 18).
-6. Spesifikasi cetak (ukuran amplop, bleed, safe area) diverifikasi ke vendor.
+6. Spesifikasi cetak (ukuran amplop, safe area) diverifikasi ke vendor. Bleed sudah diputuskan: tanpa bleed (2026-11-27, bagian 18).
 7. Ambang peringatan resolusi logo.
 8. ~~Aset visual AI dipakai di materi mana~~: diputuskan 2026-11-20 (bagian 18).
 9. ~~Penamaan ZIP hasil checklist~~: diputuskan 2026-11-20 (bagian 18). Label "(lokal)": diputuskan 2026-11-23 (bagian 18).
@@ -345,3 +345,4 @@ Tiap tahap dikerjakan di lokal, diuji pemilik, **tanpa naik ke Vercel sebelum di
 - Vercel (2026-11-22): project tetap di paket **Hobby** (keputusan pemilik), bukan Pro. Diverifikasi di dokumentasi Vercel: durasi fungsi maks. 300 detik (sama dengan `maxDuration` aplikasi), cron maks. sekali sehari dengan presisi per jam (±59 menit). Branch Production Vercel diarahkan ke `main` sebelum rilis.
 - Label versi (2026-11-23): halaman login menampilkan "Version 1.0 (lokal)" saat aplikasi berjalan di lokal/dev; production tanpa label.
 - Versi 1.1 (2026-11-25): (a) `vercel.json` memakai `git.deploymentEnabled` (`"**": false, "main": true`) karena build yang dibatalkan `ignoreCommand` tetap dihitung kuota deployment Vercel (Hobby: 100 per hari per akun, diverifikasi di dokumentasi Vercel); `ignoreCommand` dipertahankan sebagai pengaman kedua. Terverifikasi: push ke `dev` tidak lagi membuat deployment (tidak ada status Vercel di commit). (b) Halaman Admin menampilkan status cron pembersihan: 7 run terakhir disimpan di kunci bersama `bpa:shared:cron:cleanup` (cron production membersihkan folder dev dan prod), peringatan "terlambat" bila run terakhir lebih dari 26 jam lalu. (c) Temuan `npm audit` `image-size` ditinjau ulang: `pptxgenjs` 4.0.1 masih terbaru, risiko tetap diterima. Kerja harian: commit dan push hanya ke `dev`; `main` hanya atas perintah pemilik.
+- Tanpa bleed (2026-11-27, keputusan pemilik): kartu nama, ID card, dan amplop dibuat seukuran jadi (90 × 55, 85,6 × 54 / 54 × 85,6, 220 × 110 mm); area aman 4 mm dari tepi tetap. Risiko diterima pemilik: warna yang menempel di tepi bisa menyisakan garis putih tipis bila pemotongan meleset; bila percetakan meminta bleed, warna tepi diperpanjang di Illustrator. Tata letak terhadap ukuran jadi tidak berubah (dicek piksel; visual dekoratif hanya bergeser sedikit karena areanya mengecil). `bleedMm` di `data/specs.json` = 0; kode template tetap menghitung posisi dari garis potong, jadi bleed bisa dikembalikan dengan mengubah angka itu.

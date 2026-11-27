@@ -7,9 +7,9 @@ import { BLEED, SAFE, sheet, svgDoc } from "./svgdoc";
 import { fit, r, text, wrap, type Box, type TextStyle } from "./text";
 
 /**
- * Kartu nama 90 x 55 mm + bleed 3 mm (SPEC bagian 5). Depan = data orang dan kontak,
+ * Kartu nama 90 x 55 mm, tanpa bleed (SPEC bagian 5; bleed dihapus 2026-11-27). Depan = data orang dan kontak,
  * belakang = logo. Paket A dan B memakai layout berbeda. Satuan viewBox = mm.
- * Grup ber-id menjadi layer di Illustrator; panduan bleed/area aman ada di grup tersembunyi.
+ * Grup ber-id menjadi layer di Illustrator; panduan area aman ada di grup tersembunyi.
  */
 const C = SPECS.materials.businessCard;
 const S = sheet(C.widthMm, C.heightMm);
@@ -116,7 +116,7 @@ function backA(kit: BrandKit): CardSide {
 
 /* ---------------- Paket B: panel warna, aksen kontras ---------------- */
 
-const PANEL = 33; // lebar panel kiri dari tepi bleed
+const PANEL = BLEED + 30; // tepi kanan panel kiri: 30 mm dari garis potong
 
 function frontB(kit: BrandKit): CardSide {
   const k = kitColors(kit);
@@ -189,7 +189,7 @@ function backB(kit: BrandKit): CardSide {
       [
         kit.visual
           ? `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="${k.primary}"/>${placeVisual(kit.visual, { x: 0, y: 0, w: W, h: H }, "latar")}</g>`
-          : `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(W - 8)}" cy="8" r="16" fill="${k.accent}"/><circle id="lingkaran-kecil" cx="10" cy="${r(H - 9)}" r="6" fill="none" stroke="${k.onPrimary}" stroke-width="0.5" opacity="0.6"/></g>`,
+          : `  <g id="latar"><rect x="0" y="0" width="${W}" height="${H}" fill="${k.primary}"/><circle id="lingkaran-aksen" cx="${r(W - BLEED - 5)}" cy="${r(BLEED + 5)}" r="16" fill="${k.accent}"/><circle id="lingkaran-kecil" cx="${r(BLEED + 7)}" cy="${r(H - BLEED - 6)}" r="6" fill="none" stroke="${k.onPrimary}" stroke-width="0.5" opacity="0.6"/></g>`,
         `  <g id="logo"><rect id="pelat-logo" x="${r(plate.x)}" y="${r(plate.y)}" width="${plate.w}" height="${plate.h}" rx="2.5" fill="#FFFFFF"/>${logo.svg}${companySvg}</g>`,
       ].join("\n"),
     ),
